@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<RadarCommands>
+	<RadarCommand Enable="1" Command="moduleReset" /> 
+	<RadarCommand Enable="1" Command="debugLevel" DebugLevel="9" />
+	<RadarCommand Enable="1" Command="loadApp" AppIdName="XTS_ID_APP_RESP" /> <!-- XTS_ID_APP_RESP or XTS_ID_APP_PRESENCE or XTS_ID_APP_DECIM -->
+	<RadarCommand Enable="1" Command="appcommandSetDetectionZone" Start="0.5" End="1.2" /> 
+	<RadarCommand Enable="1" Command="appcommandSetSensitivity" Sensitivity="9" /> 
+	<RadarCommand Enable="1" Command="setSensorMode" ModeName="XTS_SM_RUN" /> <!-- Start actual application -->
+	<HostCommand Enable="1" Command="Delay" Value="1000" />
+	<RadarCommand Enable="1" Command="setSensorMode" ModeName="XTS_SM_NORMAL" SubModeName="XTS_SM_NORMAL_HIL_UP" /> <!-- Stop signal processing and stream raw frames -->
+	<RadarCommand Enable="0" Command="setSensorMode" ModeName="XTS_SM_MANUAL" /> <!-- Stop signal processing and stream raw frames -->
+</RadarCommands>
