@@ -33,7 +33,7 @@ fig = figure(10);
 
 exepath = '.\XethruWinAcquisition\Windows\XethruWinAcquisition.exe';
 
-systemcommand = ['start /high ' exepath ' -e -x ' filexml];
+systemcommand = ['start /high ' exepath ' -e ' filexml];
 system(systemcommand);
 
 pause(20); % ensure XethruWinAcquisition is started 
