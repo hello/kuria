@@ -2,10 +2,10 @@
 #include <iostream>
 #include <Eigen/Dense>
 
-using Eigen::MatrixXd;
+using Eigen::MatrixXf;
 
 void foobars() {
-  MatrixXd m(2,2);
+  MatrixXf m(2,2);
   m(0,0) = 3;
   m(1,0) = 2.5;
   m(0,1) = -1;

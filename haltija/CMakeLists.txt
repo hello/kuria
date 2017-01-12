@@ -14,7 +14,7 @@ find_package(eigen3 REQUIRED)
 
 #add_definitions(-DUSE_CPP_DEBUG_LOGGING)
 
-include_directories (${EIGEN3_INCLUDE_DIR} "gtest/include/" "gtest" "./")
+include_directories (${EIGEN3_INCLUDE_DIR} "gtest/include/" "gtest" "./" "./src")
 message(STATUS "${EIGEN3_INCLUDE_DIR}")
 
 add_library(haltija STATIC
