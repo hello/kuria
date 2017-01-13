@@ -8,7 +8,7 @@ set(CMAKE_INCLUDE_PATH ${PROJECT_SOURCE_DIR}/)
 set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
 
 
-find_package(eigen3 REQUIRED)
+#find_package(eigen3 REQUIRED)
 
 
 
@@ -23,7 +23,7 @@ src/example.cpp
 
 #############
 add_library(gtest STATIC gtest/gtest-all.cc)
-target_link_libraries(gtest pthread)
+#target_link_libraries(gtest pthread)
 
 ############
 add_executable(unit-test 
