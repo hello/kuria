@@ -7,12 +7,14 @@ set(CMAKE_OSX_DEPLOYMENT_TARGET "10.10")
 set(CMAKE_INCLUDE_PATH ${PROJECT_SOURCE_DIR}/)
 set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
 
+#set up zlib
 if (${CMAKE_SYSTEM_NAME} EQUAL "WINDOWS")
 set(ZLIB_LIBRARIES,${CMAKE_CURRENT_SOURCE_DIR}/zlib/zlib.lib)
 set(ZLIB_INCLUDE_DIRS,"./zlib/include")
 else()
 find_package(zlib REQUIRED)
 endif()
+
 
 include_directories ("gtest/include/" "gtest" "./" "./src" ${ZLIB_INCLUDE_DIRS})
 
@@ -43,9 +45,10 @@ add_library(gtest STATIC gtest/gtest-all.cc)
 add_executable(unit-test 
 unit-test/main.cpp 
 unit-test/testradar1.cpp
+unit-test/testmatio.cpp
 )
 
-target_link_libraries(unit-test gtest haltija)
+target_link_libraries(unit-test gtest haltija matio)
 
 
 ###########
@@ -53,3 +56,14 @@ add_executable(haltijarunner
 haltijarunner.cpp)
 
 target_link_libraries(haltijarunner haltija matio)
+
+
+
+#copy data for tests
+#this does not seem to work on windows
+add_custom_command(
+TARGET unit-test POST_BUILD
+COMMAND ${CMAKE_COMMAND} -E copy_directory
+${CMAKE_SOURCE_DIR}/unit-test/test_data
+$<TARGET_FILE_DIR:unit-test>
+)
