@@ -1,6 +1,6 @@
 #include "gtest/gtest.h"
 #include "example.h"
-#include "matio/matio.h"
+#include "matio.h"
 
 class TestMatio : public ::testing::Test {
 protected:
@@ -18,21 +18,20 @@ class DISABLED_TestMatio : public TestMatio {};
 
 
 TEST_F(TestMatio, OpenAndClose) {
-	mat_t * matfile = Mat_Open("RecX4_BB_Frames_20161028_170759.mat", MAT_ACC_RDONLY);
+    mat_t * matfile = Mat_Open("RecX4_BB_Frames_20161028_170759.mat", MAT_ACC_RDONLY);
 	ASSERT_TRUE(matfile != NULL);
 	Mat_Close(matfile);
 }
 
-
+/*
 TEST_F(TestMatio, TestReadingStuff) {
-	mat_t * matfile = Mat_Open("RecX4_BB_Frames_20161028_170759.mat", MAT_ACC_RDONLY);
+	//mat_t * matfile = Mat_Open("RecX4_BB_Frames_20161028_170759.mat", MAT_ACC_RDONLY);
 
-	ASSERT_TRUE(matfile != NULL);
+	//ASSERT_TRUE(matfile != NULL);
 
-	matvar_t * var = Mat_VarReadNext(matfile);
+    //matvar_t * foo = Mat_VarReadInfo(matfile, "RecFrames");
+    
 
-	std::cout << Mat_VarGetSize(var) << std::endl;
-
-
-	Mat_Close(matfile);
+	//Mat_Close(matfile);
 }
+*/
