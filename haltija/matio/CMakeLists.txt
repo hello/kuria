@@ -2,12 +2,22 @@ cmake_minimum_required (VERSION 2.8)
 project (matio)
 
 set(LIBRARY_OUTPUT_PATH ..)
-set(CMAKE_C_FLAGS "-Wall -Wextra -Werror -Wno-unused-function")
-
-find_package(HDF5)
+if (WIN32)
+message(STATUS "WINDOZE!")
+set(ZLIB_LIBRARIES "${CMAKE_CURRENT_SOURCE_DIR}/../zlib/zlib.lib")
+set(ZLIB_INCLUDE_DIRS "../zlib/include")
+else()
+  find_package(zlib REQUIRED)
+endif()
+ 
+message(STATUS  ${ZLIB_INCLUDE_DIRS})
+find_package(HDF5 REQUIRED)
 if (HDF5_FOUND)
 message(STATUS "Found HDF5")
-include_directories(${HDF5_INCLUDE_DIRS})
+
+set(CMAKE_INCLUDE_DIRECTORIES_BEFORE True)
+include_directories(${HDF5_INCLUDE_DIRS} ${ZLIB_INCLUDE_DIRS})
+
 add_definitions(-DMAT73)
 set(SOURCES
 ./getopt/getopt_long.c

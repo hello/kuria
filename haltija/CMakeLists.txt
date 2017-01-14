@@ -8,7 +8,7 @@ set(CMAKE_INCLUDE_PATH ${PROJECT_SOURCE_DIR}/)
 set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
 
 #set up zlib
-if (${CMAKE_SYSTEM_NAME} EQUAL "WINDOWS")
+if (WIN32)
 set(ZLIB_LIBRARIES,${CMAKE_CURRENT_SOURCE_DIR}/zlib/zlib.lib)
 set(ZLIB_INCLUDE_DIRS,"./zlib/include")
 else()
