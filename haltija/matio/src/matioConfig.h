@@ -108,7 +108,7 @@
 #define HAVE_UNISTD_H 1
 
 /* Have vasprintf */
-#define HAVE_VASPRINTF /**/
+//#define HAVE_VASPRINTF /**/
 
 /* Have va_copy */
 #define HAVE_VA_COPY /**/
