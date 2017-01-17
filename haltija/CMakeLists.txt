@@ -33,6 +33,8 @@ src/example.cpp
 #############
 add_library(gtest STATIC gtest/gtest-all.cc)
 
+add_definitions(-DUNIT_TEST_DATA="${CMAKE_CURRENT_SOURCE_DIR}/unit-test/test-data/")
+
 ############
 add_executable(unit-test 
 unit-test/main.cpp 
