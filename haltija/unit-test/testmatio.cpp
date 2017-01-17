@@ -33,17 +33,21 @@ TEST_F(TestMatio, TestReadingStuff) {
 
 	ASSERT_TRUE(matfile != NULL);
 
-	
-    matvar_t * frames = Mat_VarReadInfo(matfile, "RecFrames");
-	char * const * field_names = Mat_VarGetStructFieldnames(frames);
-	int n = Mat_VarGetNumberOfFields(frames);
+    bool foundOne = false;
+	 
+    while(matvar_t * pNext = Mat_VarReadNext(matfile)) {
+        std::cout << pNext->name << std::endl;
+        foundOne = true;
+    }
+    
+    ASSERT_TRUE(foundOne);
+    
+    Mat_Rewind(matfile);
 
-	for (int i = 0; i < n; i++) {
-		std::cout << field_names[i] << std::endl;
-	}
-	
-
-
+    matvar_t * p = Mat_VarReadNext(matfile);
+    
+    ASSERT_TRUE(strcmp(p->name,"RecFrames") == 0);
+    
 
     
 
