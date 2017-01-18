@@ -8,6 +8,7 @@ set(CMAKE_INCLUDE_PATH ${PROJECT_SOURCE_DIR}/)
 set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
 
 
+
 if (WIN32)
   set(ZLIB_LIBRARIES "${CMAKE_CURRENT_SOURCE_DIR}/winlib/zlib/zlibstatic.lib")
   set(ZLIB_INCLUDE_DIRS "${CMAKE_CURRENT_SOURCE_DIR}/winlib/zlib/include")
@@ -18,16 +19,17 @@ else()
   find_package(HDF5 REQUIRED)
 endif()
 
+add_subdirectory(matio)
 
 message(STATUS "ZLIB LIBRARIES:  ${ZLIB_LIBRARIES}")
 message(STATUS "HDF5 LIBRARIES:  ${HDF5_LIBRARIES}")
 
 include_directories ("gtest/include/" "gtest" "./" "./src" "matio/src/" ${ZLIB_INCLUDE_DIRS} ${HDF5_INCLUDE_DIRS})
 
-add_subdirectory(matio)
 
 add_library(haltija STATIC
 src/example.cpp
+src/matlabhelper.cpp
 )
 
 #############

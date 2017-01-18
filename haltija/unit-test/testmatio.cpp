@@ -1,6 +1,7 @@
 #include "gtest/gtest.h"
 #include "example.h"
 #include "matio.h"
+#include "matlabhelper.h"
 
 class TestMatio : public ::testing::Test {
 protected:
@@ -33,24 +34,56 @@ TEST_F(TestMatio, TestReadingStuff) {
 
 	ASSERT_TRUE(matfile != NULL);
 
-    bool foundOne = false;
-	 
-    while(matvar_t * pNext = Mat_VarReadNext(matfile)) {
-        std::cout << pNext->name << std::endl;
-        foundOne = true;
-    }
-    
-    ASSERT_TRUE(foundOne);
-    
-    Mat_Rewind(matfile);
-
     matvar_t * p = Mat_VarReadNext(matfile);
+    //matvar_t * p = Mat_VarRead(matfile, "RecFrames");
     
-    ASSERT_TRUE(strcmp(p->name,"RecFrames") == 0);
-    
+    ASSERT_TRUE(p != NULL);
 
+    /*
+    {
+        char * const * field_names = Mat_VarGetStructFieldnames(p);
+        const int n = Mat_VarGetNumberOfFields(p);
+        for (int i = 0; i < n; i++) {
+            std::cout << field_names[i] << std::endl;
+        }
+    }
+     */
     
+    matvar_t * frames = Mat_VarGetStructFieldByName(p,"Frames",0);
+    
+    ASSERT_TRUE(frames);
+    ASSERT_TRUE (frames->class_type == MAT_C_DOUBLE);
+    
+    const mat_complex_split_t *complex_data = static_cast<mat_complex_split_t *> (frames->data);
+    const double * re = (double *)(complex_data->Re);
+    const double * im = (double *)(complex_data->Im);
+    const size_t N = frames->nbytes / frames->data_size;
+    /*
+    for (int i = 0; i <  N; i++) {
+        std::cout << re[i] << "," << im[i] << std::endl;
+    }
+     */
+    
+    ASSERT_TRUE(re[N-1] != 0.0);
+    ASSERT_TRUE(im[N-1] != 0.0);
+
 
 	Mat_Close(matfile);
 }
 
+TEST_F(TestMatio,TestReadBaseband) {
+    std::string filepath = GET_TEST_FILE_PATH("RecX4_BB_Frames_20161028_170759.mat");
+
+    Eigen::MatrixXcf mat;
+    ASSERT_TRUE(MatlabHelper::read_baseband_from_file_v1(filepath,mat));
+    
+    ASSERT_TRUE(mat.rows() == 2099);
+    ASSERT_TRUE(mat.cols() == 188);
+    
+    //std::cout << mat(2098,187) << std::endl;
+    std::complex<float> x = mat(2098,187);
+    ASSERT_NEAR(x.real(),-218637,1e-3);
+    ASSERT_NEAR(x.imag(),-479228,1e-3);
+
+
+}

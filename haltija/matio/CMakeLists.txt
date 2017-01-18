@@ -7,7 +7,7 @@ if (WIN32)
   set(HDF5_LIBRARIES  "${CMAKE_CURRENT_SOURCE_DIR}/../winlib/hdf5/hdf5.lib")
   set(HDF5_INCLUDE_DIRS  "${CMAKE_CURRENT_SOURCE_DIR}/../winlib/hdf5/include/")
 else()
-  find_package(zlib REQUIRED)
+  find_package(zlib)
   find_package(HDF5 REQUIRED)
 endif()
 
