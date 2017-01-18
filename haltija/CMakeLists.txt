@@ -31,6 +31,7 @@ add_library(haltija STATIC
 src/example.cpp
 src/matlabreader.cpp
 src/matlabwriter.cpp
+src/pca.cpp
 )
 
 #############
@@ -45,6 +46,7 @@ unit-test/testradar1.cpp
 unit-test/testmatio.cpp
 )
 
+
 target_link_libraries(unit-test gtest haltija ${HDF5_LIBRARIES} ${ZLIB_LIBRARIES} matio)
 
 
@@ -52,7 +54,7 @@ target_link_libraries(unit-test gtest haltija ${HDF5_LIBRARIES} ${ZLIB_LIBRARIES
 add_executable(haltijarunner
 haltijarunner.cpp)
 
-target_link_libraries(haltijarunner haltija)
+target_link_libraries(haltijarunner haltija ${HDF5_LIBRARIES} ${ZLIB_LIBRARIES} matio)
 
 
  
