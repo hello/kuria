@@ -1,7 +1,8 @@
 #include "gtest/gtest.h"
 #include "example.h"
 #include "matio.h"
-#include "matlabhelper.h"
+#include "matlabreader.h"
+#include "matlabwriter.h"
 
 class TestMatio : public ::testing::Test {
 protected:
@@ -75,7 +76,7 @@ TEST_F(TestMatio,TestReadBaseband) {
     std::string filepath = GET_TEST_FILE_PATH("RecX4_BB_Frames_20161028_170759.mat");
 
     Eigen::MatrixXcf mat;
-    ASSERT_TRUE(MatlabHelper::read_baseband_from_file_v1(filepath,mat));
+    ASSERT_TRUE(MatlabReader::read_baseband_from_file_v1(filepath,mat));
     
     ASSERT_TRUE(mat.rows() == 2099);
     ASSERT_TRUE(mat.cols() == 188);
@@ -87,3 +88,24 @@ TEST_F(TestMatio,TestReadBaseband) {
 
 
 }
+
+TEST_F(TestMatio,TestWriteMatrix) {
+    
+    ASSERT_TRUE(MatlabWriter::get_instance()->open_new_matfile("./foobars.mat"));
+    
+    MatrixXf mat(2,3);
+    mat << 1,2,3,4,5,6;
+    
+    ASSERT_TRUE(MatlabWriter::get_instance()->write_new_matrix("hellothere", mat));
+    
+    MatrixXf mat2(3,2);
+    mat << 7,8,9,10,11,12;
+    ASSERT_TRUE(MatlabWriter::get_instance()->write_new_matrix("kthxbye", mat2));
+    
+    MatlabWriter::get_instance()->close();
+
+    
+    
+    
+}
+

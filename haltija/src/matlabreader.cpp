@@ -1,4 +1,4 @@
-#include "matlabhelper.h"
+#include "matlabreader.h"
 #include "matio.h"
 #include <assert.h>
 #include <iostream>
@@ -9,7 +9,7 @@
 using Eigen::MatrixXcf;
 using namespace std::literals::complex_literals;
 
-bool MatlabHelper::read_baseband_from_file_v1(const std::string & filename, Eigen::MatrixXcf & output) {
+bool MatlabReader::read_baseband_from_file_v1(const std::string & filename, Eigen::MatrixXcf & output) {
     
     mat_t * matfile = Mat_Open(filename.c_str(), MAT_ACC_RDONLY);
     

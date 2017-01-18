@@ -5,7 +5,7 @@
 #include <string>
 
 
-class MatlabHelper {
+class MatlabReader {
 public:
     static bool read_baseband_from_file_v1(const std::string & filename, Eigen::MatrixXcf & output);
     

@@ -29,7 +29,8 @@ include_directories ("gtest/include/" "gtest" "./" "./src" "matio/src/" ${ZLIB_I
 
 add_library(haltija STATIC
 src/example.cpp
-src/matlabhelper.cpp
+src/matlabreader.cpp
+src/matlabwriter.cpp
 )
 
 #############
