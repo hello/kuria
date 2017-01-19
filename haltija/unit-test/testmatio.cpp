@@ -3,9 +3,12 @@
 #include "matio.h"
 #include "matlabreader.h"
 #include "matlabwriter.h"
+#include <istream>
+#include <fstream>
+#include <regex>
 
 typedef std::complex<float> Complex_t;
-
+#define SCIENTIFIC_REGEX "[-+]?[0-9]*\.?[0-9]+([eE][-+]?[0-9]+)?i?"
 class TestMatio : public ::testing::Test {
 protected:
     
@@ -14,6 +17,80 @@ protected:
     }
     
     virtual void TearDown() {
+    }
+    
+    static Eigen::MatrixXcf read_complex_csv(const std::string & filepath) {
+        
+        const std::regex e (SCIENTIFIC_REGEX);
+        
+       
+        
+        
+        std::ifstream csvfile(filepath);
+        std::vector<Complex_t> vec;
+        vec.reserve(1000000);
+        
+        std::string line;
+        int nrows = 0;
+        int count = 0;
+        int ncols = 0;
+        
+        while(std::getline(csvfile, line)) {
+            nrows++;
+            std::string item;
+            std::stringstream ss;
+            ss << line;
+            while (std::getline(ss,item,',')  ) {
+                count++;
+
+                std::smatch m;
+                std::string s = item;
+                int icomplex = 0;
+                std::string cmplx[2] = {"0.0","0.0i"};
+                
+                while (std::regex_search (s,m,e)) {
+                    if (!m.empty()) {
+                        std::string result = m[0];
+                        
+                        if (result.empty()) {
+                            break;
+                        }
+                        
+                        if (result[result.size()-1] == 'i' || result[result.size()-1] == 'j') {
+                            result.pop_back();
+                        }
+                        
+                        cmplx[icomplex++] = result;
+                    }
+                    
+                    s = m.suffix().str();
+                }
+                
+                std::string number = "(" + cmplx[0] + "," + cmplx[1] + ")";
+                std::istringstream is(number);
+                Complex_t c;
+                is >> c;
+                vec.push_back(c);
+                
+            }
+            
+            if (!ncols) {
+                ncols = count;
+            }
+            
+            
+        }
+        
+        Eigen::MatrixXcf mat(nrows,ncols);
+        
+        for (int j = 0; j < nrows; j++) {
+            for (int i = 0; i < ncols; i++) {
+                mat(j,i) = vec[j*ncols + i];
+            }
+        }
+
+        
+        return mat;
     }
     
 };
@@ -91,7 +168,48 @@ TEST_F(TestMatio,TestReadBaseband) {
 
 }
 
-TEST_F(TestMatio,TestWriteMatrixReals) {
+TEST_F(TestMatio,TestReadBasebandVsReference) {
+    std::string filepath = GET_TEST_FILE_PATH("RecX4_BB_Frames_subset.mat");
+    std::string refpath = GET_TEST_FILE_PATH("RecFrames_subset.csv");
+
+    Eigen::MatrixXcf refmat = read_complex_csv(refpath);
+    
+    Eigen::MatrixXcf mat;
+    ASSERT_TRUE(MatlabReader::read_baseband_from_file_v1(filepath,mat));
+
+    ASSERT_TRUE(mat.rows() == 50);
+    ASSERT_TRUE(mat.cols() == 50);
+    ASSERT_TRUE(refmat.rows() == 50);
+    ASSERT_TRUE(refmat.cols() == 50);
+    
+    for (int j = 0; j < mat.rows(); j++) {
+        for (int i = 0; i < mat.cols(); i++) {
+            
+            Complex_t diff = mat(j,i) - refmat(j,i);
+            
+            Complex_t denom = mat(j,i) + refmat(j,i);
+            
+            
+            if (fabs(denom.real()) < 1e-3) {
+                denom.real(1e-3);
+            }
+            
+            if (fabs(denom.imag()) < 1e-3) {
+                denom.imag(1e-3);
+            }
+
+            Complex_t frac = diff / denom;
+            
+            ASSERT_LE(fabs(frac.real()),1e-4);
+            ASSERT_LE(fabs(frac.imag()),1e-4);
+
+        }
+    }
+
+    
+}
+
+TEST_F(DISABLED_TestMatio,TestWriteMatrixReals) {
     
     ASSERT_TRUE(MatlabWriter::get_instance()->open_new_matfile("reals.mat"));
     
@@ -107,7 +225,7 @@ TEST_F(TestMatio,TestWriteMatrixReals) {
     MatlabWriter::get_instance()->close();
 }
 
-TEST_F(TestMatio,TestWriteMatrixComplex) {
+TEST_F(DISABLED_TestMatio,TestWriteMatrixComplex) {
     
     ASSERT_TRUE(MatlabWriter::get_instance()->open_new_matfile("complex.mat"));
     
@@ -121,4 +239,6 @@ TEST_F(TestMatio,TestWriteMatrixComplex) {
     
     
 }
+
+
 
