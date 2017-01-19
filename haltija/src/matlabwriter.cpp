@@ -88,17 +88,35 @@ bool MatlabWriter::write_real_matrix(const std::string & varname, const MatrixXf
 }
 
 bool MatlabWriter::write_complex_matrix(const std::string & varname, const MatrixXcf & mat) {
-    //to be implemented
     mat_t * matfile = static_cast<mat_t *>(_mat_file_ptr);
-
-    assert(false);
     
     if (!matfile) {
         //TODO add error message
         return false;
     }
- 
-    return true;
+    
+    size_t dims[2];
+    dims[0] = mat.rows();
+    dims[1] = mat.cols();
+    
+    const Eigen::MatrixXf real = mat.real();
+    const Eigen::MatrixXf imag = mat.imag();
+
+    struct mat_complex_split_t z = {(void *)real.data(),(void *)imag.data()};
+
+    
+    matvar_t * var = Mat_VarCreate(varname.c_str(), MAT_C_SINGLE,MAT_T_SINGLE, 2, dims,&z, MAT_F_COMPLEX);
+    
+    if (!var) {
+        return false;
+    }
+    
+    int ret = Mat_VarWrite(matfile, var, MAT_COMPRESSION_ZLIB);
+    
+    Mat_VarFree(var);
+    
+    
+    return ret == 0;
 }
 
 void MatlabWriter::close() {

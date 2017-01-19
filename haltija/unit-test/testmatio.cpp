@@ -4,6 +4,8 @@
 #include "matlabreader.h"
 #include "matlabwriter.h"
 
+typedef std::complex<float> Complex_t;
+
 class TestMatio : public ::testing::Test {
 protected:
     
@@ -89,9 +91,9 @@ TEST_F(TestMatio,TestReadBaseband) {
 
 }
 
-TEST_F(TestMatio,TestWriteMatrix) {
+TEST_F(TestMatio,TestWriteMatrixReals) {
     
-    ASSERT_TRUE(MatlabWriter::get_instance()->open_new_matfile("./foobars.mat"));
+    ASSERT_TRUE(MatlabWriter::get_instance()->open_new_matfile("reals.mat"));
     
     MatrixXf mat(2,3);
     mat << 1,2,3,4,5,6;
@@ -103,8 +105,19 @@ TEST_F(TestMatio,TestWriteMatrix) {
     ASSERT_TRUE(MatlabWriter::get_instance()->write_real_matrix("kthxbye", mat2));
     
     MatlabWriter::get_instance()->close();
+}
 
+TEST_F(TestMatio,TestWriteMatrixComplex) {
     
+    ASSERT_TRUE(MatlabWriter::get_instance()->open_new_matfile("complex.mat"));
+    
+    MatrixXcf mat(2,3);
+    mat << Complex_t(1.0,1.0),Complex_t(2.0,2.0),Complex_t(3.0,3.0),Complex_t(4.0,-4.0),Complex_t(5.0,5.0),Complex_t(6.0,-6.0);
+    
+    ASSERT_TRUE(MatlabWriter::get_instance()->write_complex_matrix("c1", mat));
+    
+    
+    MatlabWriter::get_instance()->close();
     
     
 }
