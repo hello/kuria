@@ -96,11 +96,11 @@ TEST_F(TestMatio,TestWriteMatrix) {
     MatrixXf mat(2,3);
     mat << 1,2,3,4,5,6;
     
-    ASSERT_TRUE(MatlabWriter::get_instance()->write_new_matrix("hellothere", mat));
+    ASSERT_TRUE(MatlabWriter::get_instance()->write_real_matrix("hellothere", mat));
     
     MatrixXf mat2(3,2);
     mat << 7,8,9,10,11,12;
-    ASSERT_TRUE(MatlabWriter::get_instance()->write_new_matrix("kthxbye", mat2));
+    ASSERT_TRUE(MatlabWriter::get_instance()->write_real_matrix("kthxbye", mat2));
     
     MatlabWriter::get_instance()->close();
 

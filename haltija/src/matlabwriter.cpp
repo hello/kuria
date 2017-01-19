@@ -60,7 +60,7 @@ bool MatlabWriter::open_new_matfile(const std::string & filepath) {
 }
 
 
-bool MatlabWriter::write_new_matrix(const std::string & varname, const MatrixXf & mat) {
+bool MatlabWriter::write_real_matrix(const std::string & varname, const MatrixXf & mat) {
     mat_t * matfile = static_cast<mat_t *>(_mat_file_ptr);
 
     if (!matfile) {
@@ -87,7 +87,7 @@ bool MatlabWriter::write_new_matrix(const std::string & varname, const MatrixXf 
     
 }
 
-bool MatlabWriter::write_new_matrix(const std::string & varname, const MatrixXcf & mat) {
+bool MatlabWriter::write_complex_matrix(const std::string & varname, const MatrixXcf & mat) {
     //to be implemented
     mat_t * matfile = static_cast<mat_t *>(_mat_file_ptr);
 

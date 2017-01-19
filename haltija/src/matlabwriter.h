@@ -25,8 +25,8 @@ public:
     
     bool open_new_matfile(const std::string & filepath);
     
-    bool write_new_matrix(const std::string & varname, const MatrixXf & mat);
-    bool write_new_matrix(const std::string & varname, const MatrixXcf & mat);
+    bool write_real_matrix(const std::string & varname, const MatrixXf & mat);
+    bool write_complex_matrix(const std::string & varname, const MatrixXcf & mat);
     
     void close();
 

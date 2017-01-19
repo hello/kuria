@@ -3,6 +3,7 @@
 #include "matlabwriter.h"
 #include <iostream>
 #include "Pca.h"
+
 using Eigen::MatrixXcf;
 
 int main(int argc, char * argv[]) {
@@ -20,16 +21,24 @@ int main(int argc, char * argv[]) {
 		return 0;
 	}
 
+	MatlabWriter::get_instance()->open_new_matfile(argv[2]);
 
+
+	MatlabWriter::get_instance()->write_real_matrix("reals", baseband.real());
+	
+	/*DONT REMOVE THIS!!!!!
+	std::cout << baseband.block(0, 0, 100, baseband.cols()) << std::endl;
+	*/
+
+/*
 	Pca pca(baseband);
 
 	pca.fit();
 
 	pca.getTransformedData();
-
+	*/
 	//Process data
 	//CALL FUNCTION FROM HALTIJA LIBRARY
-	MatlabWriter::get_instance()->open_new_matfile(argv[2]);
 
 	/*
 	Eigen::MatrixXf floatmatrix(20, 20);
