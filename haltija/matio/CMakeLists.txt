@@ -7,7 +7,7 @@ if (WIN32)
   set(HDF5_LIBRARIES  "${CMAKE_CURRENT_SOURCE_DIR}/../winlib/hdf5/hdf5.lib")
   set(HDF5_INCLUDE_DIRS  "${CMAKE_CURRENT_SOURCE_DIR}/../winlib/hdf5/include/")
 else()
-  find_package(zlib)
+  find_package(ZLIB REQUIRED)
   find_package(HDF5 REQUIRED)
 endif()
 
@@ -61,6 +61,7 @@ set(EXTRA
 
 
 add_library(matio STATIC ${SOURCES})
+target_link_libraries(matio ${HDF5_LIBRARIES}  ${ZLIB_LIBRARIES})
 #install (FILES src/matio.h DESTINATION "/usr/local/include")
 #install(TARGETS matio DESTINATION "/usr/local/lib")
 
