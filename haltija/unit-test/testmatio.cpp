@@ -8,7 +8,7 @@
 #include <regex>
 
 typedef std::complex<float> Complex_t;
-#define SCIENTIFIC_REGEX "[-+]?[0-9]*\.?[0-9]+([eE][-+]?[0-9]+)?i?"
+#define SCIENTIFIC_REGEX "[-+]?[0-9]*\\.?[0-9]+([eE][-+]?[0-9]+)?i?"
 class TestMatio : public ::testing::Test {
 protected:
     
@@ -18,14 +18,37 @@ protected:
     
     virtual void TearDown() {
     }
+
+    static void compare_complex_mat(const Eigen::MatrixXcf & mat, const Eigen::MatrixXcf & refmat) {
+        for (int j = 0; j < mat.rows(); j++) {
+            for (int i = 0; i < mat.cols(); i++) {
+                //std::cout << mat(j,i) << "|" << refmat(j,i) << std::endl;
+                Complex_t diff = mat(j,i) - refmat(j,i);
+
+                Complex_t denom = mat(j,i) + refmat(j,i);
+
+
+                if (fabs(denom.real()) < 1e-3) {
+                    denom.real(1e-3);
+                }
+
+                if (fabs(denom.imag()) < 1e-3) {
+                    denom.imag(1e-3);
+                }
+
+                Complex_t frac = diff / denom;
+
+                ASSERT_LE(fabs(frac.real()),1e-4);
+                ASSERT_LE(fabs(frac.imag()),1e-4);
+
+            }
+        }
+    }
     
     static Eigen::MatrixXcf read_complex_csv(const std::string & filepath) {
         
         const std::regex e (SCIENTIFIC_REGEX);
-        
-       
-        
-        
+             
         std::ifstream csvfile(filepath);
         std::vector<Complex_t> vec;
         vec.reserve(1000000);
@@ -46,7 +69,7 @@ protected:
                 std::smatch m;
                 std::string s = item;
                 int icomplex = 0;
-                std::string cmplx[2] = {"0.0","0.0i"};
+                std::string cmplx[2] = {"0.0","0.0"};
                 
                 while (std::regex_search (s,m,e)) {
                     if (!m.empty()) {
@@ -67,6 +90,7 @@ protected:
                 }
                 
                 std::string number = "(" + cmplx[0] + "," + cmplx[1] + ")";
+                //std::cout << number << std::endl;
                 std::istringstream is(number);
                 Complex_t c;
                 is >> c;
@@ -151,29 +175,13 @@ TEST_F(TestMatio, TestReadingStuff) {
 	Mat_Close(matfile);
 }
 
-TEST_F(TestMatio,TestReadBaseband) {
-    std::string filepath = GET_TEST_FILE_PATH("RecX4_BB_Frames_20161028_170759.mat");
 
-    Eigen::MatrixXcf mat;
-    ASSERT_TRUE(MatlabReader::read_baseband_from_file_v1(filepath,mat));
-    
-    ASSERT_TRUE(mat.rows() == 2099);
-    ASSERT_TRUE(mat.cols() == 188);
-    
-    //std::cout << mat(2098,187) << std::endl;
-    std::complex<float> x = mat(2098,187);
-    ASSERT_NEAR(x.real(),-218637,1e-3);
-    ASSERT_NEAR(x.imag(),-479228,1e-3);
-
-
-}
-
-TEST_F(TestMatio,TestReadBasebandVsReference) {
+TEST_F(TestMatio,TestReadBasebandVsReferenceDoublePrecision) {
     std::string filepath = GET_TEST_FILE_PATH("RecX4_BB_Frames_subset.mat");
     std::string refpath = GET_TEST_FILE_PATH("RecFrames_subset.csv");
 
     Eigen::MatrixXcf refmat = read_complex_csv(refpath);
-    
+
     Eigen::MatrixXcf mat;
     ASSERT_TRUE(MatlabReader::read_baseband_from_file_v1(filepath,mat));
 
@@ -181,31 +189,28 @@ TEST_F(TestMatio,TestReadBasebandVsReference) {
     ASSERT_TRUE(mat.cols() == 50);
     ASSERT_TRUE(refmat.rows() == 50);
     ASSERT_TRUE(refmat.cols() == 50);
+
+
+    compare_complex_mat(mat,refmat);
+
+}
+
+TEST_F(TestMatio,TestReadBasebandVsReferenceRectangularSinglePrecision) {
+    std::string filepath = GET_TEST_FILE_PATH("test1.mat");
+    std::string refpath = GET_TEST_FILE_PATH("test1ref.csv");
+
+    Eigen::MatrixXcf refmat = read_complex_csv(refpath);
     
-    for (int j = 0; j < mat.rows(); j++) {
-        for (int i = 0; i < mat.cols(); i++) {
-            
-            Complex_t diff = mat(j,i) - refmat(j,i);
-            
-            Complex_t denom = mat(j,i) + refmat(j,i);
-            
-            
-            if (fabs(denom.real()) < 1e-3) {
-                denom.real(1e-3);
-            }
-            
-            if (fabs(denom.imag()) < 1e-3) {
-                denom.imag(1e-3);
-            }
+    Eigen::MatrixXcf mat;
+    ASSERT_TRUE(MatlabReader::read_baseband_from_file_v1(filepath,mat));
 
-            Complex_t frac = diff / denom;
-            
-            ASSERT_LE(fabs(frac.real()),1e-4);
-            ASSERT_LE(fabs(frac.imag()),1e-4);
+    ASSERT_TRUE(mat.rows() == 49);
+    ASSERT_TRUE(mat.cols() == 50);
+    ASSERT_TRUE(refmat.rows() == 49);
+    ASSERT_TRUE(refmat.cols() == 50);
+    
 
-        }
-    }
-
+    compare_complex_mat(mat,refmat);
     
 }
 

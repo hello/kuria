@@ -60,8 +60,9 @@ bool MatlabReader::read_baseband_from_file_v1(const std::string & filename, Matr
         MatrixXcf mat(num_rows,num_cols);
         
         for (int k = 0; k < N; k++) {
-            const int irow = k/num_cols;
-            const int icol = k % num_cols;
+            //MATLAB ISN'T ROW MAJOR, IT'S COLUMN MAJOR
+            const int icol = k/num_rows;
+            const int irow = k % num_rows;
             mat(irow,icol) = std::complex<float>(re[k],im[k]);
         }
         
@@ -78,8 +79,9 @@ bool MatlabReader::read_baseband_from_file_v1(const std::string & filename, Matr
         MatrixXcf mat(num_rows,num_cols);
         
         for (int k = 0; k < N; k++) {
-            const int irow = k/num_cols;
-            const int icol = k % num_cols;
+            //MATLAB ISN'T ROW MAJOR, IT'S COLUMN MAJOR
+            const int icol = k/num_rows;
+            const int irow = k % num_rows;
             
             mat(irow,icol) = std::complex<float>(re[k],im[k]);
         }
