@@ -25,12 +25,25 @@ public:
     
     bool open_new_matfile(const std::string & filepath);
     
-    bool write_real_matrix(const std::string & varname, const MatrixXf & mat);
-    bool write_complex_matrix(const std::string & varname, const MatrixXcf & mat);
+    bool write_matrix(const std::string & varname, const MatrixXf & mat);
+    bool write_matrix(const std::string & varname, const MatrixXcf & mat);
     
     void close();
 
 };
+
+static inline void close_matfile() {
+    MatlabWriter::get_instance()->close();
+}
+
+static inline bool open_new_matfile(const std::string & filepath) {
+    return MatlabWriter::get_instance()->open_new_matfile(filepath);
+}
+
+template <class T>
+bool write_matrix(const std::string & varname,const T & matrix) {
+    return MatlabWriter::get_instance()->write_matrix(varname,matrix);
+}
 
 
 #endif //_MATLABWRITER_H_

@@ -214,35 +214,50 @@ TEST_F(TestMatio,TestReadBasebandVsReferenceRectangularSinglePrecision) {
     
 }
 
-TEST_F(DISABLED_TestMatio,TestWriteMatrixReals) {
+TEST_F(TestMatio,TestWriteMatrixReals) {
     
-    ASSERT_TRUE(MatlabWriter::get_instance()->open_new_matfile("reals.mat"));
+    ASSERT_TRUE(open_new_matfile("reals.mat"));
+
     
-    MatrixXf mat(2,3);
-    mat << 1,2,3,4,5,6;
+    MatrixXf mat1(2,3);
+    mat1 << 1,2,3,4,5,6;
     
-    ASSERT_TRUE(MatlabWriter::get_instance()->write_real_matrix("hellothere", mat));
+    ASSERT_TRUE(write_matrix("hellothere", mat1));
     
     MatrixXf mat2(3,2);
-    mat << 7,8,9,10,11,12;
-    ASSERT_TRUE(MatlabWriter::get_instance()->write_real_matrix("kthxbye", mat2));
+    mat2 << 7,8,9,10,11,12;
+    ASSERT_TRUE(write_matrix("kthxbye", mat2));
     
-    MatlabWriter::get_instance()->close();
+    close_matfile();
+    
+    MatrixXf readmat1;
+    ASSERT_TRUE(MatlabReader::read_real_matrix("reals.mat","hellothere",readmat1));
+    
+    MatrixXf readmat2;
+    ASSERT_TRUE(MatlabReader::read_real_matrix("reals.mat","kthxbye",readmat2));
+    
+    compare_complex_mat(mat1,readmat1);
+    compare_complex_mat(mat2,readmat2);
 }
 
-TEST_F(DISABLED_TestMatio,TestWriteMatrixComplex) {
+TEST_F(TestMatio,TestWriteMatrixComplex) {
     
-    ASSERT_TRUE(MatlabWriter::get_instance()->open_new_matfile("complex.mat"));
+    ASSERT_TRUE(open_new_matfile("complex.mat"));
     
     MatrixXcf mat(2,3);
     mat << Complex_t(1.0,1.0),Complex_t(2.0,2.0),Complex_t(3.0,3.0),Complex_t(4.0,-4.0),Complex_t(5.0,5.0),Complex_t(6.0,-6.0);
     
-    ASSERT_TRUE(MatlabWriter::get_instance()->write_complex_matrix("c1", mat));
+    ASSERT_TRUE(write_matrix("c1", mat));
     
+    close_matfile();
+
+    MatrixXcf mat2;
+    ASSERT_TRUE(MatlabReader::read_complex_matrix("complex.mat","c1",mat2));
     
-    MatlabWriter::get_instance()->close();
+    ASSERT_TRUE(mat2.rows() == 2);
+    ASSERT_TRUE(mat2.cols() == 3);
     
-    
+    compare_complex_mat(mat,mat2);
 }
 
 
