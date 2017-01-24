@@ -32,6 +32,8 @@ src/example.cpp
 src/matlabreader.cpp
 src/matlabwriter.cpp
 src/pca.cpp
+src/kiss_fft.c
+src/haltijamath.cpp
 )
 
 #############
