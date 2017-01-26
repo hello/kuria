@@ -1,0 +1,6 @@
+<map id="src/hal/x4m0x_s70/xtio_extram.h" name="src/hal/x4m0x_s70/xtio_extram.h">
+<area shape="rect" id="node2" href="$hal__board__init_8c.xhtml" title="User board initialization template. " alt="" coords="5,95,169,136"/>
+<area shape="rect" id="node3" href="$startup__sams70_8c.xhtml" title="Interrupt handler definitions and start up code. " alt="" coords="193,95,384,136"/>
+<area shape="rect" id="node4" href="$xt__selftest_8c.xhtml" title="src/hal/x4m0x_s70/xt\l_selftest.c" alt="" coords="409,95,566,136"/>
+<area shape="rect" id="node5" href="$xtio__extram_8c.xhtml" title="Implementent support for external RAM on boards with Atmel SAM S70 MCU. " alt="" coords="590,95,758,136"/>
+</map>

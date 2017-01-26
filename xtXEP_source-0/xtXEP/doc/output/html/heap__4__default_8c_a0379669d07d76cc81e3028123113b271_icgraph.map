@@ -1,0 +1,5 @@
+<map id="pvPortMalloc" name="pvPortMalloc">
+<area shape="rect" id="node2" href="$xt__new__delete_8cpp.xhtml#a205ed048fdf5259c2e8e0cb60ee8f719" title="operator new" alt="" coords="197,5,303,32"/>
+<area shape="rect" id="node3" href="$xt__new__delete_8cpp.xhtml#a63ce4f64887b9307317aee5baae6b18f" title="operator new[]" alt="" coords="192,56,308,83"/>
+<area shape="rect" id="node4" href="$xtmemory__xep_8c.xhtml#ac094f55ba76fe2ae6e6b584f62ede7e0" title="Allocate memory from default location. " alt="" coords="156,107,344,133"/>
+</map>

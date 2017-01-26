@@ -1,0 +1,5 @@
+<map id="xtio_task_uart_init" name="xtio_task_uart_init">
+<area shape="rect" id="node2" href="$xtio__uart_8c.xhtml#aefe56ce11c59d2ed758098c884e9fa45" title="xtio_uart_init" alt="" coords="194,5,298,32"/>
+<area shape="rect" id="node3" href="$xtio__serial__com_8c.xhtml#a5e9056b9bb65d42367ec290aea738768" title="_uart_task_rx" alt="" coords="192,56,300,83"/>
+<area shape="rect" id="node4" href="$xtio__serial__com_8c.xhtml#a0870cbcfb33018b8eb1ce5679d543119" title="_uart_task_tx" alt="" coords="192,107,300,133"/>
+</map>

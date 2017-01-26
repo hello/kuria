@@ -1,0 +1,7 @@
+<map id="dispatch_release_message" name="dispatch_release_message">
+<area shape="rect" id="node2" href="$xep__dispatch_8c.xhtml#a7bad5694c10b470cac80025bd27f6fa9" title="Send message on dispatcher. " alt="" coords="259,5,439,32"/>
+<area shape="rect" id="node3" href="$xep__dispatch_8c.xhtml#ae2f44f0cec8ac73f19a6822c1273af28" title="Forward message to a different message tag. " alt="" coords="251,56,447,83"/>
+<area shape="rect" id="node4" href="$xep__dispatch_8c.xhtml#a249dcc57bc281563931b44ce62e77bcb" title="Reply to message. " alt="" coords="259,107,439,133"/>
+<area shape="rect" id="node5" href="$task__hostcom_8c.xhtml#a3ac02c1c3bd0b84c4488bce13f8fc1d9" title="process_dispatch_message\l_hostcom_send" alt="" coords="249,158,448,199"/>
+<area shape="rect" id="node6" href="$xep__application_8c.xhtml#a038116ea60c2b708d4ab52b0eff00379" title="Process dispatch messages. " alt="" coords="267,223,430,265"/>
+</map>

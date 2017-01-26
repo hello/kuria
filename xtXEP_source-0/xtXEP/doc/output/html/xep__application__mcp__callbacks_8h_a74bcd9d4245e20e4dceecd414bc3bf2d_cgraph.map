@@ -1,0 +1,5 @@
+<map id="onMcpX4DriverSetTxCenterFrequency" name="onMcpX4DriverSetTxCenterFrequency">
+<area shape="rect" id="node2" href="$x4driver_8h.xhtml#a3bd645021a42b838c9e3b3ff2f021d50" title="x4driver_set_tx_center\l_frequency" alt="" coords="270,5,437,47"/>
+<area shape="rect" id="node3" href="$xep__dispatch__messages_8h.xhtml#a9b90f44cd5a4308e041a205a84fe4360" title="Dispatch message to hostcom asking to send ack to host. " alt="" coords="251,71,456,112"/>
+<area shape="rect" id="node4" href="$xep__dispatch__messages_8h.xhtml#a441f9b844c9ffb78cfee8edbdb16717a" title="Dispatch message to hostcom asking to send error to host. " alt="" coords="251,136,456,177"/>
+</map>

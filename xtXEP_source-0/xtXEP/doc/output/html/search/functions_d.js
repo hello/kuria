@@ -1,0 +1,27 @@
+var searchData=
+[
+  ['pendsv_5fhandler',['PendSV_Handler',['../startup__sams70_8c.xhtml#a6303e1f258cbdc1f970ce579cc015623',1,'startup_sams70.c']]],
+  ['pioa_5fhandler',['PIOA_Handler',['../startup__sams70_8c.xhtml#afca962a3839c44570f32da889477118c',1,'startup_sams70.c']]],
+  ['piob_5fhandler',['PIOB_Handler',['../startup__sams70_8c.xhtml#a8eaa8ed51c40195131a9fd8244c31453',1,'startup_sams70.c']]],
+  ['piod_5fhandler',['PIOD_Handler',['../startup__sams70_8c.xhtml#aaf9203e2d5acd44e727a8bf4090979ca',1,'startup_sams70.c']]],
+  ['pmc_5fhandler',['PMC_Handler',['../startup__sams70_8c.xhtml#a4ce9a9f564d78cb1628a9e99b15eb3fe',1,'startup_sams70.c']]],
+  ['process_5fdispatch_5fmessage_5fhostcom_5fsend',['process_dispatch_message_hostcom_send',['../task__hostcom_8c.xhtml#a3ac02c1c3bd0b84c4488bce13f8fc1d9',1,'task_hostcom.c']]],
+  ['prvgetregistersfromstack',['prvGetRegistersFromStack',['../startup__sams70_8c.xhtml#a0af7232f7a8c719d4eb2f14796141a00',1,'prvGetRegistersFromStack(uint32_t *pulFaultStackAddress):&#160;xt_mcu_handlers.c'],['../xt__mcu__handlers_8c.xhtml#a0af7232f7a8c719d4eb2f14796141a00',1,'prvGetRegistersFromStack(uint32_t *pulFaultStackAddress):&#160;xt_mcu_handlers.c']]],
+  ['prvheapinit',['prvHeapInit',['../heap__4__default_8c.xhtml#a3e55181f788f17d9a3e7d226a5206e4f',1,'heap_4_default.c']]],
+  ['prvheapinit_5ffast',['prvHeapInit_fast',['../heap__4__fast_8c.xhtml#a6a7b3f64c3e641b6fc89a3feae5cc634',1,'heap_4_fast.c']]],
+  ['prvheapinit_5fslow',['prvHeapInit_slow',['../heap__4__slow_8c.xhtml#ae2185149d9614bd770c2e631b9dcb563',1,'heap_4_slow.c']]],
+  ['prvinsertblockintofreelist',['prvInsertBlockIntoFreeList',['../heap__4__default_8c.xhtml#a1a70fdf86d8a603f45e9b93c14e0d24a',1,'heap_4_default.c']]],
+  ['prvinsertblockintofreelist_5ffast',['prvInsertBlockIntoFreeList_fast',['../heap__4__fast_8c.xhtml#a87150d7cf9ecc9f9948693279cce7e87',1,'heap_4_fast.c']]],
+  ['prvinsertblockintofreelist_5fslow',['prvInsertBlockIntoFreeList_slow',['../heap__4__slow_8c.xhtml#a6343a15b4ebbf85493e73d12f909a48e',1,'heap_4_slow.c']]],
+  ['push_5f8051',['push_8051',['../x4driver__unittest_8cpp.xhtml#ac959c469c008d0f52799bd92b0af1df0',1,'x4driver_unittest.cpp']]],
+  ['push_5fall_5fldos',['push_all_ldos',['../x4driver__unittest_8cpp.xhtml#a052bd654070290aac9c1494b658adf05',1,'x4driver_unittest.cpp']]],
+  ['push_5fclock',['push_clock',['../x4driver__unittest_8cpp.xhtml#aad032e1daa8cb2274087b6aa0817f903',1,'x4driver_unittest.cpp']]],
+  ['push_5fldo',['push_ldo',['../x4driver__unittest_8cpp.xhtml#ac1807f82eb6bcd4292b07e2a299c2d29',1,'x4driver_unittest.cpp']]],
+  ['push_5fpif_5fread',['push_pif_read',['../x4driver__unittest_8cpp.xhtml#a1bc050f646470f9b1119b4fa564ec224',1,'x4driver_unittest.cpp']]],
+  ['push_5fpif_5fwrite',['push_pif_write',['../x4driver__unittest_8cpp.xhtml#a170b8cd8b79babc9e97102e007844290',1,'x4driver_unittest.cpp']]],
+  ['pvportmalloc',['pvPortMalloc',['../heap__4__default_8c.xhtml#a0379669d07d76cc81e3028123113b271',1,'heap_4_default.c']]],
+  ['pvportmalloc_5ffast',['pvPortMalloc_fast',['../heap__4__fast_8h.xhtml#a90c12a8560c6f7e48d14db229fe76ca6',1,'pvPortMalloc_fast(size_t xSize):&#160;heap_4_fast.c'],['../heap__4__fast_8c.xhtml#a0c2b14b67ead837339e5d2b2b37f472a',1,'pvPortMalloc_fast(size_t xWantedSize):&#160;heap_4_fast.c']]],
+  ['pvportmalloc_5fslow',['pvPortMalloc_slow',['../heap__4__slow_8h.xhtml#a7d86ba0177c10a36c06a2b290ad87c99',1,'pvPortMalloc_slow(size_t xSize):&#160;heap_4_slow.c'],['../heap__4__slow_8c.xhtml#a973c45b036208d00c837bf455b34d7f2',1,'pvPortMalloc_slow(size_t xWantedSize):&#160;heap_4_slow.c']]],
+  ['pwm0_5fhandler',['PWM0_Handler',['../startup__sams70_8c.xhtml#ace50030fcde9e4436ca5238c30dc4f12',1,'startup_sams70.c']]],
+  ['pwm1_5fhandler',['PWM1_Handler',['../startup__sams70_8c.xhtml#a0d1acb7419914a8ed8c0c7475e42375e',1,'startup_sams70.c']]]
+];

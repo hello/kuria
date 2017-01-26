@@ -1,0 +1,7 @@
+<map id="_update_normalization_constansts" name="_update_normalization_constansts">
+<area shape="rect" id="node2" href="$x4driver_8c.xhtml#a3493035f2d30f78e30586a7a4eccb481" title="Updates normalization variables and calculates new constants. " alt="" coords="221,5,389,47"/>
+<area shape="rect" id="node3" href="$x4driver_8c.xhtml#a62754f21c23479836bc83d5e96514602" title="Sets Iterations. " alt="" coords="222,71,389,98"/>
+<area shape="rect" id="node4" href="$x4driver_8c.xhtml#a7ac1a5f45b02284571e297c672ca61de" title="Sets pulses per step. " alt="" coords="231,123,379,164"/>
+<area shape="rect" id="node5" href="$x4driver_8c.xhtml#a5b607d8c62783dfffb46c688ec90781e" title="x4driver_set_dac_min" alt="" coords="225,189,386,215"/>
+<area shape="rect" id="node6" href="$x4driver_8c.xhtml#aef1600f41584063c096ca246aafdee40" title="x4driver_set_dac_max" alt="" coords="223,239,388,266"/>
+</map>

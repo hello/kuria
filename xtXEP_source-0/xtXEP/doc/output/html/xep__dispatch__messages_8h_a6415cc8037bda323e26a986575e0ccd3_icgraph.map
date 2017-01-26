@@ -1,0 +1,6 @@
+<map id="dispatch_message_hostcom_send_reply_byte" name="dispatch_message_hostcom_send_reply_byte">
+<area shape="rect" id="node2" href="$xep__application__mcp__callbacks_8h.xhtml#ab1ee8219699e8ad5565777e7962bd09f" title="onMcpX4DriverGetSpiRegister" alt="" coords="259,5,471,32"/>
+<area shape="rect" id="node3" href="$xep__application__mcp__callbacks_8h.xhtml#a269b9593eb2635b8c5b600e8d69a331f" title="onMcpX4DriverGetPifRegister" alt="" coords="261,56,468,83"/>
+<area shape="rect" id="node4" href="$xep__application__mcp__callbacks_8h.xhtml#a6fc8f78920527c2d055ab44a74192789" title="onMcpX4DriverGetXifRegister" alt="" coords="261,107,468,133"/>
+<area shape="rect" id="node5" href="$xep__application__mcp__callbacks_8h.xhtml#a4f984ea88bc111ee46e9a82d80534d78" title="onMcpX4DriverGetPrfDiv" alt="" coords="275,157,454,184"/>
+</map>

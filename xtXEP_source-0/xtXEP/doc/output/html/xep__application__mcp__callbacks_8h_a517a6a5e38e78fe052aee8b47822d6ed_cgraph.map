@@ -1,0 +1,5 @@
+<map id="onMcpX4DriverGetFps" name="onMcpX4DriverGetFps">
+<area shape="rect" id="node2" href="$x4driver_8h.xhtml#aed14fdff09edc84f19a265da84306da9" title="x4driver_get_fps" alt="" coords="255,5,382,32"/>
+<area shape="rect" id="node3" href="$xep__dispatch__messages_8h.xhtml#a71071a04cadcf7ee0fe06a39995aff63" title="Dispatch message to hostcom asking to reply with int array to host. " alt="" coords="216,57,421,98"/>
+<area shape="rect" id="node4" href="$xep__dispatch__messages_8h.xhtml#a441f9b844c9ffb78cfee8edbdb16717a" title="Dispatch message to hostcom asking to send error to host. " alt="" coords="216,122,421,163"/>
+</map>

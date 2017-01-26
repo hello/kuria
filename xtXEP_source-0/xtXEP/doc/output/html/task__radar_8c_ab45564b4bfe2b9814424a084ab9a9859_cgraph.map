@@ -1,0 +1,12 @@
+<map id="task_radar" name="task_radar">
+<area shape="rect" id="node2" href="$xtmemory_8h.xhtml#a7e516b79f5a147905446ff71d1fc98fb" title="Free memory allocated by xtmemory_malloc_default. " alt="" coords="162,5,333,32"/>
+<area shape="rect" id="node3" href="$task__monitor_8c.xhtml#a481565877c5eb69c47c0f998a5a3244d" title="Register task to monitor. " alt="" coords="166,56,329,83"/>
+<area shape="rect" id="node4" href="$x4driver_8h.xhtml#a56631da6259f3784165d78d00e5b0f80" title="Set enable for X4. " alt="" coords="172,107,323,133"/>
+<area shape="rect" id="node5" href="$x4driver_8h.xhtml#a86dbadcb2e415d23600ef1bb31c9dbde" title="Initiates x4driver. " alt="" coords="198,157,297,184"/>
+<area shape="rect" id="node6" href="$x4driver_8h.xhtml#a8bc96b0db173f49cfe59027d9e95f600" title="x4driver_check_configuration" alt="" coords="144,208,351,235"/>
+<area shape="rect" id="node7" href="$x4driver_8h.xhtml#a3d4fbcf15fcf3736ef68613007caca8e" title="x4driver_set_sweep\l_trigger_control" alt="" coords="174,259,321,301"/>
+<area shape="rect" id="node8" href="$task__monitor_8c.xhtml#a0c7f7f8017a34d24de6b5c6fd90fbfe3" title="Reset counter to indicate that task is alive. " alt="" coords="176,325,319,352"/>
+<area shape="rect" id="node9" href="$task__radar_8c.xhtml#a1f0b2f52d809a8141147add6eaa0279a" title="read_and_send_radar\l_frame" alt="" coords="167,377,328,418"/>
+<area shape="rect" id="node10" href="$x4driver_8h.xhtml#a03652f4897873d46d0534336df7f29fe" title="Will trigger a radar sweep. " alt="" coords="169,443,326,469"/>
+<area shape="rect" id="node11" href="$x4driver_8h.xhtml#af07f7d2f1758a60257ab9df3426c9a37" title="Action timer callback. " alt="" coords="176,494,319,535"/>
+</map>

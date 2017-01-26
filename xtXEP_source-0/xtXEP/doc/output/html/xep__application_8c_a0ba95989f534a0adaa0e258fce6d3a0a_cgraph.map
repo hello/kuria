@@ -1,0 +1,10 @@
+<map id="task_application" name="task_application">
+<area shape="rect" id="node2" href="$xep__dispatch_8h.xhtml#aec7d22fb1b8b57f521ec0dce927dcf72" title="Register to dispatcher, returning the queue used for dispatch messages. " alt="" coords="215,5,347,32"/>
+<area shape="rect" id="node3" href="$xep__dispatch_8h.xhtml#a2b3ec25f62ed5589d9eb774c3d059d8b" title="Subscribe to message tag. " alt="" coords="209,56,353,83"/>
+<area shape="rect" id="node4" href="$task__monitor_8c.xhtml#a481565877c5eb69c47c0f998a5a3244d" title="Register task to monitor. " alt="" coords="200,107,363,133"/>
+<area shape="rect" id="node5" href="$xep__dispatch__messages_8h.xhtml#ad41a44756422ad7d000194262a394292" title="Dispatch message to hostcom asking to send system message to host. " alt="" coords="179,158,384,199"/>
+<area shape="rect" id="node6" href="$xep__application_8c.xhtml#a00c04155c64bcddc4b34f0103ecb9117" title="xep_app_init" alt="" coords="230,224,333,251"/>
+<area shape="rect" id="node7" href="$task__monitor_8c.xhtml#a0c7f7f8017a34d24de6b5c6fd90fbfe3" title="Reset counter to indicate that task is alive. " alt="" coords="210,275,353,301"/>
+<area shape="rect" id="node8" href="$xep__application_8c.xhtml#a1a899c8752f1bdc297a19ab97098c79b" title="xep_process_dispatch\l_message" alt="" coords="200,326,363,367"/>
+<area shape="rect" id="node9" href="$xep__application_8c.xhtml#abcf0abad70893f6683240d98dceb9ed0" title="xep_app_iterate" alt="" coords="219,392,344,419"/>
+</map>

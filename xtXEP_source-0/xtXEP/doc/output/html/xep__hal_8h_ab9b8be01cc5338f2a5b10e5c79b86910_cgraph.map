@@ -1,0 +1,10 @@
+<map id="xt_board_init" name="xt_board_init">
+<area shape="rect" id="node2" href="$hal__board__init_8c.xhtml#a9744d00e2d0a1292c99875113204bcfc" title="Setup a memory region. " alt="" coords="164,5,325,32"/>
+<area shape="rect" id="node3" href="$xep__hal_8h.xhtml#a02d431b74bbdd1cc5d4ff79903f7ebd6" title="Initiate LED. " alt="" coords="196,56,293,83"/>
+<area shape="rect" id="node4" href="$xep__hal_8h.xhtml#a9c169f60838175920c2f9ab467d020c1" title="Set mode for specified IO pin. " alt="" coords="173,107,316,133"/>
+<area shape="rect" id="node5" href="$xep__hal_8h.xhtml#af1f57228b9448df87a3f5f30968b3fa8" title="Gets the operation mode of the module. " alt="" coords="157,157,332,184"/>
+<area shape="rect" id="node6" href="$xt__selftest_8c.xhtml#abc3c1300afe15432d14d378d288dbed5" title="xt_selftest_ext_ram\l_shorts" alt="" coords="171,209,319,250"/>
+<area shape="rect" id="node7" href="$xep__hal_8h.xhtml#aa3e424512de2e10133b2ffe41f6577ea" title="Initialize external RAM if available. " alt="" coords="183,275,307,301"/>
+<area shape="rect" id="node8" href="$xt__selftest_8c.xhtml#a0d0c415bbb59ac93d3d4bd7dd75934a0" title="xt_selftest_ext_ram\l_functionality" alt="" coords="171,326,319,367"/>
+<area shape="rect" id="node9" href="$x4m0x__s70_2xtio__gpio_8c.xhtml#a1566a8e0975122b9e8f51bdbe5a70582" title="xtio_irq_init" alt="" coords="197,392,292,419"/>
+</map>

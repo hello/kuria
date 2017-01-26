@@ -1,0 +1,13 @@
+<map id="xtio_spi_init" name="xtio_spi_init">
+<area shape="rect" id="node2" href="$xtio__spi_8c.xhtml#a118933f1e12fede0c1fdb33224bfe867" title="xtio_set_spi_mode" alt="" coords="177,5,319,32"/>
+<area shape="rect" id="node3" href="$xtio__spi_8c.xhtml#ab79cff6b91bff8a6f4f249a0bcb639e8" title="xtio_get_spi_mode" alt="" coords="177,56,319,83"/>
+<area shape="rect" id="node4" href="$xtio__spi_8c.xhtml#a8713e3dadd876e844883fe44a657a4bb" title="xtio_spi_write" alt="" coords="195,107,301,133"/>
+<area shape="rect" id="node5" href="$xtio__spi_8c.xhtml#ac34e9895f91b7cb2b828a0bf5fd6e957" title="xtio_spi_read" alt="" coords="195,157,301,184"/>
+<area shape="rect" id="node6" href="$xtio__spi_8c.xhtml#a64a60847a947e7e747f90424e2e7fff7" title="xtio_spi_write_read" alt="" coords="177,208,319,235"/>
+<area shape="rect" id="node7" href="$group__sam__drivers__qspi__group.xhtml#ga0880ebeed18b648d870d195869d7bbcb" title="Set the number of data bits transferred. " alt="" coords="153,259,343,285"/>
+<area shape="rect" id="node8" href="$group__sam__drivers__qspi__group.xhtml#gace03a90819597dacca37b4b78a40d382" title="Set qspi clock transfer delay. " alt="" coords="161,309,335,336"/>
+<area shape="rect" id="node9" href="$group__sam__drivers__qspi__group.xhtml#ga187cc59e7a64feb10cb09f7529ff7eea" title="Set qspi delay between consecutive transfers. " alt="" coords="159,361,337,402"/>
+<area shape="rect" id="node10" href="$group__sam__drivers__qspi__group.xhtml#ga4606b52c80f4bba49dc435501a4c7f9b" title="Set Chip Select Mode. " alt="" coords="149,427,347,453"/>
+<area shape="rect" id="node11" href="$group__sam__drivers__qspi__group.xhtml#ga31cb74b30165e2846ceda94ed0dbf759" title="Set QSPI to Memory mode. " alt="" coords="158,477,338,504"/>
+<area shape="rect" id="node12" href="$xtio__spi_8c.xhtml#a84d28ff65169bee4a4017e614e9bb331" title="[set_pin_peripheral_mode description] " alt="" coords="157,528,339,555"/>
+</map>

@@ -1,0 +1,16 @@
+var searchData=
+[
+  ['radar_5fhal_5fget_5finstance_5fsize',['radar_hal_get_instance_size',['../radar__hal_8c.xhtml#a92728c8f2a3bc96e31edab3fcb921dd3',1,'radar_hal_get_instance_size(void):&#160;radar_hal.c'],['../radar__hal_8h.xhtml#a92728c8f2a3bc96e31edab3fcb921dd3',1,'radar_hal_get_instance_size(void):&#160;radar_hal.c']]],
+  ['radar_5fhal_5finit',['radar_hal_init',['../radar__hal_8c.xhtml#ad63d969948a6bec2a0c98d02c6296446',1,'radar_hal_init(radar_handle_t **radar_handle, void *instance_memory):&#160;radar_hal.c'],['../radar__hal_8h.xhtml#ad63d969948a6bec2a0c98d02c6296446',1,'radar_hal_init(radar_handle_t **radar_handle, void *instance_memory):&#160;radar_hal.c']]],
+  ['radar_5fhal_5fpin_5fset_5fenable',['radar_hal_pin_set_enable',['../radar__hal_8c.xhtml#a8da7b99f6f9103ecd9ccfd1deab1378b',1,'radar_hal_pin_set_enable(radar_handle_t *radar_handle, uint8_t value):&#160;radar_hal.c'],['../radar__hal_8h.xhtml#a8da7b99f6f9103ecd9ccfd1deab1378b',1,'radar_hal_pin_set_enable(radar_handle_t *radar_handle, uint8_t value):&#160;radar_hal.c']]],
+  ['radar_5fhal_5fspi_5fread',['radar_hal_spi_read',['../radar__hal_8c.xhtml#af50334a3ca1a7b4611f6ceb9ce3ce35f',1,'radar_hal_spi_read(radar_handle_t *radar_handle, uint8_t *data, uint32_t length):&#160;radar_hal.c'],['../radar__hal_8h.xhtml#af50334a3ca1a7b4611f6ceb9ce3ce35f',1,'radar_hal_spi_read(radar_handle_t *radar_handle, uint8_t *data, uint32_t length):&#160;radar_hal.c']]],
+  ['radar_5fhal_5fspi_5fwrite',['radar_hal_spi_write',['../radar__hal_8c.xhtml#a8d3ce44be62fda4c2e7f290b493ab634',1,'radar_hal_spi_write(radar_handle_t *radar_handle, uint8_t *data, uint32_t length):&#160;radar_hal.c'],['../radar__hal_8h.xhtml#a8d3ce44be62fda4c2e7f290b493ab634',1,'radar_hal_spi_write(radar_handle_t *radar_handle, uint8_t *data, uint32_t length):&#160;radar_hal.c']]],
+  ['radar_5fhal_5fspi_5fwrite_5fread',['radar_hal_spi_write_read',['../radar__hal_8c.xhtml#a344cdbc24f9b3bd5f94d69b8050affc9',1,'radar_hal_spi_write_read(radar_handle_t *radar_handle, uint8_t *wdata, uint32_t wlength, uint8_t *rdata, uint32_t rlength):&#160;radar_hal.c'],['../radar__hal_8h.xhtml#a344cdbc24f9b3bd5f94d69b8050affc9',1,'radar_hal_spi_write_read(radar_handle_t *radar_handle, uint8_t *wdata, uint32_t wlength, uint8_t *rdata, uint32_t rlength):&#160;radar_hal.c']]],
+  ['read_5fand_5fsend_5fradar_5fframe',['read_and_send_radar_frame',['../task__radar_8c.xhtml#a1f0b2f52d809a8141147add6eaa0279a',1,'task_radar.c']]],
+  ['reset',['reset',['../class_pif_registers.xhtml#a1e8053d0dd40c776a83e7658a81463b5',1,'PifRegisters::reset()'],['../class_spi_registers.xhtml#a61d0294e72dd6a26d0de29525155e1af',1,'SpiRegisters::reset()']]],
+  ['reset_5fhandler',['Reset_Handler',['../startup__sams70_8c.xhtml#ae7ee340978f5c25f52f0cad1457c6616',1,'startup_sams70.c']]],
+  ['rstc_5fhandler',['RSTC_Handler',['../startup__sams70_8c.xhtml#ae6d9d81ca81deeea217508d46808c9a1',1,'startup_sams70.c']]],
+  ['rswdt_5fhandler',['RSWDT_Handler',['../startup__sams70_8c.xhtml#a716d61c011b858b2971ccae0219b0840',1,'startup_sams70.c']]],
+  ['rtc_5fhandler',['RTC_Handler',['../startup__sams70_8c.xhtml#ab6a8110ba2ed9a12326dc9db531be942',1,'startup_sams70.c']]],
+  ['rtt_5fhandler',['RTT_Handler',['../startup__sams70_8c.xhtml#a77d719ccda271977fef3aa3153d82b7b',1,'startup_sams70.c']]]
+];

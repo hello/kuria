@@ -1,0 +1,8 @@
+<map id="src/main.c" name="src/main.c">
+<area shape="rect" id="node4" href="$xep__hal_8h.xhtml" title="Brief description. " alt="" coords="210,80,293,107"/>
+<area shape="rect" id="node5" href="$xep__application_8h.xhtml" title="XEP Module application interface. " alt="" coords="317,80,450,107"/>
+<area shape="rect" id="node6" href="$task__monitor_8h.xhtml" title="System monitor task. " alt="" coords="474,80,591,107"/>
+<area shape="rect" id="node7" href="$task__hostcom_8h.xhtml" title="task_hostcom.h" alt="" coords="615,80,739,107"/>
+<area shape="rect" id="node8" href="$task__radar_8h.xhtml" title="Radar event task. " alt="" coords="763,80,865,107"/>
+<area shape="rect" id="node9" href="$xtcompiler_8h.xhtml" title="xtcompiler.h" alt="" coords="889,80,989,107"/>
+</map>

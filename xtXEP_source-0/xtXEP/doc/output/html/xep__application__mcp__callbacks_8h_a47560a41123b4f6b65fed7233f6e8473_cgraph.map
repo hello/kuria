@@ -1,0 +1,5 @@
+<map id="onMcpX4DriverGetFrameAreaOffset" name="onMcpX4DriverGetFrameAreaOffset">
+<area shape="rect" id="node2" href="$x4driver_8h.xhtml#add830117bb3e12bb135de8665f89ae97" title="Gets calculated frame offset in meters done by x4driver_set_frame_area_offset. " alt="" coords="293,5,440,47"/>
+<area shape="rect" id="node3" href="$xep__dispatch__messages_8h.xhtml#a150240f872f2c85621c9d01b8934cef8" title="Dispatch message to hostcom asking to reply with float to host. " alt="" coords="264,71,469,112"/>
+<area shape="rect" id="node4" href="$xep__dispatch__messages_8h.xhtml#a441f9b844c9ffb78cfee8edbdb16717a" title="Dispatch message to hostcom asking to send error to host. " alt="" coords="264,136,469,177"/>
+</map>

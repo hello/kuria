@@ -1,0 +1,5 @@
+<map id="onMcpGetIOPinValue" name="onMcpGetIOPinValue">
+<area shape="rect" id="node2" href="$xep__hal_8h.xhtml#a28a34b2db420bacc2f465b1af3f7ca8a" title="Get level of specified IO pin. " alt="" coords="256,5,365,32"/>
+<area shape="rect" id="node3" href="$xep__dispatch__messages_8h.xhtml#a71071a04cadcf7ee0fe06a39995aff63" title="Dispatch message to hostcom asking to reply with int array to host. " alt="" coords="208,57,413,98"/>
+<area shape="rect" id="node4" href="$xep__dispatch__messages_8h.xhtml#a441f9b844c9ffb78cfee8edbdb16717a" title="Dispatch message to hostcom asking to send error to host. " alt="" coords="208,122,413,163"/>
+</map>

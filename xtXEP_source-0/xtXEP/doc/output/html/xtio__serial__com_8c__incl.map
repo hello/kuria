@@ -1,0 +1,6 @@
+<map id="src/hal/x4m0x_s70/xtio_serial_com.c" name="src/hal/x4m0x_s70/xtio_serial_com.c">
+<area shape="rect" id="node4" href="$xep__hal_8h.xhtml" title="Brief description. " alt="" coords="45,169,127,196"/>
+<area shape="rect" id="node11" href="$xtio__serial__com_8h.xhtml" title="User board configuration template. " alt="" coords="951,95,1085,121"/>
+<area shape="rect" id="node12" href="$xtio__uart_8h.xhtml" title="Local header file for xtio UART functions. " alt="" coords="174,95,265,121"/>
+<area shape="rect" id="node13" href="$task__monitor_8h.xhtml" title="System monitor task. " alt="" coords="1109,95,1226,121"/>
+</map>

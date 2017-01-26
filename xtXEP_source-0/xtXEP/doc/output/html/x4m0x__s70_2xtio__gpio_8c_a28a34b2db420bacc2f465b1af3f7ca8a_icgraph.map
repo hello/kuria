@@ -1,0 +1,4 @@
+<map id="xtio_get_level" name="xtio_get_level">
+<area shape="rect" id="node2" href="$xtio__serial__com_8c.xhtml#a44f44f30e6e6a45ec405e61d9bf66c34" title="Check if USB is available and connected. " alt="" coords="171,5,309,32"/>
+<area shape="rect" id="node3" href="$xep__application__mcp__callbacks_8h.xhtml#ab45991b5af535952ce2020e56a1f23ca" title="onMcpGetIOPinValue" alt="" coords="163,56,317,83"/>
+</map>

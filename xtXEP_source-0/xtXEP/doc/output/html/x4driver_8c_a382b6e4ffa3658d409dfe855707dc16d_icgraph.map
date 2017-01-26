@@ -1,0 +1,24 @@
+<map id="x4driver_set_pif_register" name="x4driver_set_pif_register">
+<area shape="rect" id="node2" href="$x4driver_8c.xhtml#a03652f4897873d46d0534336df7f29fe" title="Will trigger a radar sweep. " alt="" coords="257,5,414,32"/>
+<area shape="rect" id="node3" href="$x4driver_8c.xhtml#a041e81b6d75f97dbf29f1e9a29353425" title="Will setup x4 in default configuration. " alt="" coords="487,136,653,163"/>
+<area shape="rect" id="node4" href="$x4driver_8c.xhtml#a59bb6ec7d08888223c01bffa2aedcf50" title="Set frame area start and end in meters. " alt="" coords="701,753,883,780"/>
+<area shape="rect" id="node5" href="$x4driver_8c.xhtml#aca2f2487a46b5debe6656dd21a816e97" title="x4driver_set_downconversion" alt="" coords="931,543,1140,569"/>
+<area shape="rect" id="node6" href="$x4driver_8c.xhtml#ab008a9d8a7ab0744ceb00fb2116ad850" title="Reads raw bytes from x4. " alt="" coords="258,223,413,265"/>
+<area shape="rect" id="node7" href="$x4driver_8c.xhtml#aad4194e43df4304e629fc595d582d408" title="Setup external osc on X4. " alt="" coords="266,289,405,316"/>
+<area shape="rect" id="node8" href="$x4driver_8c.xhtml#abde766e0d1366c610923ac6df6aff591" title="Enable dvdd ldo on X4 NOTE: Implements workaround to kick start LDO. " alt="" coords="242,340,429,367"/>
+<area shape="rect" id="node9" href="$x4driver_8c.xhtml#a2ed5d880184cddb6899a3ee5789ae282" title="Enable dvdd ldo on X4 NOTE: Implements workaround to kick start LDO. " alt="" coords="242,391,429,417"/>
+<area shape="rect" id="node10" href="$x4driver_8c.xhtml#ac1bde9631df9f305637fd490f6d6034e" title="Enable avdd ldo on X4 NOTE: Implements workaround to kick start LDO. " alt="" coords="242,441,429,468"/>
+<area shape="rect" id="node11" href="$x4driver_8c.xhtml#a6cf76ee14b0f9d6d942771a01b4bc6ab" title="Enable avdd ldo on X4 NOTE: Implements workaround to kick start LDO. " alt="" coords="242,492,429,519"/>
+<area shape="rect" id="node12" href="$x4driver_8c.xhtml#a5db8c4a69efec11c5d537c13e4a94f6f" title="Set frame length in cycles. " alt="" coords="263,158,408,199"/>
+<area shape="rect" id="node13" href="$x4driver_8c.xhtml#a62754f21c23479836bc83d5e96514602" title="Sets Iterations. " alt="" coords="252,593,419,620"/>
+<area shape="rect" id="node14" href="$x4driver_8c.xhtml#a7ac1a5f45b02284571e297c672ca61de" title="Sets pulses per step. " alt="" coords="261,645,409,686"/>
+<area shape="rect" id="node15" href="$x4driver_8c.xhtml#a14e3623f55953194c1660b4fcc5814cf" title="Sets a register segment. " alt="" coords="242,543,429,569"/>
+<area shape="rect" id="node16" href="$x4driver_8c.xhtml#afdda0b27e8cfa0aa286f1cca02524b1a" title="_x4driver_set_rx_ram\l_first_line" alt="" coords="491,681,649,722"/>
+<area shape="rect" id="node17" href="$x4driver_8c.xhtml#ac12013d8875e5974fd3b4703aeeee12f" title="_x4driver_set_rx_ram\l_last_line" alt="" coords="491,746,649,787"/>
+<area shape="rect" id="node18" href="$x4driver_8c.xhtml#a5b607d8c62783dfffb46c688ec90781e" title="x4driver_set_dac_min" alt="" coords="255,863,416,889"/>
+<area shape="rect" id="node19" href="$x4driver_8c.xhtml#aef1600f41584063c096ca246aafdee40" title="x4driver_set_dac_max" alt="" coords="253,913,418,940"/>
+<area shape="rect" id="node20" href="$x4driver_8c.xhtml#ac9237ca48bd407ee0efdd38db91a9b4e" title="x4driver_set_rx_wait" alt="" coords="495,913,645,940"/>
+<area shape="rect" id="node21" href="$x4driver_8c.xhtml#ab5eb8602c52123f84b4dfee408ef2cc7" title="x4driver_set_prf_div" alt="" coords="261,1015,410,1041"/>
+<area shape="rect" id="node22" href="$x4driver__unittest_8cpp.xhtml#a10059f1dd033fae04d9ab3832f498c04" title="TEST_F" alt="" coords="302,1065,369,1092"/>
+<area shape="rect" id="node23" href="$xep__application__mcp__callbacks_8h.xhtml#a4b8b3538059764feac39d03c54e37e81" title="onMcpX4DriverSetPifRegister" alt="" coords="232,1116,439,1143"/>
+</map>

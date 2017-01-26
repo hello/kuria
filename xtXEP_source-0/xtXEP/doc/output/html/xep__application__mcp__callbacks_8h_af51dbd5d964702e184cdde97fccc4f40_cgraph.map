@@ -1,0 +1,5 @@
+<map id="onMcpX4DriverGetFrameArea" name="onMcpX4DriverGetFrameArea">
+<area shape="rect" id="node2" href="$x4driver_8h.xhtml#ab5eb42dc48baf9ca2ad00d945c7cfcad" title="Get frame area Start and end in meter. " alt="" coords="275,5,458,32"/>
+<area shape="rect" id="node3" href="$xep__dispatch__messages_8h.xhtml#a150240f872f2c85621c9d01b8934cef8" title="Dispatch message to hostcom asking to reply with float to host. " alt="" coords="264,57,469,98"/>
+<area shape="rect" id="node4" href="$xep__dispatch__messages_8h.xhtml#a441f9b844c9ffb78cfee8edbdb16717a" title="Dispatch message to hostcom asking to send error to host. " alt="" coords="264,122,469,163"/>
+</map>

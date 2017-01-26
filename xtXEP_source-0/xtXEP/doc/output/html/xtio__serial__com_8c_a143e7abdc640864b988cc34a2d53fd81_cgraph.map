@@ -1,0 +1,5 @@
+<map id="xtio_serial_com_init" name="xtio_serial_com_init">
+<area shape="rect" id="node2" href="$xtio__serial__com_8c.xhtml#a44f44f30e6e6a45ec405e61d9bf66c34" title="Check if USB is available and connected. " alt="" coords="200,5,339,32"/>
+<area shape="rect" id="node3" href="$xtio__serial__com_8c.xhtml#a774bd78f2d1048c26e37640a7e4032d9" title="Initiate USB and start necessary tasks. " alt="" coords="202,56,337,83"/>
+<area shape="rect" id="node4" href="$xtio__serial__com_8c.xhtml#a7245c132bd19ba6ed3ad97529857b614" title="Initiate UART and start necessary tasks. " alt="" coords="200,107,339,133"/>
+</map>

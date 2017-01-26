@@ -1,0 +1,8 @@
+<map id="task_hostcom" name="task_hostcom">
+<area shape="rect" id="node2" href="$xep__dispatch_8h.xhtml#aec7d22fb1b8b57f521ec0dce927dcf72" title="Register to dispatcher, returning the queue used for dispatch messages. " alt="" coords="199,5,331,32"/>
+<area shape="rect" id="node3" href="$xep__dispatch_8h.xhtml#a2b3ec25f62ed5589d9eb774c3d059d8b" title="Subscribe to message tag. " alt="" coords="193,56,337,83"/>
+<area shape="rect" id="node4" href="$task__hostcom_8c.xhtml#a2107f903297b89d9863455c76cdcd97d" title="mcp_handle_protocol\l_packet" alt="" coords="185,107,344,149"/>
+<area shape="rect" id="node5" href="$task__hostcom_8c.xhtml#a712c0905d53d8aba5669e222b0f7d144" title="mcp_handle_protocol\l_error" alt="" coords="185,173,344,214"/>
+<area shape="rect" id="node6" href="$xep__hal_8h.xhtml#a143e7abdc640864b988cc34a2d53fd81" title="Initiate serial communication &#45; USB if available, otherwise UART. " alt="" coords="191,239,338,265"/>
+<area shape="rect" id="node7" href="$task__hostcom_8c.xhtml#a3ac02c1c3bd0b84c4488bce13f8fc1d9" title="process_dispatch_message\l_hostcom_send" alt="" coords="165,290,364,331"/>
+</map>

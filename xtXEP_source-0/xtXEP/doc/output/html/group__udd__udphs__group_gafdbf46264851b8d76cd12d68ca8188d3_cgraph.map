@@ -1,0 +1,7 @@
+<map id="udd_ctrl_interrupt" name="udd_ctrl_interrupt">
+<area shape="rect" id="node2" href="$group__udd__udphs__group.xhtml#ga80494c67ce9cbd4ee8eb5e7fa5c19cd6" title="Managed reception of SETUP packet on control endpoint. " alt="" coords="188,5,365,32"/>
+<area shape="rect" id="node3" href="$group__udd__udphs__group.xhtml#ga181ffd0cddf5130f55df6df8ca3f916c" title="Managed reception of IN packet on control endpoint. " alt="" coords="413,31,540,57"/>
+<area shape="rect" id="node4" href="$group__udd__udphs__group.xhtml#ga0a56388130817f0cd070dba04842740f" title="Managed reception of OUT packet on control endpoint. " alt="" coords="195,107,358,133"/>
+<area shape="rect" id="node5" href="$group__udd__udphs__group.xhtml#ga909f5689181816c06868d6aca77f3550" title="Managed overflow event of OUT packet on control endpoint. " alt="" coords="211,157,343,184"/>
+<area shape="rect" id="node6" href="$group__udd__udphs__group.xhtml#ga357a7fb2393f1995f9d6fb00ee6b166e" title="Managed underflow event of IN packet on control endpoint. " alt="" coords="206,208,347,235"/>
+</map>

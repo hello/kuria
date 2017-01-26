@@ -1,0 +1,5 @@
+<map id="xtio_led_set_state" name="xtio_led_set_state">
+<area shape="rect" id="node2" href="$main_8c.xhtml#a840291bc02cba5474a4cb46a9b9566fe" title="main" alt="" coords="254,5,309,32"/>
+<area shape="rect" id="node3" href="$task__monitor_8c.xhtml#ad45490893a79383d6cd047fa3e4c3638" title="task_monitor" alt="" coords="228,56,335,83"/>
+<area shape="rect" id="node4" href="$module__ui_8c.xhtml#a54f86bf93a9a46ab61ff08b7e535e9a0" title="Set the module LED color. " alt="" coords="192,107,371,133"/>
+</map>

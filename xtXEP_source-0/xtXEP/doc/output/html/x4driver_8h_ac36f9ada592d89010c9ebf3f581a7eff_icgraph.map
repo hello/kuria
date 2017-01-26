@@ -1,0 +1,5 @@
+<map id="x4driver_get_dac_step" name="x4driver_get_dac_step">
+<area shape="rect" id="node2" href="$x4driver_8c.xhtml#a980b02b3894a1c8a22a47210bdce97c1" title="gets DAC range based on DAC min, max and dacstep. " alt="" coords="288,5,359,32"/>
+<area shape="rect" id="node3" href="$x4driver_8c.xhtml#ad4eae703d43b3d9800fd5174ce8ff222" title="x4driver_get_sweep_time" alt="" coords="231,56,415,83"/>
+<area shape="rect" id="node4" href="$x4driver_8c.xhtml#a8bc96b0db173f49cfe59027d9e95f600" title="x4driver_check_configuration" alt="" coords="220,107,427,133"/>
+</map>

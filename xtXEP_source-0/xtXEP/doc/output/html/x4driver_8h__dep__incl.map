@@ -1,0 +1,8 @@
+<map id="include/x4driver.h" name="include/x4driver.h">
+<area shape="rect" id="node2" href="$xep_8h.xhtml" title="XEP interface. " alt="" coords="5,87,112,114"/>
+<area shape="rect" id="node3" href="$task__radar_8h.xhtml" title="Radar event task. " alt="" coords="136,87,301,114"/>
+<area shape="rect" id="node4" href="$task__radar_8c.xhtml" title="src/Radar/task_radar.c" alt="" coords="197,169,361,196"/>
+<area shape="rect" id="node5" href="$x4driver_8c.xhtml" title="Platform independent driver to interface with Xx radar. " alt="" coords="377,87,533,114"/>
+<area shape="rect" id="node6" href="$x4driver__unittest_8cpp.xhtml" title="src/XDriver/x4driver\l_unittest.cpp" alt="" coords="557,80,704,121"/>
+<area shape="rect" id="node7" href="$xep__application_8h.xhtml" title="XEP Module application interface. " alt="" coords="728,87,920,114"/>
+</map>

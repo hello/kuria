@@ -1,0 +1,5 @@
+<map id="task_monitor" name="task_monitor">
+<area shape="rect" id="node2" href="$xep__hal_8h.xhtml#aea9d8137a0fddb8ed22f14f318dfec4f" title="Set LED state. " alt="" coords="160,5,299,32"/>
+<area shape="rect" id="node3" href="$xep__hal_8h.xhtml#ace2af126089abe1d676edfc1400d0bf7" title="Triggers a software reset of MCU. " alt="" coords="162,56,297,83"/>
+<area shape="rect" id="node4" href="$xep__hal_8h.xhtml#aba84ec695575730f2fd3b4f75eefe28a" title="Reset the watchdog timer. " alt="" coords="161,107,298,133"/>
+</map>

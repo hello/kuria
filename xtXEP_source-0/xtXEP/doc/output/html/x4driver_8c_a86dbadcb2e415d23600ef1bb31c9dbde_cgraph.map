@@ -1,0 +1,11 @@
+<map id="x4driver_init" name="x4driver_init">
+<area shape="rect" id="node2" href="$x4driver_8c.xhtml#a56631da6259f3784165d78d00e5b0f80" title="Set enable for X4. " alt="" coords="181,5,332,32"/>
+<area shape="rect" id="node3" href="$x4driver_8c.xhtml#a696a63c5fe7e11fab1b8864faf6e296c" title="Get SPI register on radar chip. " alt="" coords="165,56,348,83"/>
+<area shape="rect" id="node4" href="$x4driver_8c.xhtml#a421ecb2b885441b8d565301fbd81993d" title="Upload default 8051 firmware to X4. " alt="" coords="164,107,349,149"/>
+<area shape="rect" id="node5" href="$x4driver_8c.xhtml#ae675d60c2a35b5313b71c319744a11f0" title="Enables dvdd_tx,dvdd_rx, avdd_tx dvdd_rx ldos on X4 . " alt="" coords="171,173,342,200"/>
+<area shape="rect" id="node6" href="$x4driver_8c.xhtml#aad4194e43df4304e629fc595d582d408" title="Setup external osc on X4. " alt="" coords="187,224,326,251"/>
+<area shape="rect" id="node7" href="$x4driver_8c.xhtml#a041e81b6d75f97dbf29f1e9a29353425" title="Will setup x4 in default configuration. " alt="" coords="173,275,340,301"/>
+<area shape="rect" id="node8" href="$x4driver_8c.xhtml#a3493035f2d30f78e30586a7a4eccb481" title="Updates normalization variables and calculates new constants. " alt="" coords="173,326,341,367"/>
+<area shape="rect" id="node9" href="$x4driver_8c.xhtml#a59bb6ec7d08888223c01bffa2aedcf50" title="Set frame area start and end in meters. " alt="" coords="409,417,591,444"/>
+<area shape="rect" id="node10" href="$x4driver_8c.xhtml#aca2f2487a46b5debe6656dd21a816e97" title="x4driver_set_downconversion" alt="" coords="152,443,361,469"/>
+</map>

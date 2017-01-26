@@ -1,0 +1,5 @@
+<map id="onMcpGetSystemInfo" name="onMcpGetSystemInfo">
+<area shape="rect" id="node2" href="$xep__dispatch__messages_8h.xhtml#abca07c93e1afe77599a6530c100b15c1" title="Dispatch message to hostcom asking to reply with string to host. " alt="" coords="212,5,417,47"/>
+<area shape="rect" id="node3" href="$xep_8h.xhtml#a74b3579b46539191c66b915956c19b8c" title="Append XEP components version list to destination. " alt="" coords="239,71,390,112"/>
+<area shape="rect" id="node4" href="$xep__dispatch__messages_8h.xhtml#a441f9b844c9ffb78cfee8edbdb16717a" title="Dispatch message to hostcom asking to send error to host. " alt="" coords="212,136,417,177"/>
+</map>

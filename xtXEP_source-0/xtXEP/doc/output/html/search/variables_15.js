@@ -1,0 +1,28 @@
+var searchData=
+[
+  ['x4_5fio1_5fcallback',['x4_io1_callback',['../x4m0x__s70_2xtio__gpio_8c.xhtml#ae7b7ff04eff495ef0ba4b5a966d50caf',1,'xtio_gpio.c']]],
+  ['x4_5fio2_5fcallback',['x4_io2_callback',['../x4m0x__s70_2xtio__gpio_8c.xhtml#ae4fda2671bb5db430f52fb629564c2ba',1,'xtio_gpio.c']]],
+  ['x4driver',['x4driver',['../struct_xep_handle__t.xhtml#a011df2ca19cd71590cf05d48f609f8db',1,'XepHandle_t::x4driver()'],['../struct_radar_task_parameters__t.xhtml#a3e3c2daea2caf74f1cfb4420c81f4dce',1,'RadarTaskParameters_t::x4driver()']]],
+  ['x4driver_5fbins_5fper_5frx_5fmframes',['X4DRIVER_BINS_PER_RX_MFRAMES',['../x4driver_8c.xhtml#aaf229787bd8f7d858237499565941f50',1,'x4driver.c']]],
+  ['x4driver_5fbins_5fper_5frx_5fmframes_5fcoarse',['X4DRIVER_BINS_PER_RX_MFRAMES_COARSE',['../x4driver_8c.xhtml#a9c09705129000c6b831341500ccf7366',1,'x4driver.c']]],
+  ['x4driver_5fmax_5fbins_5frange_5fmeters_5fdown_5fconversion',['X4DRIVER_MAX_BINS_RANGE_METERS_DOWN_CONVERSION',['../x4driver_8c.xhtml#a33ccb74f7a5ecdb5e542bf8b3190132c',1,'x4driver.c']]],
+  ['x4driver_5fmax_5fbins_5frange_5fmeters_5frf',['X4DRIVER_MAX_BINS_RANGE_METERS_RF',['../x4driver_8c.xhtml#ab4f34a2cced3ef73a0b0a109cac48c6c',1,'x4driver.c']]],
+  ['x4driver_5fmax_5frange_5foffset',['X4DRIVER_MAX_RANGE_OFFSET',['../x4driver_8c.xhtml#a833a924036fd8eaea3d77eb0f75553df',1,'x4driver.c']]],
+  ['x4driver_5fmeters_5fper_5fbin',['X4DRIVER_METERS_PER_BIN',['../x4driver_8c.xhtml#ac06ba95baa5406397e211adaeaee6a3b',1,'x4driver.c']]],
+  ['x4driver_5fmeters_5fper_5fbin_5fdown_5fconvertion',['X4DRIVER_METERS_PER_BIN_DOWN_CONVERTION',['../x4driver_8c.xhtml#a3e12a789e2c1ddc000167509262fe00c',1,'x4driver.c']]],
+  ['x4driver_5fmin_5frange',['X4DRIVER_MIN_RANGE',['../x4driver_8c.xhtml#af19d993adbe31d0462b71726b6654180',1,'x4driver.c']]],
+  ['x4driver_5frx_5fwait_5foffset_5fin_5fmeters',['X4DRIVER_RX_WAIT_OFFSET_IN_METERS',['../x4driver_8c.xhtml#a911a7b9d00fd0247c8e9b8d02efbbbc5',1,'x4driver.c']]],
+  ['xblockallocatedbit',['xBlockAllocatedBit',['../heap__4__default_8c.xhtml#ad7d272a4def963ce2d0185bb02fc7da4',1,'xBlockAllocatedBit():&#160;heap_4_default.c'],['../heap__4__fast_8c.xhtml#ad7d272a4def963ce2d0185bb02fc7da4',1,'xBlockAllocatedBit():&#160;heap_4_fast.c'],['../heap__4__slow_8c.xhtml#ad7d272a4def963ce2d0185bb02fc7da4',1,'xBlockAllocatedBit():&#160;heap_4_slow.c']]],
+  ['xblocksize',['xBlockSize',['../struct_a___b_l_o_c_k___l_i_n_k.xhtml#ad5dcf5df03d8be6186c567be9e2c657b',1,'A_BLOCK_LINK']]],
+  ['xethru_5fio1_5fcallback',['xethru_io1_callback',['../x4m0x__s70_2xtio__gpio_8c.xhtml#a2ad8cc7ce49568cce2bc6b6cb34a0963',1,'xtio_gpio.c']]],
+  ['xethru_5fio2_5fcallback',['xethru_io2_callback',['../x4m0x__s70_2xtio__gpio_8c.xhtml#adf82ef353f23849e67bc615193a954aa',1,'xtio_gpio.c']]],
+  ['xethru_5fio3_5fcallback',['xethru_io3_callback',['../x4m0x__s70_2xtio__gpio_8c.xhtml#acac7400ddc977c5fec4ac89be4648309',1,'xtio_gpio.c']]],
+  ['xethru_5fio4_5fcallback',['xethru_io4_callback',['../x4m0x__s70_2xtio__gpio_8c.xhtml#af6713b83d86bcd1ecc3bfe0b748655ad',1,'xtio_gpio.c']]],
+  ['xethru_5fio5_5fcallback',['xethru_io5_callback',['../x4m0x__s70_2xtio__gpio_8c.xhtml#ae4955dcd3d0c6406815379c5e2e9bbc3',1,'xtio_gpio.c']]],
+  ['xethru_5fio6_5fcallback',['xethru_io6_callback',['../x4m0x__s70_2xtio__gpio_8c.xhtml#a353a18b2b21c4c152c40703f5e55d7fa',1,'xtio_gpio.c']]],
+  ['xfreebytesremaining',['xFreeBytesRemaining',['../heap__4__default_8c.xhtml#a338244e3e604d3b290a3ef1903e97e4b',1,'xFreeBytesRemaining():&#160;heap_4_default.c'],['../heap__4__fast_8c.xhtml#a338244e3e604d3b290a3ef1903e97e4b',1,'xFreeBytesRemaining():&#160;heap_4_fast.c'],['../heap__4__slow_8c.xhtml#a338244e3e604d3b290a3ef1903e97e4b',1,'xFreeBytesRemaining():&#160;heap_4_slow.c']]],
+  ['xheapstructsize',['xHeapStructSize',['../heap__4__default_8c.xhtml#aff7bec0da6b44e3634d215b40eb1db76',1,'xHeapStructSize():&#160;heap_4_default.c'],['../heap__4__fast_8c.xhtml#aff7bec0da6b44e3634d215b40eb1db76',1,'xHeapStructSize():&#160;heap_4_fast.c'],['../heap__4__slow_8c.xhtml#aff7bec0da6b44e3634d215b40eb1db76',1,'xHeapStructSize():&#160;heap_4_slow.c']]],
+  ['xminimumeverfreebytesremaining',['xMinimumEverFreeBytesRemaining',['../heap__4__default_8c.xhtml#ae88e8dc4d81326f752232a0a39eb119f',1,'xMinimumEverFreeBytesRemaining():&#160;heap_4_default.c'],['../heap__4__fast_8c.xhtml#ae88e8dc4d81326f752232a0a39eb119f',1,'xMinimumEverFreeBytesRemaining():&#160;heap_4_fast.c'],['../heap__4__slow_8c.xhtml#ae88e8dc4d81326f752232a0a39eb119f',1,'xMinimumEverFreeBytesRemaining():&#160;heap_4_slow.c']]],
+  ['xstart',['xStart',['../heap__4__default_8c.xhtml#a02f2ab4cbfe2167dc3bbdaf9b6c629c9',1,'xStart():&#160;heap_4_default.c'],['../heap__4__fast_8c.xhtml#a02f2ab4cbfe2167dc3bbdaf9b6c629c9',1,'xStart():&#160;heap_4_fast.c'],['../heap__4__slow_8c.xhtml#a02f2ab4cbfe2167dc3bbdaf9b6c629c9',1,'xStart():&#160;heap_4_slow.c']]],
+  ['xt_5fprotocol_5flocal',['xt_protocol_local',['../xtio__serial__com_8c.xhtml#a1691dcb7f8d10dfdc6eb45ec554baaa0',1,'xtio_serial_com.c']]]
+];

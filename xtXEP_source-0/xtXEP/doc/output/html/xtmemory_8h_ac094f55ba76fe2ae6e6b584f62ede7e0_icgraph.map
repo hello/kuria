@@ -1,0 +1,8 @@
+<map id="xtmemory_malloc_default" name="xtmemory_malloc_default">
+<area shape="rect" id="node2" href="$xtio__uart_8h.xhtml#aefe56ce11c59d2ed758098c884e9fa45" title="xtio_uart_init" alt="" coords="279,5,383,32"/>
+<area shape="rect" id="node3" href="$task__radar_8h.xhtml#a8e1bd6586c853a5ad3fd6df6c3b930bf" title="Initialize Radar task. " alt="" coords="273,56,389,83"/>
+<area shape="rect" id="node4" href="$task__monitor_8h.xhtml#a481565877c5eb69c47c0f998a5a3244d" title="Resgister a task to the monitor system. " alt="" coords="249,107,412,133"/>
+<area shape="rect" id="node5" href="$xep__application_8h.xhtml#a5bb46ff10029dcede1e47eefdaa5732f" title="Initialize module application instance. " alt="" coords="295,157,366,184"/>
+<area shape="rect" id="node6" href="$xep__application_8h.xhtml#a6b62d4598b48167a0a9ca6e6896b2fff" title="Initialize Application task. " alt="" coords="255,208,406,235"/>
+<area shape="rect" id="node7" href="$xep__application_8c.xhtml#a145c12b30c377de637fb330f545ba7cb" title="xep_init_memorypoolset\l_default" alt="" coords="241,259,420,301"/>
+</map>

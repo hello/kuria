@@ -1,0 +1,8 @@
+<map id="x4driver_set_frame_area" name="x4driver_set_frame_area">
+<area shape="rect" id="node2" href="$x4driver_8c.xhtml#acee55fcb62077a150f421c3bbf2c2947" title="Utility function to take mutex. " alt="" coords="481,37,580,63"/>
+<area shape="rect" id="node3" href="$x4driver_8c.xhtml#ac9237ca48bd407ee0efdd38db91a9b4e" title="x4driver_set_rx_wait" alt="" coords="239,33,389,59"/>
+<area shape="rect" id="node4" href="$x4driver_8c.xhtml#a382b6e4ffa3658d409dfe855707dc16d" title="Sets PIF register value. " alt="" coords="441,154,620,181"/>
+<area shape="rect" id="node5" href="$x4driver_8c.xhtml#afb50fddff34b3e2ea353077619cb139e" title="Utility function to give mutex. " alt="" coords="483,98,579,125"/>
+<area shape="rect" id="node6" href="$x4driver_8c.xhtml#afdda0b27e8cfa0aa286f1cca02524b1a" title="_x4driver_set_rx_ram\l_first_line" alt="" coords="235,84,393,125"/>
+<area shape="rect" id="node7" href="$x4driver_8c.xhtml#ac12013d8875e5974fd3b4703aeeee12f" title="_x4driver_set_rx_ram\l_last_line" alt="" coords="235,149,393,191"/>
+</map>

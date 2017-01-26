@@ -1,0 +1,23 @@
+<map id="dispatch_message_hostcom_send_ack" name="dispatch_message_hostcom_send_ack">
+<area shape="rect" id="node2" href="$xep__application__mcp__callbacks_8h.xhtml#af7cff88ca2e2e7bf89b8616a868e2cda" title="onMcpModuleReset" alt="" coords="308,5,453,32"/>
+<area shape="rect" id="node3" href="$xep__application__mcp__callbacks_8h.xhtml#a8f52f6e72bd93b3a11b2c922730ee484" title="onMcpStartBootloader" alt="" coords="297,56,464,83"/>
+<area shape="rect" id="node4" href="$xep__application__mcp__callbacks_8h.xhtml#af985c748b39a157f646e4f712fc3e077" title="onMcpX4DriverSetFps" alt="" coords="299,107,462,133"/>
+<area shape="rect" id="node5" href="$xep__application__mcp__callbacks_8h.xhtml#a0a516b6779c63e36843ac4879145f84c" title="onMcpX4DriverSetIterations" alt="" coords="281,157,481,184"/>
+<area shape="rect" id="node6" href="$xep__application__mcp__callbacks_8h.xhtml#aada0a8dac6ec032dd621832d85e7435d" title="onMcpX4DriverSetPulsesPerStep" alt="" coords="265,208,497,235"/>
+<area shape="rect" id="node7" href="$xep__application__mcp__callbacks_8h.xhtml#af5af6817c24ebd7291a8e14ae8e97e34" title="onMcpX4DriverSetDownconversion" alt="" coords="259,259,503,285"/>
+<area shape="rect" id="node8" href="$xep__application__mcp__callbacks_8h.xhtml#a6c985a2ef7e19c267f3e94a7bf908735" title="onMcpX4DriverSetFrameArea" alt="" coords="275,309,486,336"/>
+<area shape="rect" id="node9" href="$xep__application__mcp__callbacks_8h.xhtml#af880e9a568158fe0dbc01768eb02b721" title="onMcpX4DriverInit" alt="" coords="312,360,449,387"/>
+<area shape="rect" id="node10" href="$xep__application__mcp__callbacks_8h.xhtml#a73702f3c3ef406ec1741300e7af01257" title="onMcpX4DriverSetDacStep" alt="" coords="283,411,478,437"/>
+<area shape="rect" id="node11" href="$xep__application__mcp__callbacks_8h.xhtml#abebd47020d9434b11d9e7987924bf4e6" title="onMcpX4DriverSetDacMin" alt="" coords="287,461,474,488"/>
+<area shape="rect" id="node12" href="$xep__application__mcp__callbacks_8h.xhtml#ad1495daac7c29451ea7c3c2ad398e997" title="onMcpX4DriverSetDacMax" alt="" coords="285,512,476,539"/>
+<area shape="rect" id="node13" href="$xep__application__mcp__callbacks_8h.xhtml#a89eff3efd6433f476df4c66dea370ad1" title="onMcpX4DriverSetFrameArea\lOffset" alt="" coords="275,563,486,605"/>
+<area shape="rect" id="node14" href="$xep__application__mcp__callbacks_8h.xhtml#a2e1f3124a9f776f311f45b0828f9bb50" title="onMcpX4DriverSetEnable" alt="" coords="289,629,472,656"/>
+<area shape="rect" id="node15" href="$xep__application__mcp__callbacks_8h.xhtml#a74bcd9d4245e20e4dceecd414bc3bf2d" title="onMcpX4DriverSetTxCenter\lFrequency" alt="" coords="282,681,479,722"/>
+<area shape="rect" id="node16" href="$xep__application__mcp__callbacks_8h.xhtml#a2feea8db577f360255e5642a40a2278b" title="onMcpX4DriverSetTxPower" alt="" coords="285,747,477,773"/>
+<area shape="rect" id="node17" href="$xep__application__mcp__callbacks_8h.xhtml#afaff4cfa6c10aaeb1121a1bf362d81b5" title="onMcpX4DriverSetSpiRegister" alt="" coords="275,797,486,824"/>
+<area shape="rect" id="node18" href="$xep__application__mcp__callbacks_8h.xhtml#a4b8b3538059764feac39d03c54e37e81" title="onMcpX4DriverSetPifRegister" alt="" coords="277,848,484,875"/>
+<area shape="rect" id="node19" href="$xep__application__mcp__callbacks_8h.xhtml#ab7cec7458dba6ab3ced50a3ecdc9377d" title="onMcpX4DriverSetXifRegister" alt="" coords="277,899,484,925"/>
+<area shape="rect" id="node20" href="$xep__application__mcp__callbacks_8h.xhtml#a799e2835d45b3fe3b1d2ae4c8a0fc910" title="onMcpX4DriverSetPrfDiv" alt="" coords="292,949,469,976"/>
+<area shape="rect" id="node21" href="$xep__application__mcp__callbacks_8h.xhtml#a8850c282d398f5566ab9c2d486e96aeb" title="onMcpSetIOPinControl" alt="" coords="299,1000,463,1027"/>
+<area shape="rect" id="node22" href="$xep__application__mcp__callbacks_8h.xhtml#a8e7d3bc0aacfe4f2fd3e8313afc11321" title="onMcpSetIOPinValue" alt="" coords="304,1051,457,1077"/>
+</map>

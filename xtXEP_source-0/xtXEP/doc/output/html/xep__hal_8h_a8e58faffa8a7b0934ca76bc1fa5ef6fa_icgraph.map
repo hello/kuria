@@ -1,0 +1,4 @@
+<map id="xt_wait" name="xt_wait">
+<area shape="rect" id="node2" href="$xep__application__mcp__callbacks_8h.xhtml#af7cff88ca2e2e7bf89b8616a868e2cda" title="onMcpModuleReset" alt="" coords="131,5,276,32"/>
+<area shape="rect" id="node3" href="$xep__application__mcp__callbacks_8h.xhtml#a8f52f6e72bd93b3a11b2c922730ee484" title="onMcpStartBootloader" alt="" coords="120,56,287,83"/>
+</map>

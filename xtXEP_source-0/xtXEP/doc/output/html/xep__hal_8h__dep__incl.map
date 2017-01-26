@@ -1,0 +1,24 @@
+<map id="include/xep_hal.h" name="include/xep_hal.h">
+<area shape="rect" id="node2" href="$_free_r_t_o_s__hooks_8c.xhtml" title="Callback functions used by FreeRTOS. " alt="" coords="5,87,167,114"/>
+<area shape="rect" id="node3" href="$radar__hal_8h.xhtml" title="Local header file for Radar HAL. " alt="" coords="191,87,331,114"/>
+<area shape="rect" id="node4" href="$radar__hal_8c.xhtml" title="src/hal/radar_hal.c" alt="" coords="191,177,330,203"/>
+<area shape="rect" id="node5" href="$board_8h.xhtml" title="User board definition template. " alt="" coords="507,87,702,114"/>
+<area shape="rect" id="node6" href="$hal__board__init_8c.xhtml" title="User board initialization template. " alt="" coords="732,169,896,211"/>
+<area shape="rect" id="node7" href="$xt__selftest_8c.xhtml" title="src/hal/x4m0x_s70/xt\l_selftest.c" alt="" coords="535,169,693,211"/>
+<area shape="rect" id="node8" href="$xt__system_8c.xhtml" title="System level hardware functionality. " alt="" coords="354,169,511,211"/>
+<area shape="rect" id="node9" href="$xtio__extram_8c.xhtml" title="Implementent support for external RAM on boards with Atmel SAM S70 MCU. " alt="" coords="937,169,1105,211"/>
+<area shape="rect" id="node10" href="$xtio__extram_8h.xhtml" title="Local header file for xtio functions. " alt="" coords="969,80,1137,121"/>
+<area shape="rect" id="node11" href="$startup__sams70_8c.xhtml" title="Interrupt handler definitions and start up code. " alt="" coords="1129,169,1320,211"/>
+<area shape="rect" id="node12" href="$x4m0x__s70_2xtio__gpio_8h.xhtml" title="Local header file for xtio functions. " alt="" coords="777,80,945,121"/>
+<area shape="rect" id="node13" href="$qspi__private_8h.xhtml" title="Local header file for xtio functions. " alt="" coords="1262,80,1433,121"/>
+<area shape="rect" id="node14" href="$xtio__spi_8c.xhtml" title="src/hal/x4m0x_s70/xtio\l_spi.c" alt="" coords="1365,169,1533,211"/>
+<area shape="rect" id="node15" href="$xtio__led_8h.xhtml" title="Local header file for xtio LED functions. " alt="" coords="1507,80,1675,121"/>
+<area shape="rect" id="node16" href="$xtio__serial__com_8c.xhtml" title="Implement USB serial communication. " alt="" coords="1641,169,1809,211"/>
+<area shape="rect" id="node17" href="$xtio__uart_8h.xhtml" title="Local header file for xtio UART functions. " alt="" coords="1750,80,1918,121"/>
+<area shape="rect" id="node18" href="$xtio__uart_8c.xhtml" title="src/hal/x4m0x_s70/xtio\l_uart.c" alt="" coords="1858,169,2026,211"/>
+<area shape="rect" id="node19" href="$task__hostcom_8c.xhtml" title="src/HostCom/task_hostcom.c" alt="" coords="1993,87,2203,114"/>
+<area shape="rect" id="node20" href="$main_8c.xhtml" title="main() function for Radar Application " alt="" coords="2227,87,2315,114"/>
+<area shape="rect" id="node21" href="$task__monitor_8c.xhtml" title="src/System/task_monitor.c" alt="" coords="2339,87,2531,114"/>
+<area shape="rect" id="node22" href="$module__ui_8c.xhtml" title="src/XEPA/module_ui.c" alt="" coords="2556,87,2715,114"/>
+<area shape="rect" id="node23" href="$xep__application__mcp__callbacks_8c.xhtml" title="src/XEPA/xep_application\l_mcp_callbacks.c" alt="" coords="2739,80,2919,121"/>
+</map>

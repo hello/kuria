@@ -1,0 +1,6 @@
+<map id="Reset_Handler" name="Reset_Handler">
+<area shape="rect" id="node2" href="$xep__hal_8h.xhtml#ab9b8be01cc5338f2a5b10e5c79b86910" title="Initiate basic HW functionality on HW board and MCU. " alt="" coords="211,5,315,32"/>
+<area shape="rect" id="node3" href="$startup__sams70_8c.xhtml#a5f388c8556f7cb6a84b5692db6b6ad80" title="__libc_init_array" alt="" coords="202,56,325,83"/>
+<area shape="rect" id="node4" href="$main_8c.xhtml#a840291bc02cba5474a4cb46a9b9566fe" title="main" alt="" coords="236,107,291,133"/>
+<area shape="rect" id="node5" href="$startup__sams70_8c.xhtml#a0af7232f7a8c719d4eb2f14796141a00" title="Default interrupt handler for unused IRQs. " alt="" coords="168,157,359,184"/>
+</map>

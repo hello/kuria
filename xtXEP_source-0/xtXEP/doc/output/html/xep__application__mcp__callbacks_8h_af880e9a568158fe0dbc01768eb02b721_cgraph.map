@@ -1,0 +1,5 @@
+<map id="onMcpX4DriverInit" name="onMcpX4DriverInit">
+<area shape="rect" id="node2" href="$x4driver_8h.xhtml#a86dbadcb2e415d23600ef1bb31c9dbde" title="Initiates x4driver. " alt="" coords="244,5,343,32"/>
+<area shape="rect" id="node3" href="$xep__dispatch__messages_8h.xhtml#a9b90f44cd5a4308e041a205a84fe4360" title="Dispatch message to hostcom asking to send ack to host. " alt="" coords="191,57,396,98"/>
+<area shape="rect" id="node4" href="$xep__dispatch__messages_8h.xhtml#a441f9b844c9ffb78cfee8edbdb16717a" title="Dispatch message to hostcom asking to send error to host. " alt="" coords="191,122,396,163"/>
+</map>

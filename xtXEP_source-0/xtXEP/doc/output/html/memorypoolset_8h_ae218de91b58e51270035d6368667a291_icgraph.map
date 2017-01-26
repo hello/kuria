@@ -1,0 +1,21 @@
+<map id="memorypoolset_take_auto" name="memorypoolset_take_auto">
+<area shape="rect" id="node2" href="$xep__dispatch_8c.xhtml#a715a18422cf4fa2c4d58b951770d25c7" title="Request a memoryblock from the dispatch memory poolset. " alt="" coords="291,5,461,47"/>
+<area shape="rect" id="node3" href="$xep__dispatch__messages_8c.xhtml#a9b90f44cd5a4308e041a205a84fe4360" title="Dispatch message to hostcom asking to send ack to host. " alt="" coords="273,71,479,112"/>
+<area shape="rect" id="node4" href="$xep__dispatch__messages_8c.xhtml#a441f9b844c9ffb78cfee8edbdb16717a" title="Dispatch message to hostcom asking to send error to host. " alt="" coords="273,136,479,177"/>
+<area shape="rect" id="node5" href="$xep__dispatch__messages_8c.xhtml#afa0ac1843a7d040677a0c8a1b8f427e2" title="Dispatch message to hostcom asking to send pong to host. " alt="" coords="273,201,479,243"/>
+<area shape="rect" id="node6" href="$xep__dispatch__messages_8c.xhtml#a78bc3683d59a32cf768de5fe9603f162" title="Dispatch message to hostcom asking to send profile data sleep to host. " alt="" coords="273,267,479,308"/>
+<area shape="rect" id="node7" href="$xep__dispatch__messages_8c.xhtml#a9cb07cdec7df91dd4a8ede59b01a9fc0" title="Dispatch message to hostcom asking to send profile data respiration to host. " alt="" coords="273,332,479,373"/>
+<area shape="rect" id="node8" href="$xep__dispatch__messages_8c.xhtml#ab8706adfce1195b9e971672df23f3bc2" title="Dispatch message to hostcom asking to send profile data truepresence single to host. " alt="" coords="248,397,504,439"/>
+<area shape="rect" id="node9" href="$xep__dispatch__messages_8c.xhtml#ad390b40a9f75a7e6a381b0ae9ce60e7e" title="Dispatch message to hostcom asking to send profile data truepresence movinglist to host..." alt="" coords="270,462,482,518"/>
+<area shape="rect" id="node10" href="$xep__dispatch__messages_8c.xhtml#aaacc4af55a7d7664ede806347d1aa55b" title="Dispatch message to hostcom asking to send profile data baseband amplitude/phase to host..." alt="" coords="273,542,479,598"/>
+<area shape="rect" id="node11" href="$xep__dispatch__messages_8c.xhtml#a790d7b75fba79015f8058ce2bef16077" title="Dispatch message to hostcom asking to send profile data baseband IQ to host. " alt="" coords="272,621,480,663"/>
+<area shape="rect" id="node12" href="$xep__dispatch__messages_8c.xhtml#a3fc50ea4a1f6588025cdee7a61eba2cc" title="Dispatch message to hostcom asking to send profile parameter file to host. " alt="" coords="250,687,502,728"/>
+<area shape="rect" id="node13" href="$xep__dispatch__messages_8c.xhtml#ad41a44756422ad7d000194262a394292" title="Dispatch message to hostcom asking to send system message to host. " alt="" coords="273,752,479,793"/>
+<area shape="rect" id="node14" href="$xep__dispatch__messages_8c.xhtml#a1d85432e0504e5196dc02922c8ed3c30" title="Dispatch message to hostcom asking to send string to host. " alt="" coords="273,817,479,859"/>
+<area shape="rect" id="node15" href="$xep__dispatch__messages_8c.xhtml#a66e62c413e7dd74946d0d8c0542ffd82" title="Dispatch message to hostcom asking to send byte array to host. " alt="" coords="273,883,479,924"/>
+<area shape="rect" id="node16" href="$xep__dispatch__messages_8c.xhtml#a51120146f30f1c984ed9bb4a5dbe16ed" title="Dispatch message to hostcom asking to send float array to host. " alt="" coords="273,948,479,989"/>
+<area shape="rect" id="node17" href="$xep__dispatch__messages_8c.xhtml#a71071a04cadcf7ee0fe06a39995aff63" title="Dispatch message to hostcom asking to reply with int array to host. " alt="" coords="273,1013,479,1055"/>
+<area shape="rect" id="node18" href="$xep__dispatch__messages_8c.xhtml#a6415cc8037bda323e26a986575e0ccd3" title="Dispatch message to hostcom asking to reply with byte array to host. " alt="" coords="273,1079,479,1120"/>
+<area shape="rect" id="node19" href="$xep__dispatch__messages_8c.xhtml#ad1b2c1285e7258ddf4624af93c5e50b3" title="Dispatch message to hostcom asking to reply with string to host. " alt="" coords="273,1144,479,1185"/>
+<area shape="rect" id="node20" href="$xep__dispatch__messages_8c.xhtml#a150240f872f2c85621c9d01b8934cef8" title="Dispatch message to hostcom asking to reply with float to host. " alt="" coords="273,1209,479,1251"/>
+</map>
