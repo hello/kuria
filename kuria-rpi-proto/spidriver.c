@@ -9,6 +9,7 @@
 #include <linux/types.h>
 #include <linux/spi/spidev.h>
 #include "kuria_utils.h"
+#include <stddef.h>
 
 static const char *device = "/dev/spidev0.0";
 
@@ -23,25 +24,25 @@ uint32_t spi_write_read(void* usr_ref, uint8_t* wdata, uint32_t wlength,
 	int ret;
     int fd = *(int*)usr_ref;
 	
-	struct spi_ioc_transfer tr = {
-		.tx_buf = (unsigned long)data,
-		.rx_buf = (unsigned long)data,
-		.len = length,
-		.delay_usecs = delay,
-		.speed_hz = speed,
-		.bits_per_word = bits,
+	struct spi_ioc_transfer tr[2] = {
+		[0].tx_buf = (unsigned long)wdata,
+		[0].rx_buf = 0,
+		[0].len = wlength,
+		[0].delay_usecs = delay,
+		[0].speed_hz = speed,
+		[0].bits_per_word = bits,
+		[1].tx_buf = 0,
+		[1].rx_buf = (unsigned long)rdata,
+		[1].len = rlength,
+		[1].delay_usecs = delay,
+		[1].speed_hz = speed,
+		[1].bits_per_word = bits,
 	};
 
-	ret = ioctl(fd, SPI_IOC_MESSAGE(1), &tr);
+	ret = ioctl(fd, SPI_IOC_MESSAGE(2), &tr);
 	if (ret < 1){
 		pabort("can't send spi message");
     }
-	for (ret = 0; ret < length; ret++) {
-		if (!(ret % 6))
-			puts("");
-		printf("%.2X ", data[ret]);
-	}
-	puts("");
     return 0;
 }
 uint32_t spi_read(void* usr_ref, uint8_t* data, uint32_t length) {
@@ -50,7 +51,7 @@ uint32_t spi_read(void* usr_ref, uint8_t* data, uint32_t length) {
     int fd = *(int*)usr_ref;
 	
 	struct spi_ioc_transfer tr = {
-		.tx_buf = (unsigned long)data,
+		.tx_buf = 0,
 		.rx_buf = (unsigned long)data,
 		.len = length,
 		.delay_usecs = delay,
@@ -72,6 +73,29 @@ uint32_t spi_read(void* usr_ref, uint8_t* data, uint32_t length) {
 }
 
 uint32_t spi_write(void* usr_ref, uint8_t* data, uint32_t length) {
+
+	int ret;
+    int fd = *(int*)usr_ref;
+	
+	struct spi_ioc_transfer tr = {
+		.tx_buf = (unsigned long)data,
+		.rx_buf = 0,
+		.len = length,
+		.delay_usecs = delay,
+		.speed_hz = speed,
+		.bits_per_word = bits,
+	};
+
+	ret = ioctl(fd, SPI_IOC_MESSAGE(1), &tr);
+	if (ret < 1){
+		pabort("can't send spi message");
+    }
+	for (ret = 0; ret < length; ret++) {
+		if (!(ret % 6))
+			puts("");
+		printf("%.2X ", data[ret]);
+	}
+	puts("");
     return 0;
 }
 
