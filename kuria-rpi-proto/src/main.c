@@ -1,16 +1,18 @@
 #include <stdio.h>
 #include <signal.h>
+#include <time.h>
+#include <sys/time.h>
 #include <unistd.h>
 #include <stdbool.h>
 #include "spidriver.h"
 #include "x4driver.h"
 #include <wiringPi.h>
-#include "freertos-linux/portable/portmacro.h"
-#include "freertos-linux/freertos/FreeRTOS/Source/include/FreeRTOS.h"
-#include "freertos-linux/freertos/FreeRTOS/Source/include/task.h"
-#include "freertos-linux/freertos/FreeRTOS/Source/include/semphr.h"
-#include "freertos-linux/freertos/FreeRTOS/Source/include/timers.h"
-#include "freertos-linux/freertos/FreeRTOS/Source/include/queue.h"
+#include "portmacro.h"
+#include "FreeRTOS.h"
+#include "task.h"
+#include "timers.h"
+#include "semphr.h"
+#include "queue.h"
 
 #define TASK_RADAR_STACK_SIZE            (1500)
 #define TASK_RADAR_PRIORITY        (tskIDLE_PRIORITY + 6)
@@ -26,6 +28,7 @@ int spi_fd;
 static X4Driver_t* x4driver;
 static TaskHandle_t h_task_radar = NULL;
 
+static unsigned long long uxQueueSendPassedCount = 0;
 void sig_handler(int sig) {
     if(sig == SIGINT || sig == SIGABRT)  {
         stop_x4_read = 1;
@@ -49,11 +52,28 @@ void vApplicationTickHook( void )
   }
 }
 
+void vApplicationIdleHook( void )
+{
+  /* The co-routines are executed in the idle task using the idle task hook. */
+  /* vCoRoutineSchedule(); */ /* Comment this out if not using Co-routines. */
+
+  struct timespec xTimeToSleep, xTimeSlept;
+  /* Makes the process more agreeable when using the Posix simulator. */
+  xTimeToSleep.tv_sec = 1;
+  xTimeToSleep.tv_nsec = 0;
+  nanosleep( &xTimeToSleep, &xTimeSlept );
+}
+
+void vMainQueueSendPassed( void )
+{
+	/* This is just an example implementation of the "queue send" trace hook. */
+	uxQueueSendPassedCount++;
+}
 void x4driver_timer_sweep_timeout(TimerHandle_t pxTimer)
 {
 	portBASE_TYPE xHigherPriorityTaskWoken = pdFALSE;
 	xTaskNotifyFromISR(h_task_radar, XEP_NOTIFY_RADAR_TRIGGER_SWEEP, eSetBits, &xHigherPriorityTaskWoken);
-	portYIELD_FROM_ISR( xHigherPriorityTaskWoken );
+	portEND_SWITCHING_ISR( xHigherPriorityTaskWoken );
 }
 
 
@@ -61,7 +81,7 @@ void x4driver_timer_action_timeout(TimerHandle_t pxTimer)
 {
 	portBASE_TYPE xHigherPriorityTaskWoken = pdFALSE;
 	xTaskNotifyFromISR(h_task_radar, XEP_NOTIFY_X4DRIVER_ACTION, eSetBits, &xHigherPriorityTaskWoken);
-	portYIELD_FROM_ISR( xHigherPriorityTaskWoken );
+	portEND_SWITCHING_ISR( xHigherPriorityTaskWoken );
 }
 
 uint32_t x4driver_timer_set_timer_timeout_frequency(void* timer , uint32_t frequency)
