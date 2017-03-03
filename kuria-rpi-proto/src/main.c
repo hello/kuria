@@ -69,11 +69,17 @@ void vMainQueueSendPassed( void )
 	/* This is just an example implementation of the "queue send" trace hook. */
 	uxQueueSendPassedCount++;
 }
+
+
+
+
+
+
 void x4driver_timer_sweep_timeout(TimerHandle_t pxTimer)
 {
 	portBASE_TYPE xHigherPriorityTaskWoken = pdFALSE;
 	xTaskNotifyFromISR(h_task_radar, XEP_NOTIFY_RADAR_TRIGGER_SWEEP, eSetBits, &xHigherPriorityTaskWoken);
-	portEND_SWITCHING_ISR( xHigherPriorityTaskWoken );
+    portYIELD_FROM_ISR( xHigherPriorityTaskWoken );	
 }
 
 
@@ -81,7 +87,7 @@ void x4driver_timer_action_timeout(TimerHandle_t pxTimer)
 {
 	portBASE_TYPE xHigherPriorityTaskWoken = pdFALSE;
 	xTaskNotifyFromISR(h_task_radar, XEP_NOTIFY_X4DRIVER_ACTION, eSetBits, &xHigherPriorityTaskWoken);
-	portEND_SWITCHING_ISR( xHigherPriorityTaskWoken );
+    portYIELD_FROM_ISR(xHigherPriorityTaskWoken );
 }
 
 uint32_t x4driver_timer_set_timer_timeout_frequency(void* timer , uint32_t frequency)
@@ -105,11 +111,11 @@ uint32_t x4driver_timer_set_timer_timeout_frequency(void* timer , uint32_t frequ
 }
 
 void x4driver_notify_data_ready(void* user_reference){
-/*    portBASE_TYPE xHigherPriorityTaskWoken = pdFALSE;
+    portBASE_TYPE xHigherPriorityTaskWoken = pdFALSE;
     xTaskNotifyFromISR(h_task_radar, XEP_NOTIFY_RADAR_DATAREADY, eSetBits, 
             &xHigherPriorityTaskWoken);
-    portYIELD_FROM_ISR( xHigherProirityTaskWoken); 
-    */
+    portYIELD_FROM_ISR(xHigherPriorityTaskWoken ); 
+
 }
 
 void x4driver_enable_ISR(void* user_reference, uint32_t enable) {
@@ -122,17 +128,16 @@ uint32_t x4driver_callback_pin_set_enable(void* user_reference, uint8_t value){
 }
 
 void x4driver_interrupt_data_ready(void) {
-   /* portBASE_TYPE xHigherPriorityTaskWoken = pdFALSE;
+    portBASE_TYPE xHigherPriorityTaskWoken = pdFALSE;
     xTaskNotifyFromISR(h_task_radar, XEP_NOTIFY_RADAR_DATAREADY, eSetBits, 
             &xHigherPriorityTaskWoken);
-    portYIELD_FROM_ISR( xHigherProirityTaskWoken); 
-    */
+    portYIELD_FROM_ISR( xHigherPriorityTaskWoken ); 
 }
 
 static void gpio_init(void) {
     // init wiringpi
     //
-   // wiringPiSetup();
+    wiringPiSetup();
 
     // Config enable pin
     //
@@ -207,6 +212,9 @@ int main() {
     }
 
     spi_init(&spi_fd);
+
+    // init gpio
+    gpio_init();
 
     x4driver_task_init();
     // Open file to save data

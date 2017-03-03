@@ -118,12 +118,19 @@ typedef portTickType TickType_t;
 
 
 /* Scheduler utilities. */
-extern void vPortYieldFromISR( void );
-extern void vPortYield( void );
+extern void vTaskSwitchContext( void );
 
-#define portYIELD()                 vPortYield()
+#define portYIELD() __asm volatile ( "SWI 0" );
+#define portEND_SWITCHING_ISR( xSwitchRequired )\
+{                                               \
+                                                \
+    if( xSwitchRequired != pdFALSE )            \
+    {                                           \
+        vTaskSwitchContext();                   \
+    }                                           \
+}
 
-#define portEND_SWITCHING_ISR( xSwitchRequired ) if( xSwitchRequired ) vPortYieldFromISR()
+#define portYIELD_FROM_ISR( x )  portEND_SWITCHING_ISR( x )
 /*-----------------------------------------------------------*/
 
 
