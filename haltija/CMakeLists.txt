@@ -46,6 +46,7 @@ add_executable(unit-test
 unit-test/main.cpp 
 unit-test/testradar1.cpp
 unit-test/testmatio.cpp
+unit-test/testfilter.cpp
 )
 
 
