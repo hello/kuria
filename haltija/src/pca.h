@@ -23,7 +23,7 @@ bool pca(const T & x, R & principal_components, R & transform) {
         x_zero_mean.col(icol).array() -= (x.col(icol).array().sum() / N);
     }
     
-    auto covariance = (x_zero_mean.transpose() * x_zero_mean) / x.rows();
+    auto covariance = (x_zero_mean.transpose() * x_zero_mean.conjugate()) / x.rows();
     
     Eigen::SelfAdjointEigenSolver<T> eigensolver(covariance);
 
