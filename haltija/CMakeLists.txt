@@ -31,7 +31,6 @@ add_library(haltija STATIC
 src/example.cpp
 src/matlabreader.cpp
 src/matlabwriter.cpp
-src/pca.cpp
 src/kiss_fft.c
 src/haltijamath.cpp
 )
@@ -47,6 +46,7 @@ unit-test/main.cpp
 unit-test/testradar1.cpp
 unit-test/testmatio.cpp
 unit-test/testfilter.cpp
+unit-test/testmatrixmath.cpp
 )
 
 
