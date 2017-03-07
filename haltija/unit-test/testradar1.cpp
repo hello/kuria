@@ -1,6 +1,7 @@
 #include "gtest/gtest.h"
 #include "example.h"
 #include "HaltijaMath.h"
+#include "pca.h"
 
 class TestRadar1 : public ::testing::Test {
 protected:
@@ -23,6 +24,3 @@ TEST_F(TestRadar1, TestSimpleExample) {
     real_matrices();
 }
 
-TEST_F(TestRadar1,TestFFT) {
-    //HaltijaMath::complex_fft(const int nfft, const Eigen::VectorXcf &x, Eigen::VectorXcf &output);
-}
