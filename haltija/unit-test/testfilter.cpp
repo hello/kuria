@@ -52,13 +52,14 @@ TEST_F(TestFilter, TestMatFIRFilter) {
     
     
     MatrixXf y = fir_filter_columns(B,x);
-    MatrixXf y2 = fir_filter_columns(B,x,1);
 
-    ASSERT_EQ(y.size(),2);
-    ASSERT_NEAR(y(0),3.0,1e-5);
-    ASSERT_NEAR(y(1),5.0,1e-5);
-    ASSERT_NEAR(y2(0),4.0,1e-5);
-    ASSERT_NEAR(y2(1),6.0,1e-5);
+    ASSERT_EQ(y.rows(),2);
+    ASSERT_EQ(y.cols(),2);
+
+    ASSERT_NEAR(y(0,0),3.0,1e-5);
+    ASSERT_NEAR(y(1,0),5.0,1e-5);
+    ASSERT_NEAR(y(0,1),4.0,1e-5);
+    ASSERT_NEAR(y(1,1),6.0,1e-5);
     
 }
 
@@ -181,5 +182,28 @@ TEST_F(TestFilter, TestComplexFft) {
     }
     
     
+}
+
+TEST_F(TestFilter,TestCiruclarShift) {
+    MatrixXf x(5,1);
+    x << 1,2,3,4,5;
+    
+    MatrixXf result1 = circular_shift_columns(x,1);
+    
+    ASSERT_TRUE(result1(0,0) == 5);
+    ASSERT_TRUE(result1(1,0) == 1);
+    ASSERT_TRUE(result1(2,0) == 2);
+    ASSERT_TRUE(result1(3,0) == 3);
+    ASSERT_TRUE(result1(4,0) == 4);
+
+    MatrixXf result2 = circular_shift_columns(x,-1);
+
+    
+    ASSERT_TRUE(result2(0,0) == 2);
+    ASSERT_TRUE(result2(1,0) == 3);
+    ASSERT_TRUE(result2(2,0) == 4);
+    ASSERT_TRUE(result2(3,0) == 5);
+    ASSERT_TRUE(result2(4,0) == 1);
+
 }
 

@@ -33,6 +33,7 @@ src/matlabreader.cpp
 src/matlabwriter.cpp
 src/kiss_fft.c
 src/haltijamath.cpp
+src/preprocessor.cpp
 )
 
 #############
@@ -47,6 +48,8 @@ unit-test/testradar1.cpp
 unit-test/testmatio.cpp
 unit-test/testfilter.cpp
 unit-test/testmatrixmath.cpp
+unit-test/testbuffers.cpp
+unit-test/testpreprocessor.cpp
 )
 
 
