@@ -13,6 +13,8 @@
 #include "timers.h"
 #include "semphr.h"
 #include "queue.h"
+#include <errno.h>
+#include <string.h>
 
 #define TASK_RADAR_STACK_SIZE            (1500)
 #define TASK_RADAR_PRIORITY        (tskIDLE_PRIORITY + 6)
@@ -23,10 +25,16 @@
 
 #define mainCHECK_DELAY       ( ( TickType_t ) 5000 / portTICK_RATE_MS )
 
+#define X4_ENABLE_PIN           3
+#define X4_GPIO1                (4)
+#define X4_GPIO2                21
+#define X4_INTR_PIN             X4_GPIO1
+#define X4_SWEEP_TRIGGER_PIN    X4_GPIO2
+
 bool stop_x4_read = 0;
-int spi_fd;
 static X4Driver_t* x4driver;
 static TaskHandle_t h_task_radar = NULL;
+static X4Driver_t x4driver_instance;
 
 static unsigned long long uxQueueSendPassedCount = 0;
 void sig_handler(int sig) {
@@ -35,6 +43,7 @@ void sig_handler(int sig) {
     }
 }
 
+/*************************** FreeRTOS application hooks**************************** */
 void vApplicationTickHook( void )
 {
   static unsigned long ulTicksSinceLastDisplay = 0;
@@ -70,10 +79,7 @@ void vMainQueueSendPassed( void )
 	uxQueueSendPassedCount++;
 }
 
-
-
-
-
+/************************ X4Driver callbacks ******************************************/
 
 void x4driver_timer_sweep_timeout(TimerHandle_t pxTimer)
 {
@@ -92,7 +98,8 @@ void x4driver_timer_action_timeout(TimerHandle_t pxTimer)
 
 uint32_t x4driver_timer_set_timer_timeout_frequency(void* timer , uint32_t frequency)
 {
-	uint32_t status = XEP_ERROR_X4DRIVER_OK;
+
+    uint32_t status = XEP_ERROR_X4DRIVER_OK;
 	uint32_t timer_ticks =  1000 / frequency / portTICK_PERIOD_MS;
 	X4DriverTimer_t * x4drivertimer = (X4DriverTimer_t*)timer;
 	x4drivertimer->configured_frequency = 1000.0 /timer_ticks;
@@ -118,13 +125,56 @@ void x4driver_notify_data_ready(void* user_reference){
 
 }
 
+void x4driver_interrupt_notify_data_ready(void) {
+    portBASE_TYPE xHigherPriorityTaskWoken = pdFALSE;
+    xTaskNotifyFromISR(h_task_radar, XEP_NOTIFY_RADAR_DATAREADY, eSetBits, 
+            &xHigherPriorityTaskWoken);
+    portYIELD_FROM_ISR(xHigherPriorityTaskWoken ); 
+
+}
+
 void x4driver_enable_ISR(void* user_reference, uint32_t enable) {
+    static bool int_reg_flag = false;
+    if( ( enable == 1) && !int_reg_flag) {
+        // register interrupt callback for rising edge
+        printf("Enabling ISR....\n");
+       /* if( wiringPiISR (X4_INTR_PIN, INT_EDGE_RISING, &x4driver_interrupt_notify_data_ready) < 0 ) {
+            printf("Unable to setup ISR \n");
+            return;
+        }*/
+
+        digitalWrite(X4_SWEEP_TRIGGER_PIN, LOW);
+        int_reg_flag = true;
+    }
+    else {
+        // unregister 
+    }
+
+    // Setup GPIO mode for IO2
+    //
+    //pinMode(X4_SWEEP_TRIGGER_PIN, OUTPUT);
+
+    //Set level low
 }
 
 uint32_t x4driver_trigger_sweep_pin(void* user_reference){
+    // Set IO2 to level high
+    //
+    digitalWrite(X4_SWEEP_TRIGGER_PIN, HIGH); 
+    // Set IO2 to level low
+    //
+    digitalWrite(X4_SWEEP_TRIGGER_PIN, LOW); 
+    return XEP_ERROR_X4DRIVER_OK;
 }
 
 uint32_t x4driver_callback_pin_set_enable(void* user_reference, uint8_t value){
+//	x4driver_enable_ISR(NULL,0);
+    //set X4_ENABLE to value
+    if( value == 0 ) digitalWrite(X4_ENABLE_PIN, LOW);
+    else if( value == 1) digitalWrite(X4_ENABLE_PIN, HIGH);
+
+    x4driver_enable_ISR(NULL,value);
+	return XEP_ERROR_X4DRIVER_OK;
 }
 
 void x4driver_interrupt_data_ready(void) {
@@ -132,17 +182,6 @@ void x4driver_interrupt_data_ready(void) {
     xTaskNotifyFromISR(h_task_radar, XEP_NOTIFY_RADAR_DATAREADY, eSetBits, 
             &xHigherPriorityTaskWoken);
     portYIELD_FROM_ISR( xHigherPriorityTaskWoken ); 
-}
-
-static void gpio_init(void) {
-    // init wiringpi
-    //
-    wiringPiSetup();
-
-    // Config enable pin
-    //
-    // Config ISR pin
-    return;
 }
 
 static uint32_t x4driver_callback_take_sem(void * sem,uint32_t timeout)
@@ -155,7 +194,31 @@ static void x4driver_callback_give_sem(void * sem)
     xSemaphoreGiveRecursive((SemaphoreHandle_t)sem);
 }
 
-static void x4driver_task_init(void){
+/*************************** Initializations *******************************/
+static void gpio_init(void) {
+    // init wiringpi
+    //
+    if( wiringPiSetup() < 0 ){
+        fprintf( stderr, "Unable to setup wiringPi: %s\n", strerror (errno)) ;
+        return;
+    }
+
+    // Config enable pin
+    //
+    pinMode(X4_ENABLE_PIN,OUTPUT);
+
+    // Config ISR pin
+    //
+    //pinMode(X4_INTR_PIN,INPUT);
+
+    // Config Sweep trigger pin
+    //
+    pinMode(X4_SWEEP_TRIGGER_PIN,OUTPUT);
+
+    return;
+}
+
+static uint32_t x4driver_task_init(void){
 
     X4DriverCallbacks_t x4driver_callbacks;
     x4driver_callbacks.pin_set_enable = x4driver_callback_pin_set_enable;   // X4 ENABLE pin
@@ -166,9 +229,13 @@ static void x4driver_task_init(void){
     x4driver_callbacks.notify_data_ready = x4driver_notify_data_ready;      // Notification when radar data is ready to read
     x4driver_callbacks.trigger_sweep = x4driver_trigger_sweep_pin;          // Method to set X4 sweep trigger pin
     x4driver_callbacks.enable_data_ready_isr = x4driver_enable_ISR;         // Control data ready notification ISR
-    
+
     X4DriverLock_t lock;
     lock.object = (void*)xSemaphoreCreateRecursiveMutex();
+    if(lock.object == NULL){ 
+        printf(" create rec mutex fail\n");
+        return -1;
+    }
     lock.lock = x4driver_callback_take_sem;
     lock.unlock = x4driver_callback_give_sem;
 
@@ -177,7 +244,7 @@ static void x4driver_task_init(void){
     X4DriverTimer_t timer_sweep;
     timer_sweep.object = xTimerCreate("X4Driver_sweep_timer", 1000 / portTICK_PERIOD_MS, pdTRUE, (void*)timer_id_sweep, x4driver_timer_sweep_timeout);
     timer_sweep.configure = x4driver_timer_set_timer_timeout_frequency;
-
+    
     // X4Driver timer used for driver action timeout.
     uint32_t timer_id_action = 3;
 	X4DriverTimer_t timer_action;
@@ -185,8 +252,20 @@ static void x4driver_task_init(void){
 	timer_action.configure = x4driver_timer_set_timer_timeout_frequency;
 
     void* x4driver_instance_memory = pvPortMalloc(x4driver_get_instance_size());
+    if(!x4driver_instance_memory){
+        printf("malloc failed\n");
+        return -1;
+    }
+
     x4driver_create(&x4driver, x4driver_instance_memory, &x4driver_callbacks,&lock,&timer_sweep,&timer_action,NULL);
-    x4driver_init(x4driver);
+    int status =  x4driver_init(x4driver);
+    if(status !=  XEP_ERROR_X4DRIVER_OK) {
+        printf ("Error initializing x4driver %d \n", status);
+    }
+    else
+        printf("X4Driver init success\n");
+
+    return status;
 }
 
 static void x4driver_task(void){
@@ -211,18 +290,23 @@ int main() {
         printf("can't catch SIGABRT\n");
     }
 
-    spi_init(&spi_fd);
+    spi_init();
+    printf("SPI init done \n");
 
     // init gpio
     gpio_init();
+    printf("GPIO Init Done\n");
 
-    x4driver_task_init();
+    if(x4driver_task_init()){
+        spi_close(); 
+        return -1;
+    }
     // Open file to save data
     // Initialize x4 module
     //
     x4driver_task();
 
-    close(spi_fd);
+    spi_close();
     return 0;
 
 }

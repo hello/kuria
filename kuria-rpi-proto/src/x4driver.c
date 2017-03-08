@@ -7,6 +7,8 @@
 #include "x4driver.h"
 #include <string.h>
 #include "spidriver.h"
+#include <stdio.h>
+#include <time.h>
 
 #define START_OF_SRAM_LSB       0x00
 #define START_OF_SRAM_MSB       0x00
@@ -575,8 +577,11 @@ int x4driver_get_instance_size(void)
  */
 int x4driver_create(X4Driver_t** x4driver, void* instance_memory, X4DriverCallbacks_t* x4driver_callbacks,X4DriverLock_t *lock,X4DriverTimer_t *timer,X4DriverTimer_t *timer_action, void* user_reference)
 {
+    printf("create x4driver\n");
+
 	X4Driver_t* d = (X4Driver_t*)instance_memory;
 	memset(d, 0, sizeof(X4Driver_t));
+
 	d->user_reference = user_reference;	
 	d->lock.object = lock->object;
     d->lock.lock = lock->lock;
@@ -607,8 +612,10 @@ int x4driver_create(X4Driver_t** x4driver, void* instance_memory, X4DriverCallba
 	d->frame_area_offset_meters =0;
 	d->frame_area_start = 0;
 	d->frame_area_end = X4DRIVER_MAX_BINS_RANGE_METERS_RF;
-	
+    
 	*x4driver = d;
+
+    printf("All done \n");
 	return XEP_ERROR_X4DRIVER_OK;
 }
 
@@ -628,6 +635,17 @@ int x4driver_upload_firmware_custom(X4Driver_t* x4driver, uint8_t * buffer,uint3
     x4driver_set_spi_register(x4driver,ADDR_SPI_MEM_FIRST_ADDR_LSB_RW,START_OF_SRAM_LSB);
     x4driver_set_spi_register(x4driver,ADDR_SPI_MEM_FIRST_ADDR_MSB_RW,START_OF_SRAM_MSB);
     x4driver_set_spi_register(x4driver,ADDR_SPI_MEM_MODE_RW,SET_PROGRAMMING_MODE);
+   
+    uint8_t reg[3];
+
+    x4driver_get_spi_register(x4driver,ADDR_SPI_MEM_FIRST_ADDR_LSB_RW,&reg[0]);
+    x4driver_get_spi_register(x4driver,ADDR_SPI_MEM_FIRST_ADDR_MSB_RW,&reg[1]);
+    x4driver_get_spi_register(x4driver,ADDR_SPI_MEM_MODE_RW,&reg[2]);
+    
+    printf("Read verify \n 1. %d==%d, 2. %d==%d, 3. %d==%d\n", \
+            START_OF_SRAM_LSB, reg[0], START_OF_SRAM_MSB, reg[1], \
+            SET_PROGRAMMING_MODE, reg[2]);
+    
     
     for(uint32_t i = 0; i< lenght;i++)
 	{
@@ -860,14 +878,24 @@ int x4driver_upload_firmware_default(X4Driver_t* x4driver)
 		return status;
     
     status = x4driver_upload_firmware_custom(x4driver,data_8051_onboard,data_8051_size);
+    printf("Upload custom firmware done %d\n",status);
     if (status != XEP_ERROR_X4DRIVER_OK) 
 		return status;    
+    uint32_t reg = 0x00; 
+    status = x4driver_get_spi_register(x4driver,ADDR_SPI_BOOT_FROM_OTP_SPI_RWE,&reg);
+    printf("Get boot from SRAM done %d %d \n",status, reg);
+    
     status = x4driver_set_spi_register(x4driver,ADDR_SPI_BOOT_FROM_OTP_SPI_RWE,BOOT_FROM_SRAM);
+    printf("Set boot from SRAM done %d\n",status);
     if (status != XEP_ERROR_X4DRIVER_OK) 
 		return status;
+    
     status = x4driver_verify_firmware(x4driver,data_8051_onboard,data_8051_size);     
+    printf("Verify firmware done %d\n", status);
     if (status != XEP_ERROR_X4DRIVER_OK) 
+    
 		return status;
+    
     mutex_give(x4driver);
     return status;
 }
@@ -891,6 +919,7 @@ int x4driver_verify_firmware(X4Driver_t* x4driver, uint8_t * buffer, uint32_t si
 	uint32_t errors = 0x00;
 	uint8_t fifo_status = 0x00;
 	x4driver_get_spi_register(x4driver,ADDR_SPI_SPI_MEM_FIFO_STATUS_R,&fifo_status);
+    printf("Read fifo status %d \n",fifo_status);
 	uint8_t read_back = 0x00;
     uint32_t max_retries = 32;// FIFO depth is 8
     uint32_t retries = 0;
@@ -923,6 +952,7 @@ int x4driver_verify_firmware(X4Driver_t* x4driver, uint8_t * buffer, uint32_t si
 	}
 	x4driver_set_spi_register(x4driver,ADDR_SPI_MEM_MODE_RW,SET_NORMAL_MODE);//set into read back mode                         
     mutex_give(x4driver);
+    printf("Verify errors: %d\n",errors);
     if(errors >0)
         return XEP_ERROR_X4DRIVER_8051_VERIFY_FAIL;
     return status;
@@ -1266,7 +1296,7 @@ int x4driver_get_spi_register(X4Driver_t* x4driver,uint8_t address, uint8_t * va
 {
     uint32_t status = mutex_take(x4driver);
 	if (status != XEP_ERROR_X4DRIVER_OK) return status;
-    
+   
 	uint8_t register_write_buffer = address;
 	uint8_t register_read_buffer = 0x00;    
 	status = x4driver->callbacks.spi_write_read(x4driver->user_reference, &register_write_buffer, 1,&register_read_buffer,1);
@@ -1910,29 +1940,41 @@ int x4driver_set_frame_length(X4Driver_t* x4driver, uint8_t cycles)
  */
 int x4driver_init(X4Driver_t* x4driver)
 {
-	x4driver->callbacks.enable_data_ready_isr(x4driver->user_reference,0);
+    printf("X4 Driver init...\n");
+	//x4driver->callbacks.enable_data_ready_isr(x4driver->user_reference,0);
     uint32_t status = 0;   
 	status = x4driver_set_enable(x4driver,0); 
     status = x4driver_set_enable(x4driver,1);
-	// Wait until X4 is stable.	
+
+    // Wait until X4 is stable.	
 	for (volatile int i = 0; i < 2000; i++)
 	{
 		__asm__ volatile ("nop");		
-	}	
+	}
+
 	uint8_t force_one = 0x00;
 	uint8_t force_zero = 0x00;
+
+    printf("Get spi register\n");
     x4driver_get_spi_register(x4driver, ADDR_SPI_FORCE_ONE_R, &force_one);
 	x4driver_get_spi_register(x4driver, ADDR_SPI_FORCE_ZERO_R, &force_zero);
+
+    printf("Got spi register\n");
 	if (force_one != 0xff && force_zero != 0x00)
 	{
+        printf("force one and zero fail\n");
 		return XEP_ERROR_X4DRIVER_NOK;
 	}
+    printf("Status before firmware upload: %d\n", status);
     if (status != XEP_ERROR_X4DRIVER_OK) 
 		return status;
     status = x4driver_upload_firmware_default(x4driver);
+    printf("Upload firmware done%d \n",status);
+    
     if (status != XEP_ERROR_X4DRIVER_OK) 
 		return status;
     status = x4driver_ldo_enable_all(x4driver);
+    printf(" ldo enabledone%d \n",status);
     if (status != XEP_ERROR_X4DRIVER_OK) 
 		return status;
     status = x4driver_init_clock(x4driver);  
@@ -1951,6 +1993,7 @@ int x4driver_init(X4Driver_t* x4driver)
 	if (status != XEP_ERROR_X4DRIVER_OK) 
 		return status;  
 	x4driver->callbacks.enable_data_ready_isr(x4driver->user_reference, 1);
+
 	return status;
 }
 

@@ -12,7 +12,13 @@
 
 uint32_t spi_read(void* usr_ref, uint8_t* data, uint32_t length);
 uint32_t spi_write(void* usr_ref, uint8_t* data, uint32_t length);
-uint32_t spi_init(int* spi_fd);
+uint32_t spi_init(void);
 uint32_t spi_write_read(void* usr_ref, uint8_t* wdata, uint32_t wlength,
         uint8_t* rdata, uint32_t rlength);
+uint32_t spi_close(void);
+
+
+
+
+
 #endif
