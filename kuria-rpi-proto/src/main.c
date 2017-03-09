@@ -133,10 +133,10 @@ void x4driver_notify_data_ready(void* user_reference){
 
 void x4driver_interrupt_notify_data_ready(void) {
     portBASE_TYPE xHigherPriorityTaskWoken = pdFALSE;
-    printf("Intr\n");
-/*    xTaskNotifyFromISR(h_task_radar, XEP_NOTIFY_RADAR_DATAREADY, eSetBits, 
+    printf("-\n");
+    xTaskNotifyFromISR(h_task_radar, XEP_NOTIFY_RADAR_DATAREADY, eSetBits, 
             &xHigherPriorityTaskWoken);
-    portYIELD_FROM_ISR(xHigherPriorityTaskWoken );*/ 
+    portYIELD_FROM_ISR(xHigherPriorityTaskWoken ); 
 
 }
 
@@ -290,12 +290,29 @@ static void x4driver_task(void* pvParameters){
     if(status) {
         printf("Somethings not right: %d \n",status);
     }
-    
+   
+    uint32_t notify_value;
     printf("X4 Test start...\n");
     while(1) {
         // poll x4 for data
         //
-        sleep(1);
+        xTaskNotifyWait( 0x00, /* Dont clear any notification bits on entry */
+                         0xffffffff, /* Reset the notification value to 0 on exit. */
+                         &notify_value, /*Notified value pass out. */
+                         500 / portTICK_PERIOD_MS ); /* Block indefinitely. */
+
+        if (notify_value & XEP_NOTIFY_RADAR_DATAREADY) {
+
+            printf("Radar Data Ready\n");
+        } else if (notify_value & XEP_NOTIFY_RADAR_TRIGGER_SWEEP) {
+
+            printf("start sweep\n");
+        } else if (notify_value & XEP_NOTIFY_X4DRIVER_ACTION) {
+
+            printf( "on action \n");
+        } else if (notify_value == 0){ //Timeout
+            printf ("n");
+        }
         if(stop_x4_read) {
             break;
         }
