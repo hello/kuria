@@ -3,6 +3,7 @@
 #include "matlabwriter.h"
 #include <iostream>
 #include "preprocessor.h"
+#include "respiration.h"
 
 using Eigen::MatrixXcf;
 
@@ -50,6 +51,13 @@ int main(int argc, char * argv[]) {
         if (is_segment) {
             //DO FRAME PROCESSING HERE
             write_matrix_to_cell_array("segments",segment);
+
+            IntVec_t possible_range_bins = get_possible_respiration_range_bins(segment);
+            
+            Eigen::MatrixXf features = get_respiration_features(segment, possible_range_bins);
+            
+            write_matrix_to_cell_array("features",features);
+
             std::cout << "frame " << iframe << std::endl;
         }
     }

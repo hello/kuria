@@ -34,6 +34,7 @@ src/matlabwriter.cpp
 src/kiss_fft.c
 src/haltijamath.cpp
 src/preprocessor.cpp
+src/respiration.cpp
 )
 
 #############
