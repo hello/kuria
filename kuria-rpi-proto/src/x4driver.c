@@ -636,15 +636,10 @@ int x4driver_upload_firmware_custom(X4Driver_t* x4driver, uint8_t * buffer,uint3
     x4driver_set_spi_register(x4driver,ADDR_SPI_MEM_FIRST_ADDR_MSB_RW,START_OF_SRAM_MSB);
     x4driver_set_spi_register(x4driver,ADDR_SPI_MEM_MODE_RW,SET_PROGRAMMING_MODE);
    
-    uint8_t reg[3];
+    uint8_t reg[3] ={0};
 
-    x4driver_get_spi_register(x4driver,ADDR_SPI_MEM_FIRST_ADDR_LSB_RW,&reg[0]);
-    x4driver_get_spi_register(x4driver,ADDR_SPI_MEM_FIRST_ADDR_MSB_RW,&reg[1]);
     x4driver_get_spi_register(x4driver,ADDR_SPI_MEM_MODE_RW,&reg[2]);
     
-    printf("Read verify \n 1. %d==%d, 2. %d==%d, 3. %d==%d\n", \
-            START_OF_SRAM_LSB, reg[0], START_OF_SRAM_MSB, reg[1], \
-            SET_PROGRAMMING_MODE, reg[2]);
     
     
     for(uint32_t i = 0; i< lenght;i++)
@@ -653,6 +648,8 @@ int x4driver_upload_firmware_custom(X4Driver_t* x4driver, uint8_t * buffer,uint3
 	}
             
            
+    printf("Read verify \n  %d==%d\n", \
+            SET_PROGRAMMING_MODE, reg[2]);
     mutex_give(x4driver);
     return status;
 }
@@ -919,7 +916,7 @@ int x4driver_verify_firmware(X4Driver_t* x4driver, uint8_t * buffer, uint32_t si
 	uint32_t errors = 0x00;
 	uint8_t fifo_status = 0x00;
 	x4driver_get_spi_register(x4driver,ADDR_SPI_SPI_MEM_FIFO_STATUS_R,&fifo_status);
-    printf("Read fifo status %d \n",fifo_status);
+    printf("Read fifo status %x \n",fifo_status);
 	uint8_t read_back = 0x00;
     uint32_t max_retries = 32;// FIFO depth is 8
     uint32_t retries = 0;
@@ -1951,8 +1948,8 @@ int x4driver_init(X4Driver_t* x4driver)
 	{
 		__asm__ volatile ("nop");		
 	}
-
-	uint8_t force_one = 0x00;
+	
+    uint8_t force_one = 0x00;
 	uint8_t force_zero = 0x00;
 
     printf("Get spi register\n");

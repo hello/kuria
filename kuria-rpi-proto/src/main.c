@@ -35,8 +35,9 @@ bool stop_x4_read = 0;
 static X4Driver_t* x4driver;
 static TaskHandle_t h_task_radar = NULL;
 static X4Driver_t x4driver_instance;
-
+static bool en_intr = false;
 static unsigned long long uxQueueSendPassedCount = 0;
+
 void sig_handler(int sig) {
     if(sig == SIGINT || sig == SIGABRT)  {
         stop_x4_read = 1;
@@ -121,30 +122,24 @@ void x4driver_notify_data_ready(void* user_reference){
     portBASE_TYPE xHigherPriorityTaskWoken = pdFALSE;
     xTaskNotifyFromISR(h_task_radar, XEP_NOTIFY_RADAR_DATAREADY, eSetBits, 
             &xHigherPriorityTaskWoken);
-    portYIELD_FROM_ISR(xHigherPriorityTaskWoken ); 
+ //   portYIELD_FROM_ISR(xHigherPriorityTaskWoken ); 
 
 }
 
 void x4driver_interrupt_notify_data_ready(void) {
     portBASE_TYPE xHigherPriorityTaskWoken = pdFALSE;
-    xTaskNotifyFromISR(h_task_radar, XEP_NOTIFY_RADAR_DATAREADY, eSetBits, 
+    printf("Intr\n");
+/*    xTaskNotifyFromISR(h_task_radar, XEP_NOTIFY_RADAR_DATAREADY, eSetBits, 
             &xHigherPriorityTaskWoken);
-    portYIELD_FROM_ISR(xHigherPriorityTaskWoken ); 
+    portYIELD_FROM_ISR(xHigherPriorityTaskWoken );*/ 
 
 }
 
 void x4driver_enable_ISR(void* user_reference, uint32_t enable) {
-    static bool int_reg_flag = false;
-    if( ( enable == 1) && !int_reg_flag) {
+    if( enable == 1)  {
         // register interrupt callback for rising edge
-        printf("Enabling ISR....\n");
-       /* if( wiringPiISR (X4_INTR_PIN, INT_EDGE_RISING, &x4driver_interrupt_notify_data_ready) < 0 ) {
-            printf("Unable to setup ISR \n");
-            return;
-        }*/
-
+        en_intr = true;
         digitalWrite(X4_SWEEP_TRIGGER_PIN, LOW);
-        int_reg_flag = true;
     }
     else {
         // unregister 
@@ -168,12 +163,12 @@ uint32_t x4driver_trigger_sweep_pin(void* user_reference){
 }
 
 uint32_t x4driver_callback_pin_set_enable(void* user_reference, uint8_t value){
-//	x4driver_enable_ISR(NULL,0);
+	x4driver_enable_ISR(NULL,0);
     //set X4_ENABLE to value
     if( value == 0 ) digitalWrite(X4_ENABLE_PIN, LOW);
     else if( value == 1) digitalWrite(X4_ENABLE_PIN, HIGH);
 
-    x4driver_enable_ISR(NULL,value);
+    x4driver_enable_ISR(NULL,1);
 	return XEP_ERROR_X4DRIVER_OK;
 }
 
@@ -258,24 +253,33 @@ static uint32_t x4driver_task_init(void){
     }
 
     x4driver_create(&x4driver, x4driver_instance_memory, &x4driver_callbacks,&lock,&timer_sweep,&timer_action,NULL);
-    int status =  x4driver_init(x4driver);
+    int status = x4driver_set_enable(x4driver, 1);
+    for(int i =0; i < 1000; i++) {
+        //wait
+        printf(".");
+    }
+    printf("\n");
+    status =  x4driver_init(x4driver);
     if(status !=  XEP_ERROR_X4DRIVER_OK) {
         printf ("Error initializing x4driver %d \n", status);
     }
     else
         printf("X4Driver init success\n");
-
+    x4driver_check_configuration(x4driver);
+    x4driver_set_sweep_trigger_control(x4driver, SWEEP_TRIGGER_X4);
     return status;
 }
 
-static void x4driver_task(void){
-
+static void x4driver_task(void* pvParameters){
 
     printf("X4 Test start...\n");
-    while(!stop_x4_read) {
+    while(1) {
         // poll x4 for data
         //
         sleep(1);
+        if(stop_x4_read) {
+            break;
+        }
     }
     printf("Ending X4 Test...\n");
 
@@ -301,10 +305,18 @@ int main() {
         spi_close(); 
         return -1;
     }
+
+    if(en_intr) {
+        printf("Enabling ISR....\n");
+        if( wiringPiISR (X4_INTR_PIN, INT_EDGE_RISING, &x4driver_interrupt_notify_data_ready) < 0 ) {
+            printf("Unable to setup ISR \n");
+            return -1;
+        }
+    }
     // Open file to save data
     // Initialize x4 module
     //
-    x4driver_task();
+    x4driver_task(NULL);
 
     spi_close();
     return 0;

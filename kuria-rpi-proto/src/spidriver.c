@@ -117,6 +117,7 @@ uint32_t spi_init(void) {
 	/*
 	 * spi mode
 	 */
+    mode =0;
     mode |= SPI_CPOL;
     mode |= SPI_CPHA;
 	ret = ioctl(spi_fd, SPI_IOC_WR_MODE, &mode);
