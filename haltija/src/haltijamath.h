@@ -3,6 +3,7 @@
 
 #include <Eigen/Core>
 #include "kiss_fft.h"
+#include "haltija_types.h"
 
 namespace HaltijaMath {
     
@@ -78,5 +79,10 @@ bool psd(const int nfft, const T & x, Eigen::MatrixXf & output) {
     
     return true;
 }
+    
+    
+Eigen::MatrixXf project_complex_cols_into_reals(const Eigen::MatrixXcf & c);
+
+
 }
 #endif //_HALTIJAMATH_H_

@@ -9,7 +9,7 @@
 
 //x is data in column format (i.e. each row is a feature vector)
 template <class T,class R>
-bool pca(const T & x, R & principal_components, R & transform) {
+bool pca(const T & x, R & principal_components, R & transform, R & transformed_values) {
     
     T x_zero_mean = x;
     const int N = x.rows();
@@ -27,7 +27,7 @@ bool pca(const T & x, R & principal_components, R & transform) {
     
     Eigen::SelfAdjointEigenSolver<T> eigensolver(covariance);
 
-    //transformed_values = x_zero_mean * eigensolver.eigenvectors().transpose();
+    transformed_values = x_zero_mean * eigensolver.eigenvectors().transpose();
     principal_components = eigensolver.eigenvalues();
     transform = eigensolver.eigenvectors();
     

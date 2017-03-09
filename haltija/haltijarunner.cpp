@@ -52,9 +52,8 @@ int main(int argc, char * argv[]) {
             //DO FRAME PROCESSING HERE
             write_matrix_to_cell_array("segments",segment);
 
-            IntVec_t possible_range_bins = get_possible_respiration_range_bins(segment);
             
-            Eigen::MatrixXf features = get_respiration_features(segment, possible_range_bins);
+            Eigen::MatrixXf features = get_respiration_features(segment);
             
             write_matrix_to_cell_array("features",features);
 

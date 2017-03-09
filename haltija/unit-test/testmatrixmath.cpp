@@ -1,6 +1,9 @@
 #include "gtest/gtest.h"
 #include "example.h"
 #include "pca.h"
+#include "haltijamath.h"
+
+using namespace Eigen;
 
 class TestMatrixMath : public ::testing::Test {
 protected:
@@ -27,9 +30,10 @@ TEST_F(TestMatrixMath,TestPCAReals) {
 
     Eigen::MatrixXf principal_components;
     Eigen::MatrixXf transform;
+    Eigen::MatrixXf transformed_values;
+
     
-    
-    ASSERT_TRUE(pca(A,principal_components,transform));
+    ASSERT_TRUE(pca(A,principal_components,transform,transformed_values));
     
     //std::cout << principal_components << std::endl << std::endl;
     //std::cout << transform << std::endl;
@@ -45,3 +49,34 @@ TEST_F(TestMatrixMath,TestPCAReals) {
 
 }
 
+TEST_F(TestMatrixMath,TestPCAComplexToReal) {
+    MatrixXcf c = MatrixXcf::Zero(10,1);
+    MatrixXcf c2 = MatrixXcf::Zero(10,2);
+    
+    c <<
+    Complex_t(1.0,1.0),
+    Complex_t(-1.0,-1.0),
+    Complex_t(1.0,1.0),
+    Complex_t(-1.0,-1.0),
+    Complex_t(1.0,1.0),
+    Complex_t(-1.0,-1.0),
+    Complex_t(1.0,1.0),
+    Complex_t(-1.0,-1.0),
+    Complex_t(1.0,1.0),
+    Complex_t(-1.0,-1.0);
+    
+    c2.col(0) = c;
+    c2.col(1) = c;
+
+    MatrixXf result = HaltijaMath::project_complex_cols_into_reals(c2);
+    
+    for (int i = 0; i < 10; i++) {
+        ASSERT_NEAR(fabs(result(i,0)),sqrt(2),1e-4);
+        ASSERT_NEAR(fabs(result(i,1)),sqrt(2),1e-4);
+    }
+    
+    ASSERT_NEAR(result(0,0) + result(1,0),0,1e-4);
+    ASSERT_NEAR(result(0,1) + result(1,1),0,1e-4);
+
+
+}
