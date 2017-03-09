@@ -1,11 +1,14 @@
 #include "example.h"
 #include "matlabreader.h"
 #include "matlabwriter.h"
-#include "filters.h"
 #include <iostream>
-#include "Pca.h"
+#include "preprocessor.h"
 
 using Eigen::MatrixXcf;
+
+#define EXPECTED_SAMPLE_RATE_HZ (20)
+#define NUM_FRAMES_IN_SEGMENT (20 * EXPECTED_SAMPLE_RATE_HZ)
+#define NUM_FRAMES_TO_WAIT (20 * EXPECTED_SAMPLE_RATE_HZ)
 
 int main(int argc, char * argv[]) {
 	//TODO read input CSV file or whatever format the radar is
@@ -23,8 +26,34 @@ int main(int argc, char * argv[]) {
 
 	open_new_matfile(argv[2]);
 
-    write_matrix("baseband", baseband);
+    
+    PreprocessorPtr_t preprocessor = Preprocessor::createWithDefaultHighpassFilter(baseband.cols(), NUM_FRAMES_IN_SEGMENT, NUM_FRAMES_TO_WAIT);
 
+    std::cout << baseband.rows() << " x " << baseband.cols() << std::endl;
+    
+    for (int iframe = 0; iframe < baseband.rows(); iframe++) {
+        
+        BasebandDataFrame_t frame;
+        frame.data.reserve(baseband.cols());
+        frame.timestamp = iframe * 1000 / EXPECTED_SAMPLE_RATE_HZ; //timestamp in ms
+        for (int irangebin = 0; irangebin < baseband.cols(); irangebin++) {
+            frame.data.push_back(baseband(iframe,irangebin));
+        }
+        
+        Eigen::MatrixXcf filtered_frame;
+        Eigen::MatrixXcf segment;
+        
+        bool is_segment = preprocessor->add_frame(frame, filtered_frame, segment);
+        
+        //DO KALMAN FILTERS HERE
+        
+        if (is_segment) {
+            //DO FRAME PROCESSING HERE
+            write_matrix_to_cell_array("segments",segment);
+            std::cout << "frame " << iframe << std::endl;
+        }
+    }
+    
     /*
     
     for (int iframe = 0; iframe < NFRAMES; i++) {

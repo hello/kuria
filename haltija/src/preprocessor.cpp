@@ -8,9 +8,16 @@ using namespace Eigen;
 Preprocessor::Preprocessor()
 : _num_samples_per_frame(1) {
     
-    _B_high_pass.resize(101,1);
-    
-    _B_high_pass << -5.09552735e-04,  -5.19377203e-04,  -5.27693802e-04,
+ 
+}
+ */
+
+std::shared_ptr<Preprocessor> Preprocessor::createWithDefaultHighpassFilter(const int num_range_bins,const int num_frames_in_segment,const int num_frames_to_wait_between_segments) {
+ 
+    MatrixXf hpf;
+    hpf.resize(101,1);
+    //0.05 nyquist highpass filter
+    hpf << -5.09552735e-04,  -5.19377203e-04,  -5.27693802e-04,
     -5.32186651e-04,  -5.29028364e-04,  -5.13008822e-04,
     -4.77777630e-04,  -4.16194545e-04,  -3.20776300e-04,
     -1.84222709e-04,  -6.21914388e-18,   2.37044837e-04,
@@ -44,33 +51,36 @@ Preprocessor::Preprocessor()
     -4.16194545e-04,  -4.77777630e-04,  -5.13008822e-04,
     -5.29028364e-04,  -5.32186651e-04,  -5.27693802e-04,
     -5.19377203e-04,  -5.09552735e-04;
+
     
+    
+    return PreprocessorPtr_t(new Preprocessor(hpf,num_range_bins,num_frames_in_segment,num_frames_to_wait_between_segments));
 }
- */
-Preprocessor::Preprocessor(const MatrixXf & high_pass_filter_coeff)
-:_num_frames_in_segment(0)
-,_num_frames_to_wait_between_segments(0)
+
+
+Preprocessor::Preprocessor(const MatrixXf & high_pass_filter_coeff,const int num_range_bins,const int num_frames_in_segment,const int num_frames_to_wait_between_segments)
+:_num_frames_in_segment(num_frames_in_segment)
+,_num_frames_to_wait_between_segments(num_frames_to_wait_between_segments)
 ,_input_idx(0)
 ,_output_idx(0)
 ,_idx_sample(0){
+    
     _high_pass_filter_coeff = high_pass_filter_coeff;
+    _input_circular_buffer = MatrixXcf::Zero(_high_pass_filter_coeff.rows(),num_range_bins);
+    _output_circular_buffer = MatrixXcf::Zero(_num_frames_in_segment,num_range_bins);
+    _num_frames_to_wait_between_segments = num_frames_in_segment;
+    _num_frames_in_segment = num_frames_in_segment;
+    
 }
 
 Preprocessor::~Preprocessor() {
     
 }
  
-void Preprocessor::initialize(const int num_range_bins,const int num_frames_in_segment,const int num_frames_to_wait_between_segments) {
- 
-    _input_circular_buffer = MatrixXcf::Zero(_high_pass_filter_coeff.rows(),num_range_bins);
-    _output_circular_buffer = MatrixXcf::Zero(_num_frames_in_segment,num_range_bins);
-    _num_frames_to_wait_between_segments = num_frames_in_segment;
-    _num_frames_in_segment = num_frames_in_segment;
-    
+void Preprocessor::reset_counters() {
     _input_idx = 0;
     _output_idx = 0;
     _idx_sample = 0;
-    
 }
 
 
@@ -83,7 +93,7 @@ bool Preprocessor::add_frame(const BasebandDataFrame_t & input, MatrixXcf & filt
         _input_circular_buffer(_input_idx,i) = input.data[i];
     }
     
-    if (++_input_idx >= _input_circular_buffer.size()) {
+    if (++_input_idx >= _input_circular_buffer.rows()) {
         _input_idx = 0;
     }
     
@@ -95,7 +105,7 @@ bool Preprocessor::add_frame(const BasebandDataFrame_t & input, MatrixXcf & filt
     //insert
     _output_circular_buffer.row(_output_idx) = filtered_frame;
     
-    if (++_output_idx >= _output_circular_buffer.size()) {
+    if (++_output_idx >= _output_circular_buffer.rows()) {
         _output_idx = 0;
     }
     

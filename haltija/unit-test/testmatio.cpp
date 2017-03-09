@@ -17,6 +17,7 @@ protected:
     }
     
     virtual void TearDown() {
+        MatlabWriter::get_instance()->deinitialize();
     }
 
     static void compare_complex_mat(const Eigen::MatrixXcf & mat, const Eigen::MatrixXcf & refmat) {
@@ -260,5 +261,35 @@ TEST_F(TestMatio,TestWriteMatrixComplex) {
     compare_complex_mat(mat,mat2);
 }
 
+TEST_F(TestMatio,TestWriteCellArraysComplex) {
+    //just make sure it doesn't crash
+    ASSERT_TRUE(open_new_matfile("cellarray.mat"));
 
+    MatrixXcf mat1(2,3);
+    mat1 << Complex_t(1.0,1.0),Complex_t(2.0,2.0),Complex_t(3.0,3.0),Complex_t(4.0,-4.0),Complex_t(5.0,5.0),Complex_t(6.0,-6.0);
+
+    MatrixXcf mat2(2,3);
+    mat2 << Complex_t(7.0,1.0),Complex_t(2.0,2.0),Complex_t(3.0,3.0),Complex_t(4.0,-4.0),Complex_t(5.0,5.0),Complex_t(6.0,-6.0);
+
+    ASSERT_TRUE(write_matrix_to_cell_array("c", mat1));
+    ASSERT_TRUE(write_matrix_to_cell_array("c", mat2));
+    
+}
+
+
+
+TEST_F(TestMatio,TestWriteCellArraysReal) {
+    //just make sure it doesn't crash
+    ASSERT_TRUE(open_new_matfile("cellarray2.mat"));
+    
+    MatrixXf mat1(2,3);
+    mat1 << 1,2,3,4,5,6;
+    
+    MatrixXf mat2(2,3);
+    mat2 << 7,2,3,4,5,6;
+    
+    ASSERT_TRUE(write_matrix_to_cell_array("f", mat1));
+    ASSERT_TRUE(write_matrix_to_cell_array("f", mat2));
+        
+}
 
