@@ -1938,7 +1938,7 @@ int x4driver_set_frame_length(X4Driver_t* x4driver, uint8_t cycles)
 int x4driver_init(X4Driver_t* x4driver)
 {
     printf("X4 Driver init...\n");
-	//x4driver->callbacks.enable_data_ready_isr(x4driver->user_reference,0);
+	x4driver->callbacks.enable_data_ready_isr(x4driver->user_reference,0);
     uint32_t status = 0;   
 	status = x4driver_set_enable(x4driver,0); 
     status = x4driver_set_enable(x4driver,1);
@@ -1966,12 +1966,12 @@ int x4driver_init(X4Driver_t* x4driver)
     if (status != XEP_ERROR_X4DRIVER_OK) 
 		return status;
     status = x4driver_upload_firmware_default(x4driver);
-    printf("Upload firmware done%d \n",status);
+    printf("Upload firmware done %d \n",status);
     
     if (status != XEP_ERROR_X4DRIVER_OK) 
 		return status;
     status = x4driver_ldo_enable_all(x4driver);
-    printf(" ldo enabledone%d \n",status);
+    printf(" ldo enabledone %d \n",status);
     if (status != XEP_ERROR_X4DRIVER_OK) 
 		return status;
     status = x4driver_init_clock(x4driver);  
