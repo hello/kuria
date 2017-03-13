@@ -20,6 +20,7 @@ else()
 endif()
 
 add_subdirectory(matio)
+add_subdirectory(nanopb)
 
 message(STATUS "ZLIB LIBRARIES:  ${ZLIB_LIBRARIES}")
 message(STATUS "HDF5 LIBRARIES:  ${HDF5_LIBRARIES}")
