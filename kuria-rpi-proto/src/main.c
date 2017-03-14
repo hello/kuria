@@ -15,6 +15,10 @@
 #include "queue.h"
 #include <errno.h>
 #include <string.h>
+#include "memorypool.h"
+#include "xep_dispatch.h"
+#include "xep_dispatch_messages.h"
+
 
 #define TASK_RADAR_STACK_SIZE            (1500)
 #define TASK_RADAR_PRIORITY        (tskIDLE_PRIORITY + 6)
@@ -39,9 +43,7 @@ static bool en_intr = true;
 static unsigned long long uxQueueSendPassedCount = 0;
 
 static void x4driver_task(void* pvParameters);
-
-
-
+static uint32_t read_and_send_radar_frame(X4Driver_t* x4driver, XepDispatch_t* dispatch);
 
 void sig_handler(int sig) {
     if(sig == SIGINT || sig == SIGABRT)  {
@@ -52,31 +54,35 @@ void sig_handler(int sig) {
 /*************************** FreeRTOS application hooks**************************** */
 void vApplicationTickHook( void )
 {
-  static unsigned long ulTicksSinceLastDisplay = 0;
-  static unsigned long ulCalled = 0;
-  portBASE_TYPE xHigherPriorityTaskWoken = pdFALSE;
+    static unsigned long ulTicksSinceLastDisplay = 0;
+    static unsigned long ulCalled = 0;
+    portBASE_TYPE xHigherPriorityTaskWoken = pdFALSE;
 
-  /* Called from every tick interrupt.  Have enough ticks passed to make it
-  time to perform our health status check again? */
-  ulTicksSinceLastDisplay++;
-  if( ulTicksSinceLastDisplay >= mainCHECK_DELAY )
-  {
+    /* Called from every tick interrupt.  Have enough ticks passed to make it
+    time to perform our health status check again? */
+    ulTicksSinceLastDisplay++;
+    if( ulTicksSinceLastDisplay >= mainCHECK_DELAY )
+    {
     ulTicksSinceLastDisplay = 0;
     ulCalled++;
     //printf("AppTickHook %ld\r\n", ulCalled);
-  }
+    }
 }
 
 void vApplicationIdleHook( void )
 {
-  /* The co-routines are executed in the idle task using the idle task hook. */
-  /* vCoRoutineSchedule(); */ /* Comment this out if not using Co-routines. */
+    /* The co-routines are executed in the idle task using the idle task hook. */
+    /* vCoRoutineSchedule(); */ /* Comment this out if not using Co-routines. */
 
-  struct timespec xTimeToSleep, xTimeSlept;
-  /* Makes the process more agreeable when using the Posix simulator. */
-  xTimeToSleep.tv_sec = 1;
-  xTimeToSleep.tv_nsec = 0;
-  nanosleep( &xTimeToSleep, &xTimeSlept );
+    struct timespec xTimeToSleep, xTimeSlept;
+    if(stop_x4_read) {
+        printf("Idle task end\n"); 
+        vTaskEndScheduler();
+    }
+    /* Makes the process more agreeable when using the Posix simulator. */
+    xTimeToSleep.tv_sec = 1;
+    xTimeToSleep.tv_nsec = 0;
+    nanosleep( &xTimeToSleep, &xTimeSlept );
 }
 
 void vMainQueueSendPassed( void )
@@ -133,7 +139,6 @@ void x4driver_notify_data_ready(void* user_reference){
 
 void x4driver_interrupt_notify_data_ready(void) {
     portBASE_TYPE xHigherPriorityTaskWoken = pdFALSE;
-    printf("-\n");
     xTaskNotifyFromISR(h_task_radar, XEP_NOTIFY_RADAR_DATAREADY, eSetBits, 
             &xHigherPriorityTaskWoken);
     portYIELD_FROM_ISR(xHigherPriorityTaskWoken ); 
@@ -282,6 +287,7 @@ static void x4driver_task(void* pvParameters){
     int status =  x4driver_init(x4driver);
     if(status !=  XEP_ERROR_X4DRIVER_OK) {
         printf ("Error initializing x4driver %d \n", status);
+        goto x4task_fail;
     }
     else
         printf("X4Driver init success\n");
@@ -289,6 +295,7 @@ static void x4driver_task(void* pvParameters){
     x4driver_set_sweep_trigger_control(x4driver, SWEEP_TRIGGER_X4);
     if(status) {
         printf("Somethings not right: %d \n",status);
+        goto x4task_fail;
     }
    
     uint32_t notify_value;
@@ -304,12 +311,20 @@ static void x4driver_task(void* pvParameters){
         if (notify_value & XEP_NOTIFY_RADAR_DATAREADY) {
 
             printf("Radar Data Ready\n");
+
+            if(x4driver->trigger_mode != SWEEP_TRIGGER_MANUAL) {
+                printf("Read and send\n"); 
+                read_and_send_radar_frame(x4driver, NULL);
+            }
+
         } else if (notify_value & XEP_NOTIFY_RADAR_TRIGGER_SWEEP) {
 
             printf("start sweep\n");
+            x4driver_start_sweep(x4driver);
         } else if (notify_value & XEP_NOTIFY_X4DRIVER_ACTION) {
 
             printf( "on action \n");
+            x4driver_on_action_event(x4driver);
         } else if (notify_value == 0){ //Timeout
             printf ("n");
         }
@@ -319,8 +334,57 @@ static void x4driver_task(void* pvParameters){
     }
     printf("Ending X4 Test...\n");
 
+x4task_fail:
+    if( !stop_x4_read) {
+        stop_x4_read = 1;
+    }else {
+        printf("x4driver task fail\n"); 
+    }
+    vTaskDelete( NULL );
+
 }
 
+static uint32_t read_and_send_radar_frame(X4Driver_t* x4driver, XepDispatch_t* dispatch) {
+
+    uint32_t status;
+
+    XepDispatchMessageContentRadardataFramePacket_t* frame_packet;
+    MemoryBlock_t* memoryblock;
+
+    uint32_t bin_count = 0;
+    x4driver_get_frame_bin_count(x4driver, &bin_count);
+    uint8_t down_convertion_enabled = 0;
+    x4driver_get_downconvertion(x4driver, &down_convertion_enabled);
+    
+    printf("Down convertion enabled: %d\n Bin count: %d\n", down_convertion_enabled, bin_count);
+    uint32_t fdata_count = bin_count;
+    if(down_convertion_enabled == 1) {
+        fdata_count = bin_count * 2;
+    }
+
+  /*  status = dispatch_message_radardata_prepare_frame(&frame_packet, &memoryblock, dispatch, fdata_count);
+    if (status != XEP_ERROR_OK ) {
+        return status;
+    }*/
+    uint32_t frame_counter;
+    uint8_t* framedata = pvPortMalloc(x4driver->frame_read_size);
+    if(!framedata) {
+        printf("malloc failed\n");
+        return -1;
+    }
+    printf("Prepare frame message done\n");
+    // Read radar data into dispatch memory.
+    status = x4driver_read_frame_normalized(x4driver, &frame_counter,(float32_t*) framedata, frame_packet->bin_count);
+    printf("Frame read completed\n");
+    vPortFree(framedata);
+    if (status != XEP_ERROR_OK) {
+ //       memorypool_free(memoryblock);
+        return status;
+    }
+//    status = dispatch_send_message(NULL, dispatch, XEP_DISPATCH_MESSAGETAG_RADAR_DATA, memoryblock, frame_packet->common.message_size);
+
+    return status;
+}
 int main() {
     if(signal(SIGINT, sig_handler) == SIG_ERR){
         printf("can't catch SIGINT\n");
@@ -347,7 +411,7 @@ int main() {
     //
     //x4driver_task(NULL);
     vTaskStartScheduler();
-
+    printf("Exit from scheduler\n");
     spi_close();
     return 0;
 
