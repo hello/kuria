@@ -1,6 +1,7 @@
 #include "haltijamath.h"
 #include <assert.h>
 #include "pca.h"
+#include <iostream>
 
 using namespace Eigen;
  
@@ -20,7 +21,11 @@ MatrixXf HaltijaMath::project_complex_cols_into_reals(const MatrixXcf & c) {
         
         pca(complex_column,principal_component_vec,transform,transformed_values);
         
-        assert (principal_component_vec(0,0) < principal_component_vec(1,0));
+        if (principal_component_vec(0,0) > principal_component_vec(1,0)) {
+            std::cout << principal_component_vec << std::endl;
+            assert (false);
+
+        }
         reals.col(icol) = transformed_values.col(1);
     }
     

@@ -44,11 +44,14 @@ int main(int argc, char * argv[]) {
         Eigen::MatrixXcf filtered_frame;
         Eigen::MatrixXcf segment;
         
-        bool is_segment = preprocessor->add_frame(frame, filtered_frame, segment);
+        uint32_t flags = preprocessor->add_frame(frame, filtered_frame, segment);
         
         //DO KALMAN FILTERS HERE
+        if (flags & PREPROCESSOR_FLAGS_FRAME_READY) {
+            
+        }
         
-        if (is_segment) {
+        if (flags & PREPROCESSOR_FLAGS_SEGMENT_READY) {
             //DO FRAME PROCESSING HERE
             write_matrix_to_cell_array("segments",segment);
 
