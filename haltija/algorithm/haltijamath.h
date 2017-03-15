@@ -2,6 +2,9 @@
 #define _HALTIJAMATH_H_
 
 #include <Eigen/Core>
+#include <memory.h>
+#define _USE_MATH_DEFINES
+#include <cmath>
 #include "kiss_fft.h"
 #include "haltija_types.h"
 
@@ -13,8 +16,8 @@ namespace HaltijaMath {
 template <class T>
 bool fft(const int nfft, const T & x, Eigen::MatrixXcf & output) {
     //COMPLETELY UNTESTED -- go write a unit test?
-    kiss_fft_cpx xin[nfft];
-    kiss_fft_cpx xout[nfft];
+    kiss_fft_cpx * xin = (kiss_fft_cpx *)malloc(nfft * sizeof(kiss_fft_cpx));
+    kiss_fft_cpx * xout = (kiss_fft_cpx *)malloc(nfft * sizeof(kiss_fft_cpx));
     
     //set input buffer to zero, c-style
     memset(xin,0,sizeof(xin));
@@ -45,6 +48,9 @@ bool fft(const int nfft, const T & x, Eigen::MatrixXcf & output) {
     
     output = outvec;
     
+	free(xin);
+	free(xout);
+
     return true;
     
 }
