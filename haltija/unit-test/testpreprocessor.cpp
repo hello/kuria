@@ -30,9 +30,9 @@ class DISABLED_TestPreprocessor : public TestPreprocessor {};
 
 
 TEST_F(TestPreprocessor, Test1) {
-    const std::string test_input_fname = GET_TEST_FILE_PATH("framesBeforeMTI.csv");
+    const std::string test_input_fname = GET_TEST_FILE_PATH("framesBeforeMTI.mat");
     
-    const std::string ref_fname = GET_TEST_FILE_PATH("test.mat");
+    const std::string ref_fname = GET_TEST_FILE_PATH("framesAfterMTIPython.mat");
     
     MatrixXcf input;
     ASSERT_TRUE(read_complex_matrix(test_input_fname,"framesBeforeMTI",input));
