@@ -10,24 +10,24 @@ set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
 
 
 if (WIN32)
-  set(ZLIB_LIBRARIES "${CMAKE_CURRENT_SOURCE_DIR}/winlib/zlib/zlibstatic.lib")
-  set(ZLIB_INCLUDE_DIRS "${CMAKE_CURRENT_SOURCE_DIR}/winlib/zlib/include")
-  set(HDF5_LIBRARIES  "${CMAKE_CURRENT_SOURCE_DIR}/winlib/hdf5/hdf5.lib")
-  set(HDF5_INCLUDE_DIRS  "${CMAKE_CURRENT_SOURCE_DIR}/winlib/hdf5/include/")
+  set(ZLIB_LIBRARIES "${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/winlib/zlib/zlibstatic.lib")
+  set(ZLIB_INCLUDE_DIRS "${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/winlib/zlib/include")
+  set(HDF5_LIBRARIES  "${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/winlib/hdf5/hdf5.lib")
+  set(HDF5_INCLUDE_DIRS  "${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/winlib/hdf5/include/")
 else()
   find_package(ZLIB REQUIRED)
   find_package(HDF5 REQUIRED)
   find_package(ZMQ REQUIRED)
 endif()
 
-add_subdirectory(matio)
-add_subdirectory(nanopb)
-add_subdirectory(yaml-cpp)
+add_subdirectory(thirdparty/matio)
+add_subdirectory(thirdparty/nanopb)
+add_subdirectory(thirdparty/yaml-cpp)
 
 message(STATUS "ZLIB LIBRARIES:  ${ZLIB_LIBRARIES}")
 message(STATUS "HDF5 LIBRARIES:  ${HDF5_LIBRARIES}")
 
-include_directories ("gtest/include/" "gtest" "./" "./algorithm" "matio/src/" "mateigen/" ${ZLIB_INCLUDE_DIRS} ${HDF5_INCLUDE_DIRS} ${ZMQ_INCLUDE_DIR})
+include_directories ("thirdparty/" "thirdparty/gtest/include/" "thirdparty/gtest" "./" "./algorithm" "thirdparty/matio/src/" "mateigen/" ${ZLIB_INCLUDE_DIRS} ${HDF5_INCLUDE_DIRS} ${ZMQ_INCLUDE_DIR})
 
 add_library(mateigen STATIC
 mateigen/matlabreader.cpp
@@ -42,7 +42,8 @@ algorithm/respiration.cpp
 )
 
 #############
-add_library(gtest STATIC gtest/gtest-all.cc)
+add_library(gtest STATIC 
+thirdparty/gtest/gtest-all.cc)
 
 add_definitions(-DUNIT_TEST_DATA="${CMAKE_CURRENT_SOURCE_DIR}/unit-test/test-data/")
 
