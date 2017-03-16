@@ -27,19 +27,18 @@ add_subdirectory(yaml-cpp)
 message(STATUS "ZLIB LIBRARIES:  ${ZLIB_LIBRARIES}")
 message(STATUS "HDF5 LIBRARIES:  ${HDF5_LIBRARIES}")
 
-include_directories ("gtest/include/" "gtest" "./" "./src" "matio/src/" "mateigen/" ${ZLIB_INCLUDE_DIRS} ${HDF5_INCLUDE_DIRS} ${ZMQ_INCLUDE_DIR})
+include_directories ("gtest/include/" "gtest" "./" "./algorithm" "matio/src/" "mateigen/" ${ZLIB_INCLUDE_DIRS} ${HDF5_INCLUDE_DIRS} ${ZMQ_INCLUDE_DIR})
 
 add_library(mateigen STATIC
 mateigen/matlabreader.cpp
 mateigen/matlabwriter.cpp
 )
 
-add_library(haltija STATIC
-src/example.cpp
-src/kiss_fft.c
-src/haltijamath.cpp
-src/preprocessor.cpp
-src/respiration.cpp
+add_library(algorithm STATIC
+algorithm/kiss_fft.c
+algorithm/haltijamath.cpp
+algorithm/preprocessor.cpp
+algorithm/respiration.cpp
 )
 
 #############
@@ -50,7 +49,6 @@ add_definitions(-DUNIT_TEST_DATA="${CMAKE_CURRENT_SOURCE_DIR}/unit-test/test-dat
 ############
 add_executable(unit-test 
 unit-test/main.cpp 
-unit-test/testradar1.cpp
 unit-test/testmatio.cpp
 unit-test/testfilter.cpp
 unit-test/testmatrixmath.cpp
@@ -59,20 +57,20 @@ unit-test/testpreprocessor.cpp
 )
 
 
-target_link_libraries(unit-test gtest haltija ${HDF5_LIBRARIES} ${ZLIB_LIBRARIES} matio mateigen)
+target_link_libraries(unit-test gtest algorithm ${HDF5_LIBRARIES} ${ZLIB_LIBRARIES} matio mateigen)
 
 
 ###########
 add_executable(haltijarunner
 haltijarunner.cpp)
 
-target_link_libraries(haltijarunner haltija ${HDF5_LIBRARIES} ${ZLIB_LIBRARIES} matio mateigen)
+target_link_libraries(haltijarunner algorithm ${HDF5_LIBRARIES} ${ZLIB_LIBRARIES} matio mateigen)
 
 ############
 add_executable(haltijanetworkrunner
 haltijanetworkrunner.cpp)
 
-target_link_libraries(haltijanetworkrunner haltija )
+target_link_libraries(haltijanetworkrunner algorithm )
 
 
 #copy data for tests
