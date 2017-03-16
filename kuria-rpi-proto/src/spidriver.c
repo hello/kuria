@@ -18,7 +18,7 @@ static const char *device = "/dev/spidev0.0";
 
 static uint8_t mode;
 static uint8_t bits = 8;
-static uint32_t speed = 15000000;
+static uint32_t speed = 30000000;
 static uint16_t delay;
 static int spi_fd;
 
@@ -48,7 +48,6 @@ uint32_t spi_write_read(void* usr_ref, uint8_t* wdata, uint32_t wlength,
 	if (ret < 1){
 		pabort("can't send spi message");
     }
-
     //printf("Read %d \n", rdata[0]);
     return 0;
 }
@@ -77,6 +76,7 @@ uint32_t spi_read(void* usr_ref, uint8_t* data, uint32_t length) {
 		printf("%.2X ", data[ret]);
 	}
 	puts("");*/
+
     return 0;
 }
 
@@ -118,8 +118,6 @@ uint32_t spi_init(void) {
 	 * spi mode
 	 */
     mode =0;
-    mode |= SPI_CPOL;
-    mode |= SPI_CPHA;
 	ret = ioctl(spi_fd, SPI_IOC_WR_MODE, &mode);
 	if (ret == -1) {
 		pabort("can't set spi mode");

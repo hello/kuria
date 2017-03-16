@@ -275,7 +275,7 @@ static uint32_t x4driver_task_init(void){
     int status = x4driver_set_enable(x4driver, 1);
     for(int i =0; i < 1000; i++) {
         //wait
-        printf(".");
+        printf("");
     }
     printf("\n");
     return status;
@@ -291,10 +291,16 @@ static void x4driver_task(void* pvParameters){
     }
     else
         printf("X4Driver init success\n");
-    x4driver_check_configuration(x4driver);
-    x4driver_set_sweep_trigger_control(x4driver, SWEEP_TRIGGER_X4);
-    if(status) {
-        printf("Somethings not right: %d \n",status);
+
+    // Configure the radar chip as needed
+
+
+    if( x4driver_check_configuration(x4driver) != XEP_ERROR_X4DRIVER_OK) {
+        printf(" check config fail \n");
+        goto x4task_fail;
+    }
+    if( x4driver_set_sweep_trigger_control(x4driver, SWEEP_TRIGGER_X4) ) {
+        printf(" Set sweep trigger control fail\n");
         goto x4task_fail;
     }
    
@@ -372,7 +378,7 @@ static uint32_t read_and_send_radar_frame(X4Driver_t* x4driver, XepDispatch_t* d
         printf("malloc failed\n");
         return -1;
     }
-    printf("Prepare frame message done\n");
+    printf("Prepare frame message done %d\n", x4driver->frame_read_size);
     // Read radar data into dispatch memory.
     status = x4driver_read_frame_normalized(x4driver, &frame_counter,(float32_t*) framedata, frame_packet->bin_count);
     printf("Frame read completed\n");

@@ -577,8 +577,6 @@ int x4driver_get_instance_size(void)
  */
 int x4driver_create(X4Driver_t** x4driver, void* instance_memory, X4DriverCallbacks_t* x4driver_callbacks,X4DriverLock_t *lock,X4DriverTimer_t *timer,X4DriverTimer_t *timer_action, void* user_reference)
 {
-    printf("create x4driver\n");
-
 	X4Driver_t* d = (X4Driver_t*)instance_memory;
 	memset(d, 0, sizeof(X4Driver_t));
 
@@ -615,11 +613,30 @@ int x4driver_create(X4Driver_t** x4driver, void* instance_memory, X4DriverCallba
     
 	*x4driver = d;
 
-    printf("All done \n");
 	return XEP_ERROR_X4DRIVER_OK;
 }
 
+int x4driver_spi_test(X4Driver_t* x4driver) {
+    uint32_t status = mutex_take( x4driver);
+    if( status != XEP_ERROR_X4DRIVER_OK) return status;
 
+    uint8_t count = 0;
+    uint8_t reg;
+
+    for(count=0; count < 0xFF; count++) {
+        x4driver_set_spi_register(x4driver, ADDR_SPI_DEBUG_RW, count);
+        x4driver_get_spi_register(x4driver, ADDR_SPI_DEBUG_RW, &reg );
+        if(reg != count) {
+            printf("Debug spi fail: %x != %x\n", count, reg);
+            status = XEP_ERROR_X4DRIVER_NOK;
+            break;
+        }
+    }
+
+    mutex_give( x4driver);
+
+    return status;
+}
 
 /**
  * @brief Uploads custom 8051 firmware to X4.
@@ -636,20 +653,11 @@ int x4driver_upload_firmware_custom(X4Driver_t* x4driver, uint8_t * buffer,uint3
     x4driver_set_spi_register(x4driver,ADDR_SPI_MEM_FIRST_ADDR_MSB_RW,START_OF_SRAM_MSB);
     x4driver_set_spi_register(x4driver,ADDR_SPI_MEM_MODE_RW,SET_PROGRAMMING_MODE);
    
-    uint8_t reg[3] ={0};
-
-    x4driver_get_spi_register(x4driver,ADDR_SPI_MEM_MODE_RW,&reg[2]);
-    
-    
-    
     for(uint32_t i = 0; i< lenght;i++)
 	{
 		x4driver_set_spi_register(x4driver,ADDR_SPI_TO_MEM_WRITE_DATA_WE,buffer[i]);
 	}
             
-           
-    printf("Read verify \n  %d==%d\n", \
-            SET_PROGRAMMING_MODE, reg[2]);
     mutex_give(x4driver);
     return status;
 }
@@ -787,72 +795,142 @@ int x4driver_setup_default(X4Driver_t* x4driver)
 {
 	uint32_t status = mutex_take(x4driver);
 	if (status != XEP_ERROR_X4DRIVER_OK) return status;
-	//Set receiver trimming values
+
+	//set receiver trimming values
 	//dac_trim_a / dac_trim_b
 	status = x4driver_set_xif_register(x4driver, ADDR_XIF_DAC_TRIM_RW, 63);
-	if (status != XEP_ERROR_X4DRIVER_OK) return status;
+	if (status != XEP_ERROR_X4DRIVER_OK){
+        mutex_give(x4driver);
+        return status;
+    }
 	//preamp_trim
 	status = x4driver_set_xif_register(x4driver, ADDR_XIF_PREAMP_TRIM_RW, 15);
-	if (status != XEP_ERROR_X4DRIVER_OK) return status;
-	//Enable Common PLL 243MHz
+	if (status != XEP_ERROR_X4DRIVER_OK){
+        mutex_give(x4driver);
+        return status;
+    }
+	//enable common pll 243mhz
 	status = x4driver_set_pif_register(x4driver, ADDR_PIF_COMMON_PLL_CTRL_1_RW, 96);
-	if (status != XEP_ERROR_X4DRIVER_OK) return status;
-	//Enable TX PLL
+	if (status != XEP_ERROR_X4DRIVER_OK){
+        mutex_give(x4driver);
+        return status;
+    }
+	//enable tx pll
 	status = x4driver_set_pif_register(x4driver, ADDR_PIF_TX_PLL_CTRL_2_RW, 3);
-	if (status != XEP_ERROR_X4DRIVER_OK) return status;
-	//Enable RX PLL
+	if (status != XEP_ERROR_X4DRIVER_OK){
+        mutex_give(x4driver);
+        return status;
+    }
+	//enable rx pll
 	status = x4driver_set_pif_register(x4driver, ADDR_PIF_RX_PLL_CTRL_2_RW, 3);
-	if (status != XEP_ERROR_X4DRIVER_OK) return status;
-	//Enable receiver back end clocks
+	if (status != XEP_ERROR_X4DRIVER_OK){
+        mutex_give(x4driver);
+        return status;
+    }
+	//enable receiver back end clocks
 	status = x4driver_set_pif_register(x4driver, ADDR_PIF_CLKOUT_SEL_RW, 16);
-	if (status != XEP_ERROR_X4DRIVER_OK) return status;
+	if (status != XEP_ERROR_X4DRIVER_OK){
+        mutex_give(x4driver);
+        return status;
+    }
 	status = x4driver_set_pif_register(x4driver, ADDR_PIF_MCLK_TRX_BACKEND_CLK_CTRL_RW, 8);
-	if (status != XEP_ERROR_X4DRIVER_OK) return status;
-	//Enable sampler
+	if (status != XEP_ERROR_X4DRIVER_OK){
+        mutex_give(x4driver);
+        return status;
+    }
+	//enable sampler
 	status = x4driver_set_xif_register(x4driver, ADDR_XIF_SAMPLER_PRESET_MSB_RW, 0);
-	if (status != XEP_ERROR_X4DRIVER_OK) return status;
+	if (status != XEP_ERROR_X4DRIVER_OK){
+        mutex_give(x4driver);
+        return status;
+    }
 	status = x4driver_set_pif_register(x4driver, ADDR_PIF_SMPL_MODE_RW, 0);
-	if (status != XEP_ERROR_X4DRIVER_OK) return status;
-	//Configuration of transmitter Transmitter
+	if (status != XEP_ERROR_X4DRIVER_OK){
+        mutex_give(x4driver);
+        return status;
+    }
+	//configuration of transmitter transmitter
 	status = x4driver_set_pif_register(x4driver, ADDR_PIF_DVDD_TRIM_RW, 80);
-	if (status != XEP_ERROR_X4DRIVER_OK) return status;
-	//Set TX center frequency to EU
+	if (status != XEP_ERROR_X4DRIVER_OK){
+        mutex_give(x4driver);
+        return status;
+    }
+	//set tx center frequency to eu
 	status = x4driver_set_pif_register(x4driver, ADDR_PIF_TX_PLL_CTRL_1_RW, 48);
-	if (status != XEP_ERROR_X4DRIVER_OK) return status;
+	if (status != XEP_ERROR_X4DRIVER_OK){
+        mutex_give(x4driver);
+        return status;
+    }
 	//set_dacmax
 	status = x4driver_set_pif_register(x4driver, ADDR_PIF_TRX_DAC_MAX_L_RW, 7);
-	if (status != XEP_ERROR_X4DRIVER_OK) return status;
+	if (status != XEP_ERROR_X4DRIVER_OK){
+        mutex_give(x4driver);
+        return status;
+    }
 	status = x4driver_set_pif_register(x4driver, ADDR_PIF_TRX_DAC_MAX_H_RW, 255);
-	if (status != XEP_ERROR_X4DRIVER_OK) return status;
+	if (status != XEP_ERROR_X4DRIVER_OK){
+        mutex_give(x4driver);
+        return status;
+    }
 	//set_dacmin
 	status = x4driver_set_pif_register(x4driver, ADDR_PIF_TRX_DAC_MIN_L_RW, 0);
-	if (status != XEP_ERROR_X4DRIVER_OK) return status;
+	if (status != XEP_ERROR_X4DRIVER_OK){
+        mutex_give(x4driver);
+        return status;
+    }
 	status = x4driver_set_pif_register(x4driver, ADDR_PIF_TRX_DAC_MIN_H_RW, 0);
-	if (status != XEP_ERROR_X4DRIVER_OK) return status;
+	if (status != XEP_ERROR_X4DRIVER_OK){
+        mutex_give(x4driver);
+        return status;
+    }
 	//set_pps
 	status = x4driver_set_pif_register(x4driver, ADDR_PIF_TRX_PULSES_PER_STEP_LSB_RW, 10);
-	if (status != XEP_ERROR_X4DRIVER_OK) return status;
+	if (status != XEP_ERROR_X4DRIVER_OK){
+        mutex_give(x4driver);
+        return status;
+    }
 	status = x4driver_set_pif_register(x4driver, ADDR_PIF_TRX_PULSES_PER_STEP_MSB_RW, 0);
-	if (status != XEP_ERROR_X4DRIVER_OK) return status;
-	//setting Iterations
+	if (status != XEP_ERROR_X4DRIVER_OK){
+        mutex_give(x4driver);
+        return status;
+    }
+	//setting iterations
 	status = x4driver_set_pif_register(x4driver, ADDR_PIF_TRX_ITERATIONS_RW, 8);
-	if (status != XEP_ERROR_X4DRIVER_OK) return status;
-	//Set up PRF
+	if (status != XEP_ERROR_X4DRIVER_OK){
+        mutex_give(x4driver);
+        return status;
+    }
+	//set up prf
 	status = x4driver_set_pif_register(x4driver, ADDR_PIF_TRX_CLOCKS_PER_PULSE_RW, 16);
-	if (status != XEP_ERROR_X4DRIVER_OK) return status;
+	if (status != XEP_ERROR_X4DRIVER_OK){
+        mutex_give(x4driver);
+        return status;
+    }
 	//rx_mframes_coarse
 	status = x4driver_set_pif_register(x4driver, ADDR_PIF_RX_MFRAMES_COARSE_RW, 16);
-	if (status != XEP_ERROR_X4DRIVER_OK) return status;
+	if (status != XEP_ERROR_X4DRIVER_OK){
+        mutex_give(x4driver);
+        return status;
+    }
 	//rx_wait
 	status = x4driver_set_pif_register(x4driver, ADDR_PIF_RX_WAIT_RW, 0);
-	if (status != XEP_ERROR_X4DRIVER_OK) return status;
+	if (status != XEP_ERROR_X4DRIVER_OK){
+        mutex_give(x4driver);
+        return status;
+    }
 	//tx_wait
 	status = x4driver_set_pif_register(x4driver, ADDR_PIF_TX_WAIT_RW, 1);
-	if (status != XEP_ERROR_X4DRIVER_OK) return status;
+	if (status != XEP_ERROR_X4DRIVER_OK){
+        mutex_give(x4driver);
+        return status;
+    }
 	//set_frame_length
 	uint8_t rx_mframes_coarse = 0x00;
 	status = x4driver_get_pif_register(x4driver,ADDR_PIF_RX_MFRAMES_COARSE_RW,&rx_mframes_coarse);	
-	if (status != XEP_ERROR_X4DRIVER_OK) return status;
+	if (status != XEP_ERROR_X4DRIVER_OK){
+        mutex_give(x4driver);
+        return status;
+    }
 	status = x4driver_set_frame_length(x4driver,rx_mframes_coarse);
 	
 	
@@ -876,22 +954,20 @@ int x4driver_upload_firmware_default(X4Driver_t* x4driver)
     
     status = x4driver_upload_firmware_custom(x4driver,data_8051_onboard,data_8051_size);
     printf("Upload custom firmware done %d\n",status);
-    if (status != XEP_ERROR_X4DRIVER_OK) 
-		return status;    
-    uint32_t reg = 0x00; 
-    status = x4driver_get_spi_register(x4driver,ADDR_SPI_BOOT_FROM_OTP_SPI_RWE,&reg);
-    printf("Get boot from SRAM done %d %d \n",status, reg);
+    if (status != XEP_ERROR_X4DRIVER_OK) {
+        mutex_give(x4driver);
+		return status;  
+    }
     
     status = x4driver_set_spi_register(x4driver,ADDR_SPI_BOOT_FROM_OTP_SPI_RWE,BOOT_FROM_SRAM);
     printf("Set boot from SRAM done %d\n",status);
-    if (status != XEP_ERROR_X4DRIVER_OK) 
+    if (status != XEP_ERROR_X4DRIVER_OK) {
+        mutex_give(x4driver);
 		return status;
+    }
     
     status = x4driver_verify_firmware(x4driver,data_8051_onboard,data_8051_size);     
     printf("Verify firmware done %d\n", status);
-    if (status != XEP_ERROR_X4DRIVER_OK) 
-    
-		return status;
     
     mutex_give(x4driver);
     return status;
@@ -1943,6 +2019,8 @@ int x4driver_init(X4Driver_t* x4driver)
 	status = x4driver_set_enable(x4driver,0); 
     status = x4driver_set_enable(x4driver,1);
 
+    if (status != XEP_ERROR_X4DRIVER_OK) 
+		return status;
     // Wait until X4 is stable.	
 	for (volatile int i = 0; i < 2000; i++)
 	{
@@ -1952,26 +2030,28 @@ int x4driver_init(X4Driver_t* x4driver)
     uint8_t force_one = 0x00;
 	uint8_t force_zero = 0x00;
 
-    printf("Get spi register\n");
     x4driver_get_spi_register(x4driver, ADDR_SPI_FORCE_ONE_R, &force_one);
 	x4driver_get_spi_register(x4driver, ADDR_SPI_FORCE_ZERO_R, &force_zero);
 
-    printf("Got spi register\n");
 	if (force_one != 0xff && force_zero != 0x00)
 	{
         printf("force one and zero fail\n");
 		return XEP_ERROR_X4DRIVER_NOK;
 	}
-    printf("Status before firmware upload: %d\n", status);
-    if (status != XEP_ERROR_X4DRIVER_OK) 
-		return status;
+
+    printf("spi debug..\n");
+    status = x4driver_spi_test(x4driver);
+    if(status != XEP_ERROR_X4DRIVER_OK) {
+        return status;
+    }
+
+
     status = x4driver_upload_firmware_default(x4driver);
     printf("Upload firmware done %d \n",status);
     
     if (status != XEP_ERROR_X4DRIVER_OK) 
 		return status;
     status = x4driver_ldo_enable_all(x4driver);
-    printf(" ldo enabledone %d \n",status);
     if (status != XEP_ERROR_X4DRIVER_OK) 
 		return status;
     status = x4driver_init_clock(x4driver);  
