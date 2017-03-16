@@ -1,4 +1,5 @@
 #include "protobuf_matrix_utils.h"
+#include "proto_utils.h"
 #include "simple_matrix.pb.h"
 #include <stdbool.h>
 #include "pb_encode.h"
@@ -20,112 +21,6 @@ const static size_t _mat_scalar_sizes[] = {
 };
 
 
-typedef struct {
-    uint8_t * buffer;
-    size_t buf_size_bytes;
-    size_t pos;
-} BufferInfo_t;
-
-static bool decode_string(pb_istream_t *stream, const pb_field_t *field, void **arg) {
-    BufferInfo_t * info = (BufferInfo_t *) *arg;
-
-    if (info->buf_size_bytes < stream->bytes_left) {
-        return false;
-    }
-    
-    if (!pb_read(stream,info->buffer,stream->bytes_left)) {
-        return false;
-    }
-    
-    return true;
-}
-
-static bool decode_repeated_bytes_fields(pb_istream_t *stream, const pb_field_t *field, void **arg) {
-    /*
-    //write string tag for delimited field
-    if (!pb_encode_tag(stream, PB_WT_STRING, field->tag)) {
-        return false;
-    }
-    
-    //write size
-    if (!pb_encode_varint(stream, (uint64_t)bytes_read)) {
-        return false;
-    }
-    
-    //write buffer
-    if (!pb_write(stream, buffer, bytes_read)) {
-        return false;
-    }
-     */
-
-    BufferInfo_t * info = (BufferInfo_t *) *arg;
-    
-    if (!info) {
-        return false;
-    }
-    
-    if (!info->buffer) {
-        return false;
-    }
-    
-    
-    uint8_t * buf = info->buffer + info->pos;
-    
-    if (info->pos + stream->bytes_left > info->buf_size_bytes) {
-        return false;
-    }
-    
-    info->pos += stream->bytes_left;
-    
-    //TODO do a memcpy instead of byte by byte
-    if (!pb_read(stream,buf,stream->bytes_left)) {
-        return false;
-    }
-    
-    return true;
-}
-
-static bool encode_buffer_fields(pb_ostream_t * stream, const pb_field_t * field, void * const * arg) {
-    BufferInfo_t * info = *arg;
-    
-    //write string tag for delimited field
-    if (!pb_encode_tag(stream, PB_WT_STRING, field->tag)) {
-        return false;
-    }
-    
-    //write size
-    if (!pb_encode_varint(stream, info->buf_size_bytes)) {
-        return false;
-    }
-    
-    //write buffer
-    if (!pb_write(stream, info->buffer, info->buf_size_bytes)) {
-        return false;
-    }
-    
-
-    return true;
-
-}
-
-
-static bool encode_string_fields(pb_ostream_t * stream, const pb_field_t *field, void * const *arg) {
-    const char * str = *arg;
-    
-    if(!str) {
-        //LOGI("_encode_string_fields: No string to encode\n");
-        return false;
-    }
-    
-    //write tag
-    //if (!pb_encode_tag(stream, PB_WT_STRING, field->tag)) { // Not sure should do this,
-    // This is for encoding byte array
-    if (!pb_encode_tag_for_field(stream, field)){
-        return 0;
-    }
-    
-    return pb_encode_string(stream, (uint8_t*)str, strlen(str));
-}
 
 
 EEncodeStatus_t protobuf_matrix_utils_create_and_write_protobuf(void * buffer,size_t * bytes_written,size_t buffer_size,const char * name, const char * device_id,const size_t num_rows, const size_t num_cols, const void * data, SimpleMatrixDataType mat_scalar_type, Timestamp_t timestamp_utc_millis, int tzoffset_millis) {

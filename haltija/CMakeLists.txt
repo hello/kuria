@@ -54,8 +54,11 @@ algorithm/respiration.cpp
 )
 
 add_library(network STATIC
+network/noveldaprotobuf.cpp
+network/novelda.pb.c
 network/simple_matrix.pb.c
 network/protobuf_matrix_utils.c
+network/proto_utils.c
 )
 
 #############
@@ -90,7 +93,7 @@ if (NOT WIN32)
   add_executable(haltijanetworkrunner
   haltijanetworkrunner.cpp)
 
-  target_link_libraries(haltijanetworkrunner algorithm network protobuf-nanopb)
+  target_link_libraries(haltijanetworkrunner algorithm network protobuf-nanopb zmq)
 endif()
 
 #copy data for tests
