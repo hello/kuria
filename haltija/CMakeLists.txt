@@ -17,21 +17,25 @@ if (WIN32)
 else()
   find_package(ZLIB REQUIRED)
   find_package(HDF5 REQUIRED)
+  find_package(ZMQ REQUIRED)
 endif()
 
 add_subdirectory(matio)
 add_subdirectory(nanopb)
+add_subdirectory(yaml-cpp)
 
 message(STATUS "ZLIB LIBRARIES:  ${ZLIB_LIBRARIES}")
 message(STATUS "HDF5 LIBRARIES:  ${HDF5_LIBRARIES}")
 
-include_directories ("gtest/include/" "gtest" "./" "./src" "matio/src/" ${ZLIB_INCLUDE_DIRS} ${HDF5_INCLUDE_DIRS})
+include_directories ("gtest/include/" "gtest" "./" "./src" "matio/src/" "mateigen/" ${ZLIB_INCLUDE_DIRS} ${HDF5_INCLUDE_DIRS} ${ZMQ_INCLUDE_DIR})
 
+add_library(mateigen STATIC
+mateigen/matlabreader.cpp
+mateigen/matlabwriter.cpp
+)
 
 add_library(haltija STATIC
 src/example.cpp
-src/matlabreader.cpp
-src/matlabwriter.cpp
 src/kiss_fft.c
 src/haltijamath.cpp
 src/preprocessor.cpp
@@ -55,17 +59,22 @@ unit-test/testpreprocessor.cpp
 )
 
 
-target_link_libraries(unit-test gtest haltija ${HDF5_LIBRARIES} ${ZLIB_LIBRARIES} matio)
+target_link_libraries(unit-test gtest haltija ${HDF5_LIBRARIES} ${ZLIB_LIBRARIES} matio mateigen)
 
 
 ###########
 add_executable(haltijarunner
 haltijarunner.cpp)
 
-target_link_libraries(haltijarunner haltija ${HDF5_LIBRARIES} ${ZLIB_LIBRARIES} matio)
+target_link_libraries(haltijarunner haltija ${HDF5_LIBRARIES} ${ZLIB_LIBRARIES} matio mateigen)
+
+############
+add_executable(haltijanetworkrunner
+haltijanetworkrunner.cpp)
+
+target_link_libraries(haltijanetworkrunner haltija )
 
 
- 
 #copy data for tests
 #this does not seem to work on windows
 #add_custom_command(
