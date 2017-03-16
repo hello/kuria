@@ -72,10 +72,11 @@ unit-test/testfilter.cpp
 unit-test/testmatrixmath.cpp
 unit-test/testbuffers.cpp
 unit-test/testpreprocessor.cpp
+unit-test/testnetwork.cpp
 )
 
 
-target_link_libraries(unit-test gtest algorithm ${HDF5_LIBRARIES} ${ZLIB_LIBRARIES} matio mateigen)
+target_link_libraries(unit-test gtest algorithm ${HDF5_LIBRARIES} ${ZLIB_LIBRARIES} matio mateigen network protobuf-nanopb)
 
 
 ###########
@@ -88,7 +89,7 @@ target_link_libraries(haltijarunner algorithm ${HDF5_LIBRARIES} ${ZLIB_LIBRARIES
 add_executable(haltijanetworkrunner
 haltijanetworkrunner.cpp)
 
-target_link_libraries(haltijanetworkrunner algorithm )
+target_link_libraries(haltijanetworkrunner algorithm network protobuf-nanopb)
 
 
 #copy data for tests

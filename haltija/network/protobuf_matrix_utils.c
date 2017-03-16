@@ -59,8 +59,14 @@ static bool decode_repeated_bytes_fields(pb_istream_t *stream, const pb_field_t 
     while (1) {
         uint32_t tag;
         bool eof;
-        if (!pb_decode_tag(stream, PB_WT_STRING, &tag, &eof)) {
-            break;
+        pb_wire_type_t wire_type;
+        
+        if (!pb_decode_tag(stream, &wire_type, &tag, &eof)) {
+            if (eof) {
+                break;
+            }
+            
+            return false;
         }
         
         uint64_t bytes_read = 0;
@@ -126,10 +132,8 @@ static bool encode_string_fields(pb_ostream_t * stream, const pb_field_t *field,
 }
 
 
-ByteBuf_t protobuf_matrix_utils_create_and_write_protobuf(const char * name, const char * device_id,const size_t num_rows, const size_t num_cols, const void * data, EMatrixDataScalarType_t mat_scalar_type, Timestamp_t timestamp_utc_millis, int tzoffset_millis) {
-    
-    ByteBuf_t bytebuf = {NULL,0};
-    
+EEncodeStatus_t protobuf_matrix_utils_create_and_write_protobuf(void * buffer,size_t * bytes_written,size_t buffer_size,const char * name, const char * device_id,const size_t num_rows, const size_t num_cols, const void * data, EMatrixDataScalarType_t mat_scalar_type, Timestamp_t timestamp_utc_millis, int tzoffset_millis) {
+        
     SimpleMatrix mat;
     const size_t scalar_size = _mat_scalar_sizes[mat_scalar_type];
     const size_t num_buf_bytes = scalar_size * num_rows * num_cols;
@@ -138,7 +142,7 @@ ByteBuf_t protobuf_matrix_utils_create_and_write_protobuf(const char * name, con
 
     //bounds check on the enum
     if ((int)mat_scalar_type >= sizeof(_type_map) / sizeof(_type_map[0]) || (int)mat_scalar_type < 0) {
-        return bytebuf;
+        return encode_status_invalid_input;
     }
     
     
@@ -170,19 +174,15 @@ ByteBuf_t protobuf_matrix_utils_create_and_write_protobuf(const char * name, con
     mat.payload.funcs.encode = encode_buffer_fields;
     mat.payload.arg = (void *)&info;
     
-    pb_ostream_t sizestream = PB_OSTREAM_SIZING;
-    pb_encode(&sizestream, SimpleMatrix_fields, &mat);
-
-    void * buf = malloc(sizestream.bytes_written);
+    pb_ostream_t bufstream = pb_ostream_from_buffer(buffer,buffer_size);
     
-    pb_ostream_t bufstream = pb_ostream_from_buffer(buf,sizestream.bytes_written);
+    if (!pb_encode(&bufstream, SimpleMatrix_fields, &mat)) {
+        return encode_status_buffer_too_small;
+    }
     
-    pb_encode(&bufstream, SimpleMatrix_fields, &mat);
+    *bytes_written = bufstream.bytes_written;
     
-    bytebuf.buf = buf;
-    bytebuf.num_bytes = sizestream.bytes_written;
-    
-    return bytebuf;
+    return encode_status_success;
 }
 
 bool protobuf_matrix_utils_decode_protobuf(const void * bytes, const size_t num_bytes, DecodedSimpleMatrix_t * decoded_mat) {
