@@ -27,7 +27,19 @@ add_subdirectory(thirdparty/yaml-cpp)
 message(STATUS "ZLIB LIBRARIES:  ${ZLIB_LIBRARIES}")
 message(STATUS "HDF5 LIBRARIES:  ${HDF5_LIBRARIES}")
 
-include_directories ("thirdparty/" "thirdparty/gtest/include/" "thirdparty/gtest" "./" "./algorithm" "thirdparty/matio/src/" "mateigen/" ${ZLIB_INCLUDE_DIRS} ${HDF5_INCLUDE_DIRS} ${ZMQ_INCLUDE_DIR})
+include_directories (
+"include" 
+"thirdparty/" 
+"thirdparty/nanopb/" 
+"thirdparty/gtest/include/" 
+"thirdparty/gtest" 
+"./" 
+"./algorithm" 
+"thirdparty/matio/src/" 
+"mateigen/" 
+${ZLIB_INCLUDE_DIRS} 
+${HDF5_INCLUDE_DIRS} 
+${ZMQ_INCLUDE_DIR})
 
 add_library(mateigen STATIC
 mateigen/matlabreader.cpp
@@ -39,6 +51,11 @@ algorithm/kiss_fft.c
 algorithm/haltijamath.cpp
 algorithm/preprocessor.cpp
 algorithm/respiration.cpp
+)
+
+add_library(network STATIC
+network/simple_matrix.pb.c
+network/protobuf_matrix_utils.c
 )
 
 #############
