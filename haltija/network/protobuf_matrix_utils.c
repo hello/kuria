@@ -30,34 +30,58 @@ const static size_t _mat_scalar_sizes[] = {
     16
 };
 
-/*
-void setup_protbuf(SimpleMatrix * mat,hlo_stream_t * bytestream, const char * net_id, const char * keyword,const int num_cols,FeaturesPayloadType_t feats_type) {
-    memset(mat,0,sizeof(SimpleMatrix));
-    
-    strncpy(_id_buf,net_id,sizeof(_id_buf));
-    strncat(_id_buf,"+",sizeof(_id_buf));
-    strncat(_id_buf,keyword,sizeof(_id_buf));
-    
-    mat->id.arg = (void *) _id_buf;
-    mat->id.funcs.encode = _encode_string_fields;
-    
-    mat->has_data_type = true;
-    mat->data_type = map_type(feats_type);
-    
-    mat->has_num_cols = true;
-    mat->num_cols = num_cols;
-    
-    mat->payload.funcs.encode = encode_repeated_streaming_bytes_and_mark_done;
-    mat->payload.arg = bytestream;
-    
-    mat->device_id.funcs.encode = encode_device_id_string;
-    
-}
-*/
+
 typedef struct {
-    void * buffer;
+    unsigned char * buffer;
     size_t buf_size_bytes;
 } BufferInfo_t;
+
+static bool decode_repeated_bytes_fields(pb_istream_t *stream, const pb_field_t *field, void **arg) {
+    /*
+    //write string tag for delimited field
+    if (!pb_encode_tag(stream, PB_WT_STRING, field->tag)) {
+        return false;
+    }
+    
+    //write size
+    if (!pb_encode_varint(stream, (uint64_t)bytes_read)) {
+        return false;
+    }
+    
+    //write buffer
+    if (!pb_write(stream, buffer, bytes_read)) {
+        return false;
+    }
+     */
+    
+    BufferInfo_t * info = (BufferInfo_t *) *arg;
+    
+    while (1) {
+        uint32_t tag;
+        bool eof;
+        if (!pb_decode_tag(stream, PB_WT_STRING, &tag, &eof)) {
+            break;
+        }
+        
+        uint64_t bytes_read = 0;
+        
+        if (!pb_decode_varint(stream,&bytes_read)) {
+            return false;
+        }
+        
+        //TODO decide if I malloc every time or just concatenate
+        //leaning towards concatenate and have a max buffer size
+        
+        /*
+        if (!pb_read(stream,buf,bytes_read)) {
+            return false;
+        }
+         */
+        
+    }
+    
+    return true;
+}
 
 static bool encode_buffer_fields(pb_ostream_t * stream, const pb_field_t * field, void * const * arg) {
     BufferInfo_t * info = *arg;
@@ -163,7 +187,6 @@ ByteBuf_t protobuf_matrix_utils_create_and_write_protobuf(const char * name, con
 
 bool protobuf_matrix_utils_decode_protobuf(const void * bytes, const size_t num_bytes, DecodedSimpleMatrix_t * decoded_mat) {
     /*
-    SimpleMatrix mat;
     pb_istream_t istream = pb_istream_from_buffer(bytes, num_bytes);
     
     memset(&mat,0,sizeof(mat));
@@ -172,6 +195,8 @@ bool protobuf_matrix_utils_decode_protobuf(const void * bytes, const size_t num_
     
     pb_decode(&istream,SimpleMatrix_fields,&mat);
     */
+    
+
     return false;
 }
 
