@@ -86,11 +86,12 @@ haltijarunner.cpp)
 target_link_libraries(haltijarunner algorithm ${HDF5_LIBRARIES} ${ZLIB_LIBRARIES} matio mateigen)
 
 ############
-add_executable(haltijanetworkrunner
-haltijanetworkrunner.cpp)
+if (NOT WIN32)
+  add_executable(haltijanetworkrunner
+  haltijanetworkrunner.cpp)
 
-target_link_libraries(haltijanetworkrunner algorithm network protobuf-nanopb)
-
+  target_link_libraries(haltijanetworkrunner algorithm network protobuf-nanopb)
+endif()
 
 #copy data for tests
 #this does not seem to work on windows
