@@ -77,6 +77,7 @@ void vApplicationIdleHook( void )
     struct timespec xTimeToSleep, xTimeSlept;
     if(stop_x4_read) {
         printf("Idle task end\n"); 
+        fflush(stdout);
         vTaskEndScheduler();
     }
     /* Makes the process more agreeable when using the Posix simulator. */
@@ -346,6 +347,7 @@ x4task_fail:
     }else {
         printf("x4driver task fail\n"); 
     }
+    vTaskDelay(5);
     vTaskDelete( NULL );
 
 }

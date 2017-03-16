@@ -9,6 +9,8 @@
 #include "spidriver.h"
 #include <stdio.h>
 #include <time.h>
+#include <unistd.h>
+
 
 #define START_OF_SRAM_LSB       0x00
 #define START_OF_SRAM_MSB       0x00
@@ -625,12 +627,14 @@ int x4driver_spi_test(X4Driver_t* x4driver) {
 
     for(count=0; count < 0xFF; count++) {
         x4driver_set_spi_register(x4driver, ADDR_SPI_DEBUG_RW, count);
+        usleep(10);
         x4driver_get_spi_register(x4driver, ADDR_SPI_DEBUG_RW, &reg );
         if(reg != count) {
             printf("Debug spi fail: %x != %x\n", count, reg);
             status = XEP_ERROR_X4DRIVER_NOK;
             break;
         }
+        usleep(20);
     }
 
     mutex_give( x4driver);
@@ -2038,14 +2042,13 @@ int x4driver_init(X4Driver_t* x4driver)
         printf("force one and zero fail\n");
 		return XEP_ERROR_X4DRIVER_NOK;
 	}
-
+#if 1
     printf("spi debug..\n");
     status = x4driver_spi_test(x4driver);
     if(status != XEP_ERROR_X4DRIVER_OK) {
         return status;
     }
-
-
+#endif
     status = x4driver_upload_firmware_default(x4driver);
     printf("Upload firmware done %d \n",status);
     

@@ -12,14 +12,14 @@
 #include "kuria_utils.h"
 
 
-
+#define DELAY_US 0
 
 static const char *device = "/dev/spidev0.0";
 
 static uint8_t mode;
 static uint8_t bits = 8;
 static uint32_t speed = 30000000;
-static uint16_t delay;
+static uint16_t delay = 0;
 static int spi_fd;
 
 
@@ -117,7 +117,7 @@ uint32_t spi_init(void) {
 	/*
 	 * spi mode
 	 */
-    mode =0;
+    mode = SPI_MODE_3;
 	ret = ioctl(spi_fd, SPI_IOC_WR_MODE, &mode);
 	if (ret == -1) {
 		pabort("can't set spi mode");
