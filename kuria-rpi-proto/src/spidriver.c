@@ -43,7 +43,6 @@ uint32_t spi_write_read(void* usr_ref, uint8_t* wdata, uint32_t wlength,
 		[1].speed_hz = speed,
 		[1].bits_per_word = bits,
 	};
-
 	ret = ioctl(spi_fd, SPI_IOC_MESSAGE(2), tr);
 	if (ret < 1){
 		pabort("can't send spi message");

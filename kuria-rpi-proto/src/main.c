@@ -216,7 +216,7 @@ static void gpio_init(void) {
     // Config enable pin
     //
     pinMode(X4_ENABLE_PIN,OUTPUT);
-
+    digitalWrite(X4_ENABLE_PIN, LOW);
     // Config ISR pin
     //
     //pinMode(X4_INTR_PIN,INPUT);
@@ -274,7 +274,7 @@ static uint32_t x4driver_task_init(void){
            NULL , TASK_RADAR_PRIORITY, &h_task_radar);
 
     int status = x4driver_set_enable(x4driver, 1);
-    for(int i =0; i < 1000; i++) {
+    for(int i =0; i < 2000; i++) {
         //wait
         printf("");
     }
@@ -292,12 +292,21 @@ static void x4driver_task(void* pvParameters){
     }
     else
         printf("X4Driver init success\n");
-
+#if 0
     // Configure the radar chip as needed
-
-
-    if( x4driver_check_configuration(x4driver) != XEP_ERROR_X4DRIVER_OK) {
-        printf(" check config fail \n");
+    x4driver_set_dac_min(x4driver, 500);
+    x4driver_set_dac_max(x4driver, 1500);
+    x4driver_set_iterations(x4driver, 15);
+    x4driver_set_pulses_per_step(x4driver, 10);
+    x4driver_set_downconversion(x4driver, 1);
+    x4driver_set_frame_area_offset(x4driver, 0.6);
+    x4driver_set_frame_area(x4driver, 0.5, 4.0);
+    x4driver_set_fps(x4driver, 20);
+#endif
+    x4driver_set_downconversion(x4driver, 1);
+    status = x4driver_check_configuration(x4driver);
+    if( status != XEP_ERROR_X4DRIVER_OK) {
+        printf(" check config fail %d \n", status);
         goto x4task_fail;
     }
     if( x4driver_set_sweep_trigger_control(x4driver, SWEEP_TRIGGER_X4) ) {
@@ -342,6 +351,12 @@ static void x4driver_task(void* pvParameters){
     printf("Ending X4 Test...\n");
 
 x4task_fail:
+    status = x4driver_set_enable(x4driver, 0);
+    for(int i =0; i < 2000; i++) {
+        //wait
+        printf("");
+    }
+    printf("\n");
     if( !stop_x4_read) {
         stop_x4_read = 1;
     }else {
@@ -405,15 +420,21 @@ int main() {
     spi_init();
     printf("SPI init done \n");
 
+    usleep(100);
     // init gpio
     gpio_init();
     printf("GPIO Init Done\n");
 
+    for(int i =0; i < 2000; i++) {
+        //wait
+        printf("");
+    }
     if(x4driver_task_init()){
         spi_close(); 
         return -1;
     }
 
+    usleep(100);
     // Open file to save data
     // Initialize x4 module
     //

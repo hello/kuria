@@ -2009,7 +2009,26 @@ int x4driver_set_frame_length(X4Driver_t* x4driver, uint8_t cycles)
 	return status;
 }
 
+int x4driver_cpu_reset(X4Driver_t* x4driver) {
 
+    uint32_t status = mutex_take(x4driver);
+	if (status != XEP_ERROR_X4DRIVER_OK) return status;
+
+    // hold cpu in reset
+    x4driver_set_spi_register(x4driver, ADDR_SPI_CPU_RESET_RW, 0x01);
+
+	for (volatile int i = 0; i < 200; i++)
+	{
+		__asm__ volatile ("nop");		
+	}
+
+    // get cpu out of reset
+    x4driver_set_spi_register(x4driver, ADDR_SPI_CPU_RESET_RW, 0x00);
+
+    mutex_give(x4driver);
+    
+    return status;
+}
 /**
  * @brief Inits x4driver.
  * Will make sure that enable is set, 8051 SRAM is programmed, ldos are enabled, and that the external oscillator has been enabled. 
@@ -2030,7 +2049,9 @@ int x4driver_init(X4Driver_t* x4driver)
 	{
 		__asm__ volatile ("nop");		
 	}
-	
+
+	x4driver_cpu_reset(x4driver);
+
     uint8_t force_one = 0x00;
 	uint8_t force_zero = 0x00;
 
