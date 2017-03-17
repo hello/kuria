@@ -6,8 +6,8 @@ import sys
 import threading
 import signal
 import struct
-from Queue import Queue
-from Queue import Empty
+from queue import Queue
+from queue import Empty
 import copy
 import radar_messages_pb2
 import zmq
@@ -127,15 +127,13 @@ def updatePlot():
         raise
 
 def subscribe_messages(target):
-    print target
     # Prepare our context and publisher
     context    = zmq.Context()
     subscriber = context.socket(zmq.SUB)
     subscriber.connect(target)
     subscriber.setsockopt(zmq.SUBSCRIBE,b"PLOT")
 
-    print "started waiting"
-    print target
+    print (target)
     while not g_kill:
         # Read envelope with address
         try:
@@ -144,11 +142,10 @@ def subscribe_messages(target):
              vec.ParseFromString(message)
 
              x = [f for f in vec.floatfeats]
-             print x
+             print(x)
              g_PlotQueue.put(x)
                   
         except IOError:
-             print "io errrrrrerorerer"
              pass
           
     # We never get here but clean up anyhow
@@ -206,5 +203,4 @@ def main_plotter():
 
 ## Start Qt event loop unless running in interactive mode or using pyside.
 if __name__ == '__main__':
-    print "GLGDJLKSDGJS"
     test()
