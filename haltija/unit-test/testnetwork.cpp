@@ -1,5 +1,6 @@
 #include "gtest/gtest.h"
 #include "network/protobuf_matrix_utils.h"
+#include "network/noveldaprotobuf.h"
 #include <string.h>
 #include <stdlib.h>
 #include <fstream>
@@ -22,6 +23,24 @@ protected:
 };
 
 class DISABLED_TestNetwork : public TestNetwork {};
+
+TEST_F(TestNetwork,TestDecodeNovelda) {
+    char buf[100000] = {0};
+
+    const std::string filepath = GET_TEST_FILE_PATH("novelda.bin");
+    std::ifstream fin(filepath, std::ios::in | std::ios::binary );
+    fin.seekg (0, fin.end);
+    int length = fin.tellg();
+    fin.seekg (0, fin.beg);
+    
+    fin.read(buf, sizeof(buf));
+    
+    NoveldaData_t deserialized_data;
+    
+    ASSERT_TRUE(NoveldaProtobuf::deserialize_protobuf((uint8_t *)buf, length, deserialized_data));
+    ASSERT_EQ(deserialized_data.range_bins.size(),188);
+    
+}
 
 TEST_F(TestNetwork, TestDecodeSimpleMatrix) {
 

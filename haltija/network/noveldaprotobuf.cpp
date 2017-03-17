@@ -3,6 +3,9 @@
 #include "novelda.pb.h"
 #include <string.h>
 #include "pb_decode.h"
+#include <iostream>
+#include "log.h"
+
 
 bool NoveldaProtobuf::deserialize_protobuf(const uint8_t * protobuf_bytes, const size_t protobuf_size, NoveldaData_t & deserialized_data) {
     
@@ -21,14 +24,18 @@ bool NoveldaProtobuf::deserialize_protobuf(const uint8_t * protobuf_bytes, const
     frame.range_bins.arg = (void *)&info;
     
     if (!pb_decode(&istream,novelda_RadarFrame_fields,&frame)) {
+        LOG("failed to decode");
         return false;
     }
     
     const size_t num_items_received = info.pos / sizeof(double);
     
     if (num_items_received == 0) {
+        LOG("items received is zero");
         return false;
     }
+    
+    LOG("%d",num_items_received);
     
     deserialized_data.frame_id = 0;
     deserialized_data.is_base_band = false;

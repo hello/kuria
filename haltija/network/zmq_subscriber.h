@@ -3,14 +3,15 @@
 #include <zmq.h>
 #include <map>
 #include <iostream>
-
+#include "log.h"
 
 //example url "tcp://localhost:5563"
 
 template <class Deserializer,class Message,class Subscriber>
 class ZmqSubscriber {
 public:
-    ZmqSubscriber(size_t buf_size, const std::string & url) {
+    ZmqSubscriber(size_t buf_size, const std::string & url)
+    :_max_size(buf_size) {
         _message_buf = (uint8_t *)malloc(buf_size);
         _url = url;
     }
@@ -36,11 +37,13 @@ public:
 
         while (1) {
             
-            int size = zmq_recv (subscriber, _message_buf, sizeof(_message_buf), 0);
+            int size = zmq_recv (subscriber, _message_buf, _max_size, 0);
             
             if (size == -1) {
-                std::cerr << "error receiving data" << std::endl;
+                LOG("error receiving data");
             }
+            
+            _message_buf[size] = '\0';
 
             Message message;
             if (!_deserializer.deserialize_protobuf(_message_buf,size,message)) {
@@ -65,5 +68,6 @@ private:
     Deserializer _deserializer;
     uint8_t * _message_buf;
     std::string _url;
+    const size_t _max_size;
     
 };

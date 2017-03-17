@@ -7,7 +7,7 @@
 
 class NoveldaProtobuf {
 public:
-    bool deserialize_protobuf(const uint8_t * protobuf_bytes, const size_t protobuf_size, NoveldaData_t & deserialized_data);
+    static bool deserialize_protobuf(const uint8_t * protobuf_bytes, const size_t protobuf_size, NoveldaData_t & deserialized_data);
     
 };
 

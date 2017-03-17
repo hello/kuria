@@ -5,15 +5,16 @@ bool decode_repeated_doubles(pb_istream_t *stream, const pb_field_t *field, void
     BufferInfo_t * info = (BufferInfo_t *) *arg;
     
     double * dbuf = (double *)info->buffer;
-    size_t pos = 0;
+
     while(stream->bytes_left > 0) {
         
-        if (pos + 8 > info->buf_size_bytes) {
+        if (info->pos + 8 > info->buf_size_bytes) {
             return false;
         }
         
         pb_decode_fixed64(stream, dbuf);
         dbuf += 1;
+        info->pos += sizeof(double);
     }
     
     return true;
