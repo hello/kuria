@@ -16,4 +16,15 @@ typedef struct {
 } BasebandDataFrame_t ;
 
 
+
+typedef std::complex<double> Complex128_t;
+typedef std::vector<Complex128_t> Complex128Vec_t;
+
+typedef struct  {
+    Complex128Vec_t range_bins;
+    uint32_t frame_id;
+    bool is_base_band;
+} NoveldaData_t ;
+
+
 #endif //_HALTIJA_TYPES_H_

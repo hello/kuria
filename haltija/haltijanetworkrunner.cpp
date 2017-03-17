@@ -1,35 +1,17 @@
 
 #include "network/zmq_subscriber.h"
-class TestMessage {
-
-};
-
-class Subscriber {
-public:
-    void receive_message(const TestMessage & message) {
-        
-    }
-};
+#include "network/noveldaprotobuf.h"
+#include "algorithm/novelda_radar_subscriber.h"
+#include "haltija_types.h"
 
 
-class Deserializer {
-public:
-    bool deserialize_protobuf(const uint8_t * bytes, const size_t num_bytes, TestMessage & testmessage) {
-        
-        std::cout << "got message of " << num_bytes << "len" << std::endl;
+int main(int argc, char * argv[]) {
     
-        return true;
-    }
-};
-
-int main() {
+    ZmqSubscriber<NoveldaProtobuf,NoveldaData_t,NoveldaRadarSubscriber> zmq_subscriber(100000,"tcp://localhost:5563");
     
-    ZmqSubscriber<Deserializer,TestMessage,Subscriber> zmq_subscriber(10000,"tcp://localhost:5563");
-    
-    zmq_subscriber.add_subscriber("foobars", new Subscriber());
+    zmq_subscriber.add_subscriber("foobars", new NoveldaRadarSubscriber());
     
     zmq_subscriber.run();
     
-
     return 0;
 }

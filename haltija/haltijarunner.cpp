@@ -1,4 +1,3 @@
-#include "example.h"
 #include "matlabreader.h"
 #include "matlabwriter.h"
 #include <iostream>

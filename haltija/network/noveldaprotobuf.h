@@ -3,20 +3,11 @@
 
 #include <complex>
 #include <vector>
-
-
-typedef std::complex<double> Complex128_t;
-typedef std::vector<Complex128_t> Complex128Vec_t;
-
-struct NoveldaData {
-    Complex128Vec_t range_bins;
-    uint32_t frame_id;
-    bool is_base_band;
-};
+#include "haltija_types.h"
 
 class NoveldaProtobuf {
 public:
-    bool deserialize_protobuf(const uint8_t * protobuf_bytes, const size_t protobuf_size, NoveldaData & deserialized_data);
+    bool deserialize_protobuf(const uint8_t * protobuf_bytes, const size_t protobuf_size, NoveldaData_t & deserialized_data);
     
 };
 

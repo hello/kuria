@@ -1,11 +1,10 @@
 #include "noveldaprotobuf.h"
-#include "zmq_subscriber.h"
 #include "proto_utils.h"
 #include "novelda.pb.h"
 #include <string.h>
 #include "pb_decode.h"
 
-bool NoveldaProtobuf::deserialize_protobuf(const uint8_t * protobuf_bytes, const size_t protobuf_size, NoveldaData & deserialized_data) {
+bool NoveldaProtobuf::deserialize_protobuf(const uint8_t * protobuf_bytes, const size_t protobuf_size, NoveldaData_t & deserialized_data) {
     
     novelda_RadarFrame frame;
     
@@ -43,10 +42,10 @@ bool NoveldaProtobuf::deserialize_protobuf(const uint8_t * protobuf_bytes, const
         deserialized_data.is_base_band = frame.base_band;
     }
     
-    deserialized_data.range_bins.reserve(num_items_received);
+    deserialized_data.range_bins.reserve(num_items_received/2);
     
-    for (int i = 0; i < num_items_received; i++) {
-        deserialized_data.range_bins.push_back(buf[i]);
+    for (int i = 0; i < num_items_received/2; i++) {
+        deserialized_data.range_bins.push_back(Complex128_t(buf[2*i],buf[2*i+1]));
     }
     
     return true;

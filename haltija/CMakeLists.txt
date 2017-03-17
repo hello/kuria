@@ -51,6 +51,7 @@ algorithm/kiss_fft.c
 algorithm/haltijamath.cpp
 algorithm/preprocessor.cpp
 algorithm/respiration.cpp
+algorithm/novelda_radar_subscriber.cpp
 )
 
 add_library(network STATIC
