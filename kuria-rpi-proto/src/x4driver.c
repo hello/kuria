@@ -137,7 +137,7 @@ int _x4driver_set_internal_register(X4Driver_t* x4driver, uint8_t address, uint8
 void _x4driver_set_action(X4Driver_t* x4driver,xtx4_x4driver_action_t action);
 void _x4driver_clear_action(X4Driver_t* x4driver,xtx4_x4driver_action_t action);
 
-uint32_t _unpack_bin(uint8_t * data, uint8_t bytes_per_counter);
+uint32_t _unpack_bin(uint8_t * data, uint8_t bytes_per_counter); 
 uint32_t _update_normalization_variables(X4Driver_t* x4driver);
 int _x4driver_unpack_frame(X4Driver_t* x4driver,uint32_t* bins_data, uint32_t bins_data_size ,uint8_t * raw_data, uint32_t raw_data_length);
 void _x4driver_normalize_frame(X4Driver_t* x4driver,uint32_t * data,uint32_t data_length,float32_t * destination,uint32_t destination_length );
@@ -364,12 +364,12 @@ uint32_t _update_normalization_variables(X4Driver_t* x4driver)
 }
 
 
-
+#pragma optimize on
 /**
  * @brief unpacks bin. 
  * Note: returns 32 bit value, max 4 bytes per counter.
  */
-__attribute__ ((optimize("-O3"))) uint32_t _unpack_bin(uint8_t * data, uint8_t bytes_per_counter)
+uint32_t _unpack_bin(uint8_t * data, uint8_t bytes_per_counter) 
 {
 	uint32_t val = 0;
 	for(uint32_t i = 0; i<bytes_per_counter;i++)
@@ -378,7 +378,7 @@ __attribute__ ((optimize("-O3"))) uint32_t _unpack_bin(uint8_t * data, uint8_t b
 	}
 	return val;
 }
-
+#pragma optimize off
 
 /**
  * @brief Gets mask for reading bins from buffer.  
@@ -625,16 +625,14 @@ int x4driver_spi_test(X4Driver_t* x4driver) {
     uint8_t count = 0;
     uint8_t reg;
 
-    for(count=0; count < 0xFF; count++) {
+    for(count=0xA5; count == 0xA5; count++) {
         x4driver_set_spi_register(x4driver, ADDR_SPI_DEBUG_RW, count);
-        usleep(10);
         x4driver_get_spi_register(x4driver, ADDR_SPI_DEBUG_RW, &reg );
         if(reg != count) {
             printf("Debug spi fail: %x != %x\n", count, reg);
             status = XEP_ERROR_X4DRIVER_NOK;
             break;
         }
-        usleep(20);
     }
 
     mutex_give( x4driver);
@@ -952,6 +950,7 @@ int x4driver_setup_default(X4Driver_t* x4driver)
  */
 int x4driver_upload_firmware_default(X4Driver_t* x4driver)
 {
+    printf("Upload default firmware done \n");
     uint32_t status = mutex_take(x4driver);
 	if (status != XEP_ERROR_X4DRIVER_OK) 
 		return status;
@@ -969,7 +968,8 @@ int x4driver_upload_firmware_default(X4Driver_t* x4driver)
         mutex_give(x4driver);
 		return status;
     }
-    
+   
+    printf("Verify start...\n");
     status = x4driver_verify_firmware(x4driver,data_8051_onboard,data_8051_size);     
     printf("Verify firmware done %d\n", status);
     

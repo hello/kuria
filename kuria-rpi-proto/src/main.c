@@ -15,10 +15,6 @@
 #include "queue.h"
 #include <errno.h>
 #include <string.h>
-#include "memorypool.h"
-#include "xep_dispatch.h"
-#include "xep_dispatch_messages.h"
-
 
 #define TASK_RADAR_STACK_SIZE            (1500)
 #define TASK_RADAR_PRIORITY        (tskIDLE_PRIORITY + 6)
@@ -38,12 +34,11 @@
 bool stop_x4_read = 0;
 static X4Driver_t* x4driver;
 static TaskHandle_t h_task_radar = NULL;
-static X4Driver_t x4driver_instance;
 static bool en_intr = true;
 static unsigned long long uxQueueSendPassedCount = 0;
 
 static void x4driver_task(void* pvParameters);
-static uint32_t read_and_send_radar_frame(X4Driver_t* x4driver, XepDispatch_t* dispatch);
+static uint32_t read_and_send_radar_frame(X4Driver_t* x4driver);
 
 void sig_handler(int sig) {
     if(sig == SIGINT || sig == SIGABRT)  {
@@ -56,7 +51,6 @@ void vApplicationTickHook( void )
 {
     static unsigned long ulTicksSinceLastDisplay = 0;
     static unsigned long ulCalled = 0;
-    portBASE_TYPE xHigherPriorityTaskWoken = pdFALSE;
 
     /* Called from every tick interrupt.  Have enough ticks passed to make it
     time to perform our health status check again? */
@@ -74,16 +68,13 @@ void vApplicationIdleHook( void )
     /* The co-routines are executed in the idle task using the idle task hook. */
     /* vCoRoutineSchedule(); */ /* Comment this out if not using Co-routines. */
 
-    struct timespec xTimeToSleep, xTimeSlept;
     if(stop_x4_read) {
         printf("Idle task end\n"); 
         fflush(stdout);
         vTaskEndScheduler();
     }
     /* Makes the process more agreeable when using the Posix simulator. */
-    xTimeToSleep.tv_sec = 1;
-    xTimeToSleep.tv_nsec = 0;
-    nanosleep( &xTimeToSleep, &xTimeSlept );
+    sleep(1);
 }
 
 void vMainQueueSendPassed( void )
@@ -96,7 +87,7 @@ void vMainQueueSendPassed( void )
 
 void x4driver_timer_sweep_timeout(TimerHandle_t pxTimer)
 {
-	portBASE_TYPE xHigherPriorityTaskWoken = pdFALSE;
+	BaseType_t xHigherPriorityTaskWoken = pdFALSE;
 	xTaskNotifyFromISR(h_task_radar, XEP_NOTIFY_RADAR_TRIGGER_SWEEP, eSetBits, &xHigherPriorityTaskWoken);
     portYIELD_FROM_ISR( xHigherPriorityTaskWoken );	
 }
@@ -104,7 +95,7 @@ void x4driver_timer_sweep_timeout(TimerHandle_t pxTimer)
 
 void x4driver_timer_action_timeout(TimerHandle_t pxTimer)
 {
-	portBASE_TYPE xHigherPriorityTaskWoken = pdFALSE;
+	BaseType_t xHigherPriorityTaskWoken = pdFALSE;
 	xTaskNotifyFromISR(h_task_radar, XEP_NOTIFY_X4DRIVER_ACTION, eSetBits, &xHigherPriorityTaskWoken);
     portYIELD_FROM_ISR(xHigherPriorityTaskWoken );
 }
@@ -131,7 +122,7 @@ uint32_t x4driver_timer_set_timer_timeout_frequency(void* timer , uint32_t frequ
 }
 
 void x4driver_notify_data_ready(void* user_reference){
-    portBASE_TYPE xHigherPriorityTaskWoken = pdFALSE;
+    BaseType_t xHigherPriorityTaskWoken = pdFALSE;
     xTaskNotifyFromISR(h_task_radar, XEP_NOTIFY_RADAR_DATAREADY, eSetBits, 
             &xHigherPriorityTaskWoken);
     portYIELD_FROM_ISR(xHigherPriorityTaskWoken ); 
@@ -139,7 +130,7 @@ void x4driver_notify_data_ready(void* user_reference){
 }
 
 void x4driver_interrupt_notify_data_ready(void) {
-    portBASE_TYPE xHigherPriorityTaskWoken = pdFALSE;
+    BaseType_t xHigherPriorityTaskWoken = pdFALSE;
     xTaskNotifyFromISR(h_task_radar, XEP_NOTIFY_RADAR_DATAREADY, eSetBits, 
             &xHigherPriorityTaskWoken);
     portYIELD_FROM_ISR(xHigherPriorityTaskWoken ); 
@@ -188,7 +179,7 @@ uint32_t x4driver_callback_pin_set_enable(void* user_reference, uint8_t value){
 }
 
 void x4driver_interrupt_data_ready(void) {
-    portBASE_TYPE xHigherPriorityTaskWoken = pdFALSE;
+    BaseType_t xHigherPriorityTaskWoken = pdFALSE;
     xTaskNotifyFromISR(h_task_radar, XEP_NOTIFY_RADAR_DATAREADY, eSetBits, 
             &xHigherPriorityTaskWoken);
     portYIELD_FROM_ISR( xHigherPriorityTaskWoken ); 
@@ -279,19 +270,32 @@ static uint32_t x4driver_task_init(void){
         printf("");
     }
     printf("\n");
+
+#if 1
+    status =  x4driver_init(x4driver);
+    if(status !=  XEP_ERROR_X4DRIVER_OK) {
+        printf ("Error initializing x4driver %d \n", status);
+    //    goto x4task_fail;
+    }
+    else
+        printf("X4Driver init success\n");
+#else
+    const TickType_t xDelay = 20000 / portTICK_PERIOD_MS;
+    do{
+        status = x4driver_init(x4driver);
+
+    //    vTaskDelay(xDelay);
+        sleep(10);
+    }while (status != XEP_ERROR_X4DRIVER_OK);
+
+    printf("X4Driver init success\n");
+#endif
     return status;
 
 }
 
 static void x4driver_task(void* pvParameters){
-
-    int status =  x4driver_init(x4driver);
-    if(status !=  XEP_ERROR_X4DRIVER_OK) {
-        printf ("Error initializing x4driver %d \n", status);
-        goto x4task_fail;
-    }
-    else
-        printf("X4Driver init success\n");
+    int status;
 #if 0
     // Configure the radar chip as needed
     x4driver_set_dac_min(x4driver, 500);
@@ -330,7 +334,7 @@ static void x4driver_task(void* pvParameters){
 
             if(x4driver->trigger_mode != SWEEP_TRIGGER_MANUAL) {
                 printf("Read and send\n"); 
-                read_and_send_radar_frame(x4driver, NULL);
+                read_and_send_radar_frame(x4driver);
             }
 
         } else if (notify_value & XEP_NOTIFY_RADAR_TRIGGER_SWEEP) {
@@ -367,12 +371,8 @@ x4task_fail:
 
 }
 
-static uint32_t read_and_send_radar_frame(X4Driver_t* x4driver, XepDispatch_t* dispatch) {
-
-    uint32_t status;
-
-    XepDispatchMessageContentRadardataFramePacket_t* frame_packet;
-    MemoryBlock_t* memoryblock;
+static uint32_t read_and_send_radar_frame(X4Driver_t* x4driver) {
+    int32_t status = XEP_ERROR_X4DRIVER_OK;
 
     uint32_t bin_count = 0;
     x4driver_get_frame_bin_count(x4driver, &bin_count);
@@ -397,10 +397,10 @@ static uint32_t read_and_send_radar_frame(X4Driver_t* x4driver, XepDispatch_t* d
     }
     printf("Prepare frame message done %d\n", x4driver->frame_read_size);
     // Read radar data into dispatch memory.
-    status = x4driver_read_frame_normalized(x4driver, &frame_counter,(float32_t*) framedata, frame_packet->bin_count);
+    //status = x4driver_read_frame_normalized(x4driver, &frame_counter,(float32_t*) framedata, frame_packet->bin_count);
     printf("Frame read completed\n");
     vPortFree(framedata);
-    if (status != XEP_ERROR_OK) {
+    if (status != XEP_ERROR_X4DRIVER_OK) {
  //       memorypool_free(memoryblock);
         return status;
     }
@@ -416,11 +416,10 @@ int main() {
     if(signal(SIGABRT, sig_handler) == SIG_ERR){
         printf("can't catch SIGABRT\n");
     }
-
+    setbuf(stdout, NULL);
     spi_init();
     printf("SPI init done \n");
 
-    usleep(100);
     // init gpio
     gpio_init();
     printf("GPIO Init Done\n");
@@ -434,7 +433,6 @@ int main() {
         return -1;
     }
 
-    usleep(100);
     // Open file to save data
     // Initialize x4 module
     //

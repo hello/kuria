@@ -18,7 +18,7 @@ static const char *device = "/dev/spidev0.0";
 
 static uint8_t mode;
 static uint8_t bits = 8;
-static uint32_t speed = 30000000;
+static uint32_t speed = 15000000;
 static uint16_t delay = 0;
 static int spi_fd;
 
@@ -36,12 +36,14 @@ uint32_t spi_write_read(void* usr_ref, uint8_t* wdata, uint32_t wlength,
 		[0].delay_usecs = delay,
 		[0].speed_hz = speed,
 		[0].bits_per_word = bits,
+        [0].cs_change = 0,
 		[1].tx_buf = (unsigned long)NULL,
 		[1].rx_buf = (unsigned long)rdata,
 		[1].len = rlength,
 		[1].delay_usecs = delay,
 		[1].speed_hz = speed,
 		[1].bits_per_word = bits,
+        [1].cs_change = 0,
 	};
 	ret = ioctl(spi_fd, SPI_IOC_MESSAGE(2), tr);
 	if (ret < 1){
@@ -62,6 +64,7 @@ uint32_t spi_read(void* usr_ref, uint8_t* data, uint32_t length) {
 		.delay_usecs = delay,
 		.speed_hz = speed,
 		.bits_per_word = bits,
+        .cs_change = 0,
 	};
 
 	ret = ioctl(spi_fd, SPI_IOC_MESSAGE(1), &tr);
@@ -90,6 +93,7 @@ uint32_t spi_write(void* usr_ref, uint8_t* data, uint32_t length) {
 		.delay_usecs = delay,
 		.speed_hz = speed,
 		.bits_per_word = bits,
+        .cs_change = 0,
 	};
 
 	ret = ioctl(spi_fd, SPI_IOC_MESSAGE(1), &tr);
@@ -116,7 +120,7 @@ uint32_t spi_init(void) {
 	/*
 	 * spi mode
 	 */
-    mode = SPI_MODE_3;
+    mode = SPI_MODE_0;
 	ret = ioctl(spi_fd, SPI_IOC_WR_MODE, &mode);
 	if (ret == -1) {
 		pabort("can't set spi mode");
