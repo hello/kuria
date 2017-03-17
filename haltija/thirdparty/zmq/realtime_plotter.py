@@ -1,7 +1,7 @@
 #!/usr/bin/python
+import pyqtgraph
 from pyqtgraph.Qt import QtGui, QtCore
 import numpy as np
-import pyqtgraph as pg
 import sys
 import threading
 import signal
@@ -9,11 +9,12 @@ import struct
 from Queue import Queue
 from Queue import Empty
 import copy
-
+import radar_messages_pb2
+import zmq
 #sys.path.append('.')
 
 
-np.set_printoptions(precision=3, suppress=True, threshold=numpy.nan)
+np.set_printoptions(precision=3, suppress=True, threshold=np.nan)
 
 #def signal_handler(signal, frame):
  #       print('You pressed Ctrl+C!')
@@ -125,29 +126,40 @@ def updatePlot():
     except Exception:
         raise
 
+def subscribe_messages(target):
+    print target
+    # Prepare our context and publisher
+    context    = zmq.Context()
+    subscriber = context.socket(zmq.SUB)
+    subscriber.connect(target)
+    subscriber.setsockopt(zmq.SUBSCRIBE,b"PLOT")
 
-def updateAudio(stream):
-    first = True    
-    helloaudio.Init()
-
-    arr = helloaudio.new_intArray(CHUNK)
-    feats = helloaudio.new_intArray(num_feats)
-
-    #p6.enableAutoRange('xy', False)  ## stop auto-scaling after the first data set is plotted
-    while(not g_kill):
+    print "started waiting"
+    print target
+    while not g_kill:
+        # Read envelope with address
         try:
-#                     g_PlotQueue.put(block)
-            '''
-            TODO get data from zmq subscriber, in some format, and then do g_PlotQueue.put(.........)
-            '''
-        
+             envelope,message = subscriber.recv_multipart()
+             vec = radar_messages_pb2.FeatureVector()
+             vec.ParseFromString(message)
+
+             x = [f for f in vec.floatfeats]
+             print x
+             g_PlotQueue.put(x)
+                  
         except IOError:
-            print "IO Error"
+             print "io errrrrrerorerer"
+             pass
+          
+    # We never get here but clean up anyhow
+    subscriber.close()
+    context.term()
 
 
-## Start Qt event loop unless running in interactive mode or using pyside.
-if __name__ == '__main__':
-    
+def test():
+    subscribe_messages(sys.argv[1])
+     
+def main_plotter():
     argc = len(sys.argv)
     if argc > 1:
         plot_target = sys.argv[1]
@@ -181,14 +193,8 @@ if __name__ == '__main__':
         g_plotdata.append([0 for j in range(plot_samples)])
     g_plotdata.append(g_segdata)
 
-    stream = paud.open(format=FORMAT,
-                channels=CHANNELS,
-                rate=RATE,
-                input=True,
-                frames_per_buffer=CHUNK)
                 
-
-    t = threading.Thread(target=updateAudio, args = (stream,))
+    t = threading.Thread(target=subscribe_messages, args = (target,))
     t.start()
 
 
@@ -197,3 +203,8 @@ if __name__ == '__main__':
         QtGui.QApplication.instance().exec_()
     
     g_kill = True
+
+## Start Qt event loop unless running in interactive mode or using pyside.
+if __name__ == '__main__':
+    print "GLGDJLKSDGJS"
+    test()
