@@ -3,8 +3,9 @@
 #include <iostream>
 #include "preprocessor.h"
 #include "respiration.h"
+#include "pca.h"
 
-using Eigen::MatrixXcf;
+using namespace Eigen;
 
 #define EXPECTED_SAMPLE_RATE_HZ (20)
 #define NUM_FRAMES_IN_SEGMENT (20 * EXPECTED_SAMPLE_RATE_HZ)
@@ -31,6 +32,8 @@ int main(int argc, char * argv[]) {
 
     std::cout << baseband.rows() << " x " << baseband.cols() << std::endl;
     
+    VectorXcf max_vector;
+    
     for (int iframe = 0; iframe < baseband.rows(); iframe++) {
         
         BasebandDataFrame_t frame;
@@ -52,12 +55,39 @@ int main(int argc, char * argv[]) {
         
         if (flags & PREPROCESSOR_FLAGS_SEGMENT_READY) {
             //DO FRAME PROCESSING HERE
-            write_matrix_to_cell_array("segments",segment);
+            
+            MatrixXcf shorter_range_bins = segment.block(0,8,segment.rows(),38);
+            
+            MatrixXcf principal_components;
+            MatrixXcf eigen_vectors;
+            MatrixXcf transformed_values;
+            pca(shorter_range_bins,principal_components,eigen_vectors,transformed_values);
+            
+            
+            VectorXcf max_vector2 = eigen_vectors.col(eigen_vectors.cols()-1);
+
+            if (max_vector.rows() == 0) {
+                max_vector = max_vector2;
+            }
+            
+            Complex_t val = max_vector2.dot(max_vector.conjugate());
+            
+            if (val.real()*val.real() + val.imag()*val.imag() < 0.5) {
+                std::cout << val << std::endl;
+                std::cout << "CHANGE!" << std::endl;
+                max_vector = max_vector2;
+            }
+            
+            //write_matrix_to_cell_array("p",principal_components);
+            //write_matrix_to_cell_array("T",eigen_vectors);
+            //write_matrix_to_cell_array("v",transformed_values);
+
+
 
             
-            Eigen::MatrixXf features = get_respiration_features(segment);
-            
-            write_matrix_to_cell_array("features",features);
+ //           Eigen::MatrixXf features = get_respiration_features(segment);
+ //
+ //           write_matrix_to_cell_array("features",features);
 
             std::cout << "frame " << iframe << std::endl;
         }
