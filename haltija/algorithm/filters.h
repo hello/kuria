@@ -3,6 +3,61 @@
 
 #include <Eigen/Core>
 
+template <class T, class C>
+class IIRFilter {
+public:
+    IIRFilter(const C & B, const C & A, const size_t num_bins) {
+        _input_history = T::Zero(B.rows(),num_bins);
+        _output_history = T::Zero(A.rows(),num_bins);
+        _time_index = 0;
+        
+        _B = B;
+        _A = A;
+        
+    }
+    
+    T filter(const T & x) {
+        _input_history.row(_time_index) = x;
+        
+        size_t short_index = (_time_index + 1) % _B.rows();
+        
+        T sum = _input_history.row(_time_index) * _B(0,0);
+
+        
+        //increasing short_index means going from oldest to newest samples
+        for (size_t idelay = _B.rows() - 1; idelay > 0; idelay--) {
+            sum += _input_history.row(short_index) * _B(idelay,0);
+            sum -= _output_history.row(short_index) * _A(idelay,0);
+            short_index = (short_index + 1) % _B.rows();
+        }
+        
+        sum *= (1.0 / _A(0,0));
+        
+        _output_history.row(_time_index) = sum;
+        
+        _time_index = (_time_index + 1) % _B.rows();
+        
+        return sum;
+ 
+    }
+    
+private:
+    T _input_history;
+    T _output_history;
+    C _B;
+    C _A;
+    size_t _time_index;
+};
+
+template <class T,class R>
+R iir_filter_columns_stateful(const T & B,const T & A,
+                              R & input_history, R & output_history,
+                              const R & x) {
+ 
+    
+    
+}
+
 //B is filter coefficient, x is matrix, icol specifies the column on which to operate
 template <class T,class R>
 R fir_filter_columns(const T & B, const R & x) {

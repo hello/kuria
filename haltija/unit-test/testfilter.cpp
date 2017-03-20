@@ -207,3 +207,64 @@ TEST_F(TestFilter,TestCiruclarShift) {
 
 }
 
+
+TEST_F(TestFilter,TestIIRFilter) {
+
+    //B = [ 0.85284624 -1.70569249  0.85284624];
+    //A = [ 1.         -1.68391975  0.72746523]
+    
+    MatrixXf B(3,1);
+    MatrixXf A(3,1);
+    
+    B << 0.85284624, -1.70569249,  0.85284624;
+    A << 1.,         -1.68391975,  0.72746523;
+
+    IIRFilter<MatrixXf, MatrixXf> filter(B,A,1);
+    
+    
+    const float yref[20] = {0.85284624,  0.58327839,  0.36177801,  0.18489039,  0.04815965,
+        -0.05340434, -0.1249631 , -0.17157802, -0.19801732, -0.20862822,
+        -0.20726247, -0.19724359, -0.18136613, -0.16191816, -0.14071964,
+        -0.11917074, -0.09830532, -0.0788457 , -0.06125613, -0.0457929};
+    
+    MatrixXf x(1,1);
+    for (int i = 0; i < 20; i++) {
+        x(0,0) = 1.0f;
+        MatrixXf y = filter.filter(x);
+        ASSERT_NEAR(y(0,0),yref[i],1e-4);
+        //std::cout << y << std::endl;
+
+    }
+    
+    const float yref2[20] = {0.        ,  0.85284624,  1.43612463,  1.79790264,  1.98279303,
+        2.03095267,  1.97754833,  1.85258524,  1.68100721,  1.4829899 ,
+        1.27436167,  1.0670992 ,  0.86985561,  0.68848948,  0.52657132,
+        0.38585168,  0.26668094,  0.16837562,  0.08952992,  0.0282738};
+    
+    
+    IIRFilter<MatrixXf, MatrixXf> filter2(B,A,1);
+
+    for (int i = 0; i < 20; i++) {
+        x(0,0) = i;
+        MatrixXf y = filter2.filter(x);
+        ASSERT_NEAR(y(0,0),yref2[i],1e-4);
+        //std::cout << y << std::endl;
+        
+    }
+
+    
+    IIRFilter<MatrixXf, MatrixXf> filter3(B,A,2);
+    MatrixXf x2(1,2);
+    for (int i = 0; i < 20; i++) {
+        x2(0,0) = 1;
+        x2(0,1) = i;
+        MatrixXf y = filter3.filter(x2);
+        ASSERT_NEAR(y(0,0),yref[i],1e-4);
+        ASSERT_NEAR(y(0,1),yref2[i],1e-4);
+
+        //std::cout << y << std::endl;
+        
+    }
+
+    
+}
