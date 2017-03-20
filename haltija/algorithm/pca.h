@@ -20,14 +20,16 @@ bool pca(const T & x, R & principal_components, R & transform, R & transformed_v
     
     //create covariance matrix
     for (int icol = 0; icol < x.cols(); icol++) {
-        x_zero_mean.col(icol).array() -= (x.col(icol).array().sum() / N);
+        x_zero_mean.col(icol).array() -= (x.col(icol).array().sum() / (float)N);
     }
     
     auto covariance = (x_zero_mean.transpose() * x_zero_mean.conjugate()) / x.rows();
     
     Eigen::SelfAdjointEigenSolver<T> eigensolver(covariance);
 
-    transformed_values = x_zero_mean * eigensolver.eigenvectors().transpose();
+    //   S = EIGEN_VEC * EIGEN_VAL * EIGEN_VEC'
+    //   [T x N]  * [N x N] ====> [T x N]
+    transformed_values = x_zero_mean * eigensolver.eigenvectors();
     principal_components = eigensolver.eigenvalues();
     transform = eigensolver.eigenvectors();
     

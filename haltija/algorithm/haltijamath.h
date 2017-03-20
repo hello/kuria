@@ -20,7 +20,7 @@ bool fft(const int nfft, const T & x, Eigen::MatrixXcf & output) {
     kiss_fft_cpx * xout = (kiss_fft_cpx *)malloc(nfft * sizeof(kiss_fft_cpx));
     
     //set input buffer to zero, c-style
-    memset(xin,0,sizeof(xin));
+    memset(xin,0,nfft * sizeof(kiss_fft_cpx));
     
     
     //pick the smaller of nfft or the input
