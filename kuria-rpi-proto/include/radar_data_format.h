@@ -14,6 +14,7 @@ typedef struct {
     float range_offset; // first range bin start in meters;
     float* sig_i; // array of num_of_bins float values of the signal I-channel
     float* sig_q; // array of num_of_bins float values of the signal q-channel
-
+    float* fdata; // array of alternating I and Q channel float values
+}radar_frame_packet;
 #endif
 

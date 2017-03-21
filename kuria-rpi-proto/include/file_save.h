@@ -17,9 +17,9 @@
 
 
 
-int32_t file_save_task_init(void); 
-void file_save_task(void* pvParameters); 
-
+int32_t file_task_init(void); 
+void file_task(void* pvParameters); 
+int32_t file_close(void);
 
 
 

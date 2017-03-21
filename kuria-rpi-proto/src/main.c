@@ -15,6 +15,11 @@
 #include "queue.h"
 #include <errno.h>
 #include <string.h>
+#include "file_save.h"
+#include "radar_data_format.h"
+
+
+
 
 #define TASK_RADAR_STACK_SIZE            (1500)
 #define TASK_RADAR_PRIORITY        (tskIDLE_PRIORITY + 6)
@@ -40,10 +45,24 @@ static unsigned long long uxQueueSendPassedCount = 0;
 static void x4driver_task(void* pvParameters);
 static uint32_t read_and_send_radar_frame(X4Driver_t* x4driver);
 
+extern QueueHandle_t radar_data_queue; 
+
+
+
 void sig_handler(int sig) {
     if(sig == SIGINT || sig == SIGABRT)  {
         stop_x4_read = 1;
     }
+}
+
+void dump_spi_reg(void){
+    for(uint32_t i=ADDR_SPI_FORCE_ZERO_R; i<= ADDR_SPI_SPI_CONFIG_WE; i++){
+        uint8_t value;
+     //   if(i== ADDR_SPI_RADAR_DATA_SPI_RE) continue;
+        x4driver_get_spi_register(x4driver,i ,&value );
+        printf(" %d: %x\n", i, value);
+    }
+
 }
 
 /*************************** FreeRTOS application hooks**************************** */
@@ -74,7 +93,7 @@ void vApplicationIdleHook( void )
         vTaskEndScheduler();
     }
     /* Makes the process more agreeable when using the Posix simulator. */
-    sleep(1);
+    vTaskDelay(100);
 }
 
 void vMainQueueSendPassed( void )
@@ -195,6 +214,47 @@ static void x4driver_callback_give_sem(void * sem)
     xSemaphoreGiveRecursive((SemaphoreHandle_t)sem);
 }
 
+static int32_t radar_data_frame_prepare( radar_frame_packet* packet, uint32_t data_count ){
+
+    packet = (radar_frame_packet*) pvPortMalloc( sizeof(radar_frame_packet) );
+
+    if( !packet ) {
+        perror( "Error creating radar packet \n");
+        return -1;
+    }
+
+    memset( packet, 0, sizeof( radar_frame_packet) );
+
+    packet->num_of_bins = data_count;
+
+    packet->fdata = (float*) pvPortMalloc( sizeof(float) * data_count );
+    if( !packet-> fdata ) {
+        perror( "fdata malloc error\n" );
+        return -1;
+    }
+    return 0;
+
+}
+
+int32_t radar_data_frame_free( radar_frame_packet* packet ) {
+    if( packet->fdata ) {
+        vPortFree(packet->fdata);
+    }
+
+    if( packet->sig_i ) {
+        vPortFree( packet->sig_i );
+    }
+
+    if( packet->sig_q ) {
+        vPortFree( packet->sig_q );
+    }
+
+    vPortFree( packet );
+
+    return 0;
+
+}
+
 /*************************** Initializations *******************************/
 static void gpio_init(void) {
     // init wiringpi
@@ -264,13 +324,22 @@ static uint32_t x4driver_task_init(void){
     xTaskCreate(x4driver_task, (const char* const) "Radar", TASK_RADAR_STACK_SIZE, \
            NULL , TASK_RADAR_PRIORITY, &h_task_radar);
 
-    int status = x4driver_set_enable(x4driver, 1);
-    for(int i =0; i < 2000; i++) {
+    int status;
+
+    status = x4driver_set_enable(x4driver, 0);
+    for(uint32_t i =0; i < 2000; i++) {
         //wait
         printf("");
     }
     printf("\n");
 
+    status = x4driver_set_enable(x4driver, 1);
+    for(uint32_t i =0; i < 2000; i++) {
+        //wait
+        printf("");
+    }
+    printf("\n"); 
+    dump_spi_reg();
 #if 1
     status =  x4driver_init(x4driver);
     if(status !=  XEP_ERROR_X4DRIVER_OK) {
@@ -374,38 +443,49 @@ x4task_fail:
 static uint32_t read_and_send_radar_frame(X4Driver_t* x4driver) {
     int32_t status = XEP_ERROR_X4DRIVER_OK;
 
+    // get bin count
     uint32_t bin_count = 0;
     x4driver_get_frame_bin_count(x4driver, &bin_count);
+    
+    // is downconvertion enabled
     uint8_t down_convertion_enabled = 0;
     x4driver_get_downconvertion(x4driver, &down_convertion_enabled);
     
     printf("Down convertion enabled: %d\n Bin count: %d\n", down_convertion_enabled, bin_count);
+  
+    // calculate data count
     uint32_t fdata_count = bin_count;
     if(down_convertion_enabled == 1) {
         fdata_count = bin_count * 2;
     }
 
-  /*  status = dispatch_message_radardata_prepare_frame(&frame_packet, &memoryblock, dispatch, fdata_count);
-    if (status != XEP_ERROR_OK ) {
-        return status;
-    }*/
-    uint32_t frame_counter;
-    uint8_t* framedata = pvPortMalloc(x4driver->frame_read_size);
-    if(!framedata) {
-        printf("malloc failed\n");
+    // prepare radar data frame
+    //
+    radar_frame_packet* radar_packet = NULL;
+
+    if( radar_data_frame_prepare(radar_packet, fdata_count ) ) {
+        perror(" error creating radar data frame \n");
         return -1;
     }
-    printf("Prepare frame message done %d\n", x4driver->frame_read_size);
+    printf("Prepare frame message done %d\n",fdata_count );
+    
     // Read radar data into dispatch memory.
-    //status = x4driver_read_frame_normalized(x4driver, &frame_counter,(float32_t*) framedata, frame_packet->bin_count);
+    status = x4driver_read_frame_normalized(x4driver, &radar_packet->frame_counter,(float32_t*)radar_packet->fdata, radar_packet->num_of_bins);
     printf("Frame read completed\n");
-    vPortFree(framedata);
+    
     if (status != XEP_ERROR_X4DRIVER_OK) {
- //       memorypool_free(memoryblock);
+        radar_data_frame_free( radar_packet );
         return status;
     }
-//    status = dispatch_send_message(NULL, dispatch, XEP_DISPATCH_MESSAGETAG_RADAR_DATA, memoryblock, frame_packet->common.message_size);
 
+    // send radar data to file task
+    //
+    if( xQueueSend( radar_data_queue, radar_packet, (TickType_t ) 10 ) != pdPASS ) {
+        perror( "Failed to send msg to queue \n");
+        radar_data_frame_free( radar_packet );
+        return -1;
+    }
+    
     return status;
 }
 int main() {
@@ -430,16 +510,21 @@ int main() {
     }
     if(x4driver_task_init()){
         spi_close(); 
+        x4driver_set_enable(x4driver, 0);
+        return -1;
+    }
+    
+    if( file_task_init() ) {
+        printf("Error initializing file task\n");
+        spi_close();
+        x4driver_set_enable(x4driver, 0);
         return -1;
     }
 
-    // Open file to save data
-    // Initialize x4 module
-    //
-    //x4driver_task(NULL);
     vTaskStartScheduler();
     printf("Exit from scheduler\n");
     spi_close();
+    file_close();
     return 0;
 
 }
