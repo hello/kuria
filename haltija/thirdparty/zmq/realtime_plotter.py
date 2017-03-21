@@ -13,7 +13,7 @@ import radar_messages_pb2
 import zmq
 import collections
 
-server_address = "tcp://127.0.0.1:6543"
+server_address = "tcp://127.0.0.1:5564"
 
 np.set_printoptions(precision=3, suppress=True, threshold=np.nan)
 

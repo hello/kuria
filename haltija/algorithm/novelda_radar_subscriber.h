@@ -21,6 +21,8 @@ private:
     IntSet_t _rangebins_we_care_about;
 
     RadarResultPublisherInterface * _publisher;
+    
+    int64_t _sequence_number;
 };
 
 #endif //_RADARSUBSCRIBER_H_

@@ -23,7 +23,7 @@ def main():
     # Prepare our context and publisher
     context   = zmq.Context()
     publisher = context.socket(zmq.PUB)
-    publisher.bind("tcp://*:5563")
+    publisher.bind("tcp://127.0.0.1:5563")
     while(True):
         for i in range(baseband.shape[0]):
             print 'publish ', i

@@ -8,12 +8,13 @@
 #include "radar_result_publisher_interface.h"
 #include "haltija_types.h"
 
-
+const char * publish_host_port = "tcp://127.0.0.1:5564";
+const char * subscribe_host_port = "tcp://127.0.0.1:5563";
 
 class RadarMessagePublisher : public RadarResultPublisherInterface {
 public:
     RadarMessagePublisher() {
-        _publisher.initialize("tcp://*:5564");
+        _publisher.initialize(publish_host_port);
     }
     
     void publish(const char * prefix, const RadarMessage_t & message) {
@@ -27,7 +28,7 @@ private:
 
 int main(int argc, char * argv[]) {
     
-    ZmqSubscriber<NoveldaProtobuf,NoveldaData_t,NoveldaRadarSubscriber> zmq_subscriber(100000,"tcp://localhost:5563");
+    ZmqSubscriber<NoveldaProtobuf,NoveldaData_t,NoveldaRadarSubscriber> zmq_subscriber(100000,subscribe_host_port);
     
     zmq_subscriber.add_subscriber("foobars", new NoveldaRadarSubscriber(new RadarMessagePublisher()));
     

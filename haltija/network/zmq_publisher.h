@@ -2,6 +2,9 @@
 #define _ZMQPUBLISHER_H_
 
 #include <unistd.h>
+#include <cstring>
+
+#define PREFIX_BUF_SIZE (1024)
 
 template <class Serializer,class Message>
 class ZmqPublisher {
@@ -24,19 +27,29 @@ public:
     }
 
     bool publish(const char * prefix, const Message & message) {
+        char prefix_buf[PREFIX_BUF_SIZE] = {0};
+        
+        strncpy(prefix_buf,prefix,PREFIX_BUF_SIZE);
+        
         if (!_context || !_publisher) {
             return false;
         }
 
         if (prefix) {
-            s_sendmore (_publisher, prefix); 
+            int sent_size = s_sendmore (_publisher, (const uint8_t *)prefix,strnlen(prefix,PREFIX_BUF_SIZE));
+            
+            std::cout << "sent " << sent_size << " prefix bytes, ";
         }
         
         size_t message_size = 0;
         uint8_t * null_terminated_bytes = Serializer::serialize_protobuf(message,message_size);
 
         if (null_terminated_bytes) {
-            s_send (_publisher,null_terminated_bytes,message_size);
+            int sent_size = s_send (_publisher,null_terminated_bytes,message_size);
+            
+            std::cout << "sent " << sent_size << " payload bytes" <<std::endl;
+
+            
             free(null_terminated_bytes);
         }
         
@@ -48,12 +61,12 @@ private:
     void * _publisher;
     
     int s_sendmore (void *socket, const uint8_t * bytes, const size_t size) {
-        int sent_size = zmq_send (socket, string, size, ZMQ_SNDMORE);
+        int sent_size = zmq_send (socket, bytes, size, ZMQ_SNDMORE);
         return sent_size;
     }
     
     int s_send (void *socket,  const uint8_t * bytes,const size_t size) {
-        int sent_size = zmq_send (socket, string, size, 0);
+        int sent_size = zmq_send (socket, bytes, size, 0);
         return sent_size;
     }
 };
