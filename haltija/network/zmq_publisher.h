@@ -24,6 +24,7 @@ public:
     void initialize(const char * target) {
         _context = zmq_ctx_new();
         _publisher = zmq_socket (_context, ZMQ_PUB);
+        zmq_bind(_publisher,target);
     }
 
     bool publish(const char * prefix, const Message & message) {
