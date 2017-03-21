@@ -50,6 +50,7 @@ add_library(algorithm STATIC
 algorithm/kiss_fft.c
 algorithm/haltijamath.cpp
 algorithm/preprocessor.cpp
+algorithm/preprocessorIIR.cpp
 algorithm/respiration.cpp
 algorithm/novelda_radar_subscriber.cpp
 )

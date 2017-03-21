@@ -3,7 +3,7 @@
 
 #include <Eigen/Core>
 
-template <class T, class C>
+template <class C, class T>
 class IIRFilter {
 public:
     IIRFilter(const C & B, const C & A, const size_t num_bins) {
@@ -39,6 +39,12 @@ public:
         
         return sum;
  
+    }
+    
+    void reset() {
+        _input_history.setZero();
+        _output_history.setZero();
+        _time_index = 0;
     }
     
 private:

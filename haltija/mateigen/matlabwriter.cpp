@@ -133,7 +133,7 @@ bool MatlabWriter::write_matrix(const std::string & varname, const MatrixXcf & m
 bool MatlabWriter::write_matrix_to_cell_array(const std::string & varname, const MatrixXcf & mat) {
     if (_cellmap.find(varname) == _cellmap.end()) {
         _cellmap[varname] = CellArray_t();
-        _cellmap[varname].reserve(10000);
+        _cellmap[varname].reserve(100000);
     }
     
     _cellmap[varname].push_back(CellItem(mat));

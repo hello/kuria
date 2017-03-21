@@ -12,7 +12,7 @@ Preprocessor::Preprocessor()
 }
  */
 
-std::shared_ptr<Preprocessor> Preprocessor::createWithDefaultHighpassFilter(const int num_range_bins,const int num_frames_in_segment,const int num_frames_to_wait_between_segments) {
+PreprocessorPtr_t Preprocessor::createWithDefaultHighpassFilter(const int num_range_bins,const int num_frames_in_segment,const int num_frames_to_wait_between_segments) {
  
     MatrixXf hpf;
     hpf.resize(501,1);
@@ -589,7 +589,7 @@ Preprocessor::~Preprocessor() {
     
 }
  
-void Preprocessor::reset_counters() {
+void Preprocessor::reset() {
     _input_idx = 0;
     _output_idx = 0;
     _idx_sample = 0;

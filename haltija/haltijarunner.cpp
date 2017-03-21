@@ -1,7 +1,9 @@
 #include "matlabreader.h"
 #include "matlabwriter.h"
 #include <iostream>
+#include "preprocessorIIR.h"
 #include "preprocessor.h"
+
 #include "respiration.h"
 #include "pca.h"
 
@@ -49,18 +51,21 @@ int main(int argc, char * argv[]) {
         uint32_t flags = preprocessor->add_frame(frame, filtered_frame, segment);
         
         //DO KALMAN FILTERS HERE
-        if (flags & PREPROCESSOR_FLAGS_FRAME_READY) {
-            
+        if (~flags & PREPROCESSOR_FLAGS_FRAME_READY) {
+            continue;
         }
         
         if (flags & PREPROCESSOR_FLAGS_SEGMENT_READY) {
             //DO FRAME PROCESSING HERE
+            write_matrix_to_cell_array("seg",segment);
+
             
             MatrixXcf shorter_range_bins = segment.block(0,8,segment.rows(),38);
             
             MatrixXcf principal_components;
             MatrixXcf eigen_vectors;
             MatrixXcf transformed_values;
+            
             pca(shorter_range_bins,principal_components,eigen_vectors,transformed_values);
             
             
@@ -71,16 +76,20 @@ int main(int argc, char * argv[]) {
             }
             
             Complex_t val = max_vector2.dot(max_vector.conjugate());
-            
-            if (val.real()*val.real() + val.imag()*val.imag() < 0.5) {
+
+            if (val.real()*val.real() + val.imag() * val.imag() < 0.25) {
                 std::cout << val << std::endl;
                 std::cout << "CHANGE!" << std::endl;
                 max_vector = max_vector2;
             }
             
-            //write_matrix_to_cell_array("p",principal_components);
-            //write_matrix_to_cell_array("T",eigen_vectors);
-            //write_matrix_to_cell_array("v",transformed_values);
+            MatrixXcf combined_time_series = shorter_range_bins * max_vector;
+            
+            write_matrix_to_cell_array("seg",segment);
+            write_matrix_to_cell_array("p",eigen_vectors);
+            write_matrix_to_cell_array("x",combined_time_series);
+            write_matrix_to_cell_array("T",eigen_vectors);
+            write_matrix_to_cell_array("v",transformed_values);
 
 
 

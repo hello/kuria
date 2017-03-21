@@ -1,23 +1,14 @@
 #ifndef _PREPROCESSOR_H_
 #define _PREPROCESSOR_H_
 
-#include "haltija_types.h"
+#include "preprocessor_interface.h"
 #include "circbuf.h"
-#include <Eigen/Core>
 #include <vector>
 #include <stdint.h>
-#include <memory>
-
-class Preprocessor;
-typedef std::shared_ptr<Preprocessor> PreprocessorPtr_t;
 
 
 
-#define PREPROCESSOR_FLAGS_NOT_READY      (0x00)
-#define PREPROCESSOR_FLAGS_FRAME_READY    (0x01)
-#define PREPROCESSOR_FLAGS_SEGMENT_READY  (0x02)
-
-class Preprocessor {
+class Preprocessor : public PreprocessorInterface {
     
 private:
     //private constructor so this can only be created with create methods
@@ -26,7 +17,7 @@ private:
 public:
     ~Preprocessor();
     
-    void reset_counters();
+    void reset();
     
     //return flags
     uint32_t add_frame(const BasebandDataFrame_t & input, Eigen::MatrixXcf & filtered_frame, Eigen::MatrixXcf & segment);
