@@ -11,7 +11,8 @@
 using namespace Eigen;
 
 
-NoveldaRadarSubscriber::NoveldaRadarSubscriber() {
+NoveldaRadarSubscriber::NoveldaRadarSubscriber(RadarResultPublisherInterface * publisher)
+:_publisher(publisher){
     _preprocessor = PreprocessorPtr_t(NULL);
     
     for (int i = 8; i < 38; i++) {
@@ -23,6 +24,7 @@ NoveldaRadarSubscriber::NoveldaRadarSubscriber() {
 NoveldaRadarSubscriber::~NoveldaRadarSubscriber() {
     
 }
+
 
 void NoveldaRadarSubscriber::receive_message(const NoveldaData_t & message) {
         
@@ -59,6 +61,11 @@ void NoveldaRadarSubscriber::receive_message(const NoveldaData_t & message) {
     if (_combiner.get_latest_reduced_measurement(filtered_frame, transformed_frame)) {
 
         //send frame over the wire, or process it or something
+        
+        if (_publisher) {
+            
+            //_publisher->publish(<#const char *prefix#>, <#const RadarMessage_t &message#>)
+        }
     
     }
 

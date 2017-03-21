@@ -58,8 +58,10 @@ algorithm/rangebincombiner.cpp
 
 add_library(network STATIC
 network/noveldaprotobuf.cpp
+network/radarmessageprotobuf.cpp
 network/novelda.pb.c
 network/simple_matrix.pb.c
+network/radar_messages.pb.c
 network/protobuf_matrix_utils.c
 network/proto_utils.c
 )

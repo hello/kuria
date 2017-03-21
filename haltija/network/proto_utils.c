@@ -1,20 +1,40 @@
 #include "proto_utils.h"
 
 bool decode_repeated_doubles(pb_istream_t *stream, const pb_field_t *field, void **arg) {
- 
     BufferInfo_t * info = (BufferInfo_t *) *arg;
     
     double * dbuf = (double *)info->buffer;
 
     while(stream->bytes_left > 0) {
         
-        if (info->pos + 8 > info->buf_size_bytes) {
+        if (info->pos + sizeof(double) > info->buf_size_bytes) {
             return false;
         }
+        
         
         pb_decode_fixed64(stream, dbuf);
         dbuf += 1;
         info->pos += sizeof(double);
+    }
+    
+    return true;
+    
+}
+
+bool decode_repeated_floats(pb_istream_t *stream, const pb_field_t *field, void **arg) {
+    BufferInfo_t * info = (BufferInfo_t *) *arg;
+    
+    float * fbuf = (float *)info->buffer;
+    
+    while(stream->bytes_left > 0) {
+        
+        if (info->pos + sizeof(float) > info->buf_size_bytes) {
+            return false;
+        }
+        
+        pb_decode_fixed32(stream, fbuf);
+        fbuf += 1;
+        info->pos += sizeof(float);
     }
     
     return true;
@@ -121,4 +141,36 @@ bool encode_string_fields(pb_ostream_t * stream, const pb_field_t *field, void *
     }
     
     return pb_encode_string(stream, (uint8_t*)str, strlen(str));
+}
+
+bool encode_repeated_floats(pb_ostream_t * stream, const pb_field_t *field, void * const *arg) {
+    const BufferInfo_t * info = *arg;
+    const size_t num_elements = info->buf_size_bytes / sizeof(float);
+    const float * fbuf = (float *)info->buffer;
+    size_t i;
+    if (!info) {
+        return false;
+    }
+    
+    //write string tag for delimited field
+    if (!pb_encode_tag(stream, PB_WT_STRING, field->tag)) {
+        return false;
+    }
+    
+    
+    //write size
+    if (!pb_encode_varint(stream, info->buf_size_bytes)) {
+        return false;
+    }
+    
+    
+    //write buffer
+    for (i = 0; i < num_elements; i++) {
+        if (!pb_encode_fixed32(stream, (const void *)&fbuf[i])) {
+            return false;
+        }
+    }
+    
+  
+    return true;
 }

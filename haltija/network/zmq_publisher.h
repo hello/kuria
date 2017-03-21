@@ -1,9 +1,7 @@
 #ifndef _ZMQPUBLISHER_H_
-#define _ZMQPUBLIHSER_H_
+#define _ZMQPUBLISHER_H_
 
-#include "zhelpers.h"
 #include <unistd.h>
-#include <cstdlib>
 
 template <class Serializer,class Message>
 class ZmqPublisher {
@@ -33,18 +31,31 @@ public:
         if (prefix) {
             s_sendmore (_publisher, prefix); 
         }
-
-        uint8_t * null_terminated_bytes = Serializer::serialize_protobuf(message);
+        
+        size_t message_size = 0;
+        uint8_t * null_terminated_bytes = Serializer::serialize_protobuf(message,message_size);
 
         if (null_terminated_bytes) {
-            s_send (_publisher,null_terminated_bytes);   
+            s_send (_publisher,null_terminated_bytes,message_size);
             free(null_terminated_bytes);
         }
+        
+        return true;
     }
 
 private:
     void * _context;
     void * _publisher;
+    
+    int s_sendmore (void *socket, const uint8_t * bytes, const size_t size) {
+        int sent_size = zmq_send (socket, string, size, ZMQ_SNDMORE);
+        return sent_size;
+    }
+    
+    int s_send (void *socket,  const uint8_t * bytes,const size_t size) {
+        int sent_size = zmq_send (socket, string, size, 0);
+        return sent_size;
+    }
 };
 
 

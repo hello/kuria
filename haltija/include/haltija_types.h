@@ -9,6 +9,7 @@ typedef long long Timestamp_t;
 
 typedef std::complex<float> Complex_t;
 typedef std::vector<Complex_t> ComplexVec_t;
+typedef std::vector<float> FloatVec_t;
 typedef std::vector<int> IntVec_t;
 typedef std::set<int> IntSet_t;
 
@@ -27,6 +28,15 @@ typedef struct  {
     uint32_t frame_id;
     bool is_base_band;
 } NoveldaData_t ;
+
+typedef struct {
+    FloatVec_t vec;
+    std::string id;
+    std::string device_id;
+    int64_t sequence_number;
+    
+    
+} RadarMessage_t;
 
 
 #endif //_HALTIJA_TYPES_H_
