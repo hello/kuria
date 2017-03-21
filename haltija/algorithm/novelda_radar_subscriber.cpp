@@ -8,8 +8,16 @@
 #define NUM_FRAMES_TO_WAIT (20 * EXPECTED_SAMPLE_RATE_HZ)
 
 
+using namespace Eigen;
+
+
 NoveldaRadarSubscriber::NoveldaRadarSubscriber() {
     _preprocessor = PreprocessorPtr_t(NULL);
+    
+    for (int i = 8; i < 38; i++) {
+        _rangebins_we_care_about.insert(i);
+    }
+    
 }
 
 NoveldaRadarSubscriber::~NoveldaRadarSubscriber() {
@@ -32,23 +40,28 @@ void NoveldaRadarSubscriber::receive_message(const NoveldaData_t & message) {
         frame.data.push_back(Complex_t((*it).real(),(*it).imag()));
     }
        
-    Eigen::MatrixXcf filtered_frame;
-    Eigen::MatrixXcf segment;
+    MatrixXcf filtered_frame;
+    MatrixXcf segment;
     
     uint32_t flags = _preprocessor->add_frame(frame, filtered_frame, segment);
     
     //DO KALMAN FILTERS HERE
-    if (flags & PREPROCESSOR_FLAGS_FRAME_READY) {
-        
+    if (~flags & PREPROCESSOR_FLAGS_FRAME_READY) {
+        return;
     }
     
     if (flags & PREPROCESSOR_FLAGS_SEGMENT_READY) {
         //DO FRAME PROCESSING HERE
-        
-        
-        Eigen::MatrixXf features = get_respiration_features(segment);
-        
+        _combiner.set_latest_segment(segment, _rangebins_we_care_about);
     }
+    
+    MatrixXcf transformed_frame;
+    if (_combiner.get_latest_reduced_measurement(filtered_frame, transformed_frame)) {
+
+        //send frame over the wire, or process it or something
+    
+    }
+
     
 
 }
