@@ -3,6 +3,7 @@
 #include <iostream>
 #include "preprocessorIIR.h"
 #include "preprocessor.h"
+#include "rangebincombiner.h"
 
 #include "respiration.h"
 #include "pca.h"
@@ -14,6 +15,13 @@ using namespace Eigen;
 #define NUM_FRAMES_TO_WAIT (20 * EXPECTED_SAMPLE_RATE_HZ)
 
 int main(int argc, char * argv[]) {
+    
+    IntSet_t range_bins_we_care_about;
+    
+    for (int i = 8; i < 38; i++) {
+        range_bins_we_care_about.insert(i);
+    }
+    
 	//TODO read input CSV file or whatever format the radar is
 	if (argc <= 2) {
 		std::cerr << "you need to specify an input and output file" << std::endl;
@@ -31,10 +39,11 @@ int main(int argc, char * argv[]) {
 
     
     PreprocessorPtr_t preprocessor = Preprocessor::createWithDefaultHighpassFilter(baseband.cols(), NUM_FRAMES_IN_SEGMENT, NUM_FRAMES_TO_WAIT);
+    
+    RangebinCombiner combiner;
 
     std::cout << baseband.rows() << " x " << baseband.cols() << std::endl;
     
-    VectorXcf max_vector;
     
     for (int iframe = 0; iframe < baseband.rows(); iframe++) {
         
@@ -59,48 +68,20 @@ int main(int argc, char * argv[]) {
             //DO FRAME PROCESSING HERE
             write_matrix_to_cell_array("seg",segment);
 
+            combiner.set_latest_segment(segment, range_bins_we_care_about);
             
-            MatrixXcf shorter_range_bins = segment.block(0,8,segment.rows(),38);
-            
-            MatrixXcf principal_components;
-            MatrixXcf eigen_vectors;
-            MatrixXcf transformed_values;
-            
-            pca(shorter_range_bins,principal_components,eigen_vectors,transformed_values);
-            
-            
-            VectorXcf max_vector2 = eigen_vectors.col(eigen_vectors.cols()-1);
-
-            if (max_vector.rows() == 0) {
-                max_vector = max_vector2;
-            }
-            
-            Complex_t val = max_vector2.dot(max_vector.conjugate());
-
-            if (val.real()*val.real() + val.imag() * val.imag() < 0.25) {
-                std::cout << val << std::endl;
-                std::cout << "CHANGE!" << std::endl;
-                max_vector = max_vector2;
-            }
-            
-            MatrixXcf combined_time_series = shorter_range_bins * max_vector;
-            
-            write_matrix_to_cell_array("seg",segment);
-            write_matrix_to_cell_array("p",eigen_vectors);
-            write_matrix_to_cell_array("x",combined_time_series);
-            write_matrix_to_cell_array("T",eigen_vectors);
-            write_matrix_to_cell_array("v",transformed_values);
-
-
-
-            
- //           Eigen::MatrixXf features = get_respiration_features(segment);
- //
- //           write_matrix_to_cell_array("features",features);
-
             std::cout << "frame " << iframe << std::endl;
         }
+        
+        
+        MatrixXcf transformed_frame;
+        if (combiner.get_latest_reduced_measurement(filtered_frame, transformed_frame)) {
+            write_matrix_to_cell_array("t",transformed_frame);
+        }
+        
     }
+    
+    
     
     /*
     

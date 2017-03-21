@@ -53,6 +53,7 @@ algorithm/preprocessor.cpp
 algorithm/preprocessorIIR.cpp
 algorithm/respiration.cpp
 algorithm/novelda_radar_subscriber.cpp
+algorithm/rangebincombiner.cpp
 )
 
 add_library(network STATIC
