@@ -233,21 +233,21 @@ static void x4driver_callback_give_sem(void * sem)
     xSemaphoreGiveRecursive((SemaphoreHandle_t)sem);
 }
 
-static int32_t radar_data_frame_prepare( radar_frame_packet* packet, uint32_t data_count ){
+static int32_t radar_data_frame_prepare( radar_frame_packet** packet, uint32_t data_count ){
 
-    packet = (radar_frame_packet*) pvPortMalloc( sizeof(radar_frame_packet) );
+    *packet = (radar_frame_packet*) pvPortMalloc( sizeof(radar_frame_packet) );
 
-    if( !packet ) {
+    if( !(*packet) ) {
         perror( "Error creating radar packet \n");
         return -1;
     }
 
-    memset( packet, 0, sizeof( radar_frame_packet) );
+    memset( *packet, 0, sizeof( radar_frame_packet) );
 
-    packet->num_of_bins = data_count;
+    (*packet)->num_of_bins = data_count;
 
-    packet->fdata = (float*) pvPortMalloc( sizeof(float) * data_count );
-    if( !packet-> fdata ) {
+    (*packet)->fdata = (float32_t*) pvPortMalloc( sizeof(float32_t) * data_count );
+    if( (*packet)->fdata == NULL ) {
         perror( "fdata malloc error\n" );
         return -1;
     }
@@ -363,7 +363,7 @@ static uint32_t x4driver_task_init(void){
     status =  x4driver_init(x4driver);
     if(status !=  XEP_ERROR_X4DRIVER_OK) {
         printf ("Error initializing x4driver %d \n", status);
-    //    goto x4task_fail;
+        return status;
     }
     else
         printf("X4Driver init success\n");
@@ -457,8 +457,6 @@ static uint32_t read_and_send_radar_frame(X4Driver_t* x4driver) {
     uint8_t down_convertion_enabled = 0;
     x4driver_get_downconvertion(x4driver, &down_convertion_enabled);
     
-    printf("Down convertion enabled: %d\n Bin count: %d\n", down_convertion_enabled, bin_count);
-  
     // calculate data count
     uint32_t fdata_count = bin_count;
     if(down_convertion_enabled == 1) {
@@ -469,29 +467,34 @@ static uint32_t read_and_send_radar_frame(X4Driver_t* x4driver) {
     //
     radar_frame_packet* radar_packet = NULL;
 
-    if( radar_data_frame_prepare(radar_packet, fdata_count ) ) {
+    if( radar_data_frame_prepare(&radar_packet, fdata_count ) ) {
         perror(" error creating radar data frame \n");
         return -1;
     }
     printf("Prepare frame message done %d\n",fdata_count );
-    
+   
     // Read radar data into dispatch memory.
-    status = x4driver_read_frame_normalized(x4driver, &radar_packet->frame_counter,(float32_t*)radar_packet->fdata, radar_packet->num_of_bins);
-    printf("Frame read completed\n");
+    status = x4driver_read_frame_normalized(x4driver, &radar_packet->frame_counter,radar_packet->fdata, radar_packet->num_of_bins);
     
     if (status != XEP_ERROR_X4DRIVER_OK) {
         radar_data_frame_free( radar_packet );
         return status;
     }
+    else {
+        printf("Frame read completed\n");
+    }
 
     // send radar data to file task
     //
-    if( xQueueSend( radar_data_queue, radar_packet, (TickType_t ) 10 ) != pdPASS ) {
-        perror( "Failed to send msg to queue \n");
-        radar_data_frame_free( radar_packet );
-        return -1;
+    if(radar_data_queue ){
+        if( xQueueSend( radar_data_queue, &radar_packet, (TickType_t ) 10 ) != pdPASS ) {
+            perror( "Failed to send msg to queue \n");
+            radar_data_frame_free( radar_packet );
+            return -1;
+        }
     }
-    
+   
+    printf("Message sent\n");
     return status;
 }
 int main() {

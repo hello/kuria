@@ -54,18 +54,20 @@ void file_task(void* pvParameters) {
     while(1) {
         // receive data from queue
         //
-        if( xQueueReceive( radar_data_queue, packet, 0 ) ) {
+        if( xQueueReceive( radar_data_queue, &packet, 0 ) ) {
             if( !packet->fdata ) {
                 perror(" invalid data \n" );
                 continue;
             }
-            
+           
+            printf("Data received for writing\n");
             for(data_index = 0; data_index < packet->num_of_bins; data_index+=2) {
                 // save to file
                 //
-                fprintf( fp, "%f%c%fi,",  packet->fdata[data_index], (packet->fdata[data_index+1]>=0 ) ? '+':'-', packet->fdata[data_index+1]);
+                fprintf( fp, "%f%fi,",  packet->fdata[data_index], packet->fdata[data_index+1]);
             }
             fprintf(fp, "\n");
+            printf("wrote\n");
             
             // free pointers to radar frame data
             // 
