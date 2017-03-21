@@ -78,7 +78,11 @@ void file_task(void* pvParameters) {
 }
 
 int32_t file_close(void){
-    vQueueDelete( radar_data_queue );
-    return fclose(fp);
+    if( radar_data_queue) vQueueDelete( radar_data_queue );
+    int32_t status = 0;
+    if(fp){
+        status = fclose(fp);
+    }
+    return status;
 
 }

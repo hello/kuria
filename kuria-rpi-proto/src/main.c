@@ -27,6 +27,7 @@
 #define XEP_NOTIFY_RADAR_DATAREADY		0x0001
 #define XEP_NOTIFY_RADAR_TRIGGER_SWEEP	0x0002
 #define XEP_NOTIFY_X4DRIVER_ACTION		0x0004
+#define XEP_NOTIFY_TASK_END             0x0010
 
 #define mainCHECK_DELAY       ( ( TickType_t ) 5000 / portTICK_RATE_MS )
 
@@ -64,6 +65,20 @@ void dump_spi_reg(void){
     }
 
 }
+void end_radar_data_capture(void) {
+
+    x4driver_set_enable(x4driver, 0);
+    // Close files
+    //
+    file_close();
+    // Close spi
+    //
+    spi_close();
+    // End pending tasks
+    //
+    //
+}
+
 
 /*************************** FreeRTOS application hooks**************************** */
 void vApplicationTickHook( void )
@@ -76,9 +91,9 @@ void vApplicationTickHook( void )
     ulTicksSinceLastDisplay++;
     if( ulTicksSinceLastDisplay >= mainCHECK_DELAY )
     {
-    ulTicksSinceLastDisplay = 0;
-    ulCalled++;
-    //printf("AppTickHook %ld\r\n", ulCalled);
+        ulTicksSinceLastDisplay = 0;
+        ulCalled++;
+        //printf("AppTickHook %ld\r\n", ulCalled);
     }
 }
 
@@ -90,10 +105,14 @@ void vApplicationIdleHook( void )
     if(stop_x4_read) {
         printf("Idle task end\n"); 
         fflush(stdout);
+        xTaskNotify(h_task_radar, XEP_NOTIFY_TASK_END, eSetBits);
+        
+        vTaskDelay(100);
+        file_close();
         vTaskEndScheduler();
     }
     /* Makes the process more agreeable when using the Posix simulator. */
-    vTaskDelay(100);
+    vTaskDelay(1);
 }
 
 void vMainQueueSendPassed( void )
@@ -339,7 +358,7 @@ static uint32_t x4driver_task_init(void){
         printf("");
     }
     printf("\n"); 
-    dump_spi_reg();
+    //dump_spi_reg();
 #if 1
     status =  x4driver_init(x4driver);
     if(status !=  XEP_ERROR_X4DRIVER_OK) {
@@ -359,12 +378,7 @@ static uint32_t x4driver_task_init(void){
 
     printf("X4Driver init success\n");
 #endif
-    return status;
-
-}
-
-static void x4driver_task(void* pvParameters){
-    int status;
+    
 #if 0
     // Configure the radar chip as needed
     x4driver_set_dac_min(x4driver, 500);
@@ -380,12 +394,17 @@ static void x4driver_task(void* pvParameters){
     status = x4driver_check_configuration(x4driver);
     if( status != XEP_ERROR_X4DRIVER_OK) {
         printf(" check config fail %d \n", status);
-        goto x4task_fail;
+        return status;
     }
     if( x4driver_set_sweep_trigger_control(x4driver, SWEEP_TRIGGER_X4) ) {
         printf(" Set sweep trigger control fail\n");
-        goto x4task_fail;
+        return status;
     }
+    return status;
+
+}
+
+static void x4driver_task(void* pvParameters){
    
     uint32_t notify_value;
     printf("X4 Test start...\n");
@@ -414,29 +433,16 @@ static void x4driver_task(void* pvParameters){
 
             printf( "on action \n");
             x4driver_on_action_event(x4driver);
+        } else if (notify_value & XEP_NOTIFY_TASK_END) {
+            printf("Ending radar task\n");
+            break;
         } else if (notify_value == 0){ //Timeout
             printf ("n");
         }
-        if(stop_x4_read) {
-            break;
-        }
     }
     printf("Ending X4 Test...\n");
-
-x4task_fail:
-    status = x4driver_set_enable(x4driver, 0);
-    for(int i =0; i < 2000; i++) {
-        //wait
-        printf("");
-    }
-    printf("\n");
-    if( !stop_x4_read) {
-        stop_x4_read = 1;
-    }else {
-        printf("x4driver task fail\n"); 
-    }
-    vTaskDelay(5);
-    vTaskDelete( NULL );
+    
+    vTaskDelete( NULL);
 
 }
 
@@ -504,27 +510,20 @@ int main() {
     gpio_init();
     printf("GPIO Init Done\n");
 
-    for(int i =0; i < 2000; i++) {
-        //wait
-        printf("");
-    }
     if(x4driver_task_init()){
-        spi_close(); 
-        x4driver_set_enable(x4driver, 0);
+        end_radar_data_capture();
         return -1;
     }
     
     if( file_task_init() ) {
         printf("Error initializing file task\n");
-        spi_close();
-        x4driver_set_enable(x4driver, 0);
+        end_radar_data_capture();
         return -1;
     }
 
     vTaskStartScheduler();
     printf("Exit from scheduler\n");
-    spi_close();
-    file_close();
+    end_radar_data_capture();
     return 0;
 
 }

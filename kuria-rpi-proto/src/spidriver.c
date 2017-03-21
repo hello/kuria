@@ -159,7 +159,10 @@ uint32_t spi_init(void) {
 }
 
 uint32_t spi_close(void) {
-    close( spi_fd);
+    if( spi_fd){
+        close( spi_fd);
+    }
+    
 
     return 0;
 }
