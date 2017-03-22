@@ -3,6 +3,7 @@
 #include "respiration.h"
 #include "log.h"
 #include <unistd.h>
+#include "preprocessorIIR.h"
 
 #define EXPECTED_SAMPLE_RATE_HZ (20)
 #define NUM_FRAMES_IN_SEGMENT (5 * EXPECTED_SAMPLE_RATE_HZ)
@@ -33,7 +34,7 @@ void NoveldaRadarSubscriber::receive_message(const NoveldaData_t & message) {
     
     if (!_preprocessor.get()) {
         //TODO configure this from constructor
-        _preprocessor = Preprocessor::createWithDefaultHighpassFilter(message.range_bins.size(), NUM_FRAMES_IN_SEGMENT, NUM_FRAMES_TO_WAIT);
+        _preprocessor = PreprocessorIIR::createWithDefaultHighpassFilter(message.range_bins.size(), NUM_FRAMES_IN_SEGMENT, NUM_FRAMES_TO_WAIT);
         
         LOG("initialized preprocessor");
     }

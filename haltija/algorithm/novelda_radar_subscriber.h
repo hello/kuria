@@ -2,7 +2,7 @@
 #define _RADARSUBSCRIBER_H_
 
 #include "haltija_types.h"
-#include "preprocessor.h"
+#include "preprocessor_interface.h"
 #include "rangebincombiner.h"
 #include "radar_result_publisher_interface.h"
 
