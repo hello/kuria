@@ -14,7 +14,8 @@ using namespace Eigen;
 
 NoveldaRadarSubscriber::NoveldaRadarSubscriber(RadarResultPublisherInterface * publisher)
 :_publisher(publisher)
-,_sequence_number(0LL) {
+,_sequence_number(0)
+,_received_number(0) {
     _preprocessor = PreprocessorPtr_t(NULL);
     
     for (int i = 8; i < 38; i++) {
@@ -33,9 +34,14 @@ void NoveldaRadarSubscriber::receive_message(const NoveldaData_t & message) {
     if (!_preprocessor.get()) {
         //TODO configure this from constructor
         _preprocessor = Preprocessor::createWithDefaultHighpassFilter(message.range_bins.size(), NUM_FRAMES_IN_SEGMENT, NUM_FRAMES_TO_WAIT);
+        
+        LOG("initialized preprocessor");
     }
     
-    std::cout << "frame " << message.frame_id << std::endl;
+    if (_received_number % 100 == 0) {
+        LOG("I am alive: %lld frames",_received_number);
+    }
+    _received_number++;
 
     BasebandDataFrame_t frame;
     frame.data.reserve(message.range_bins.size());
@@ -46,7 +52,6 @@ void NoveldaRadarSubscriber::receive_message(const NoveldaData_t & message) {
        
     MatrixXcf filtered_frame;
     MatrixXcf segment;
-    
     uint32_t flags = _preprocessor->add_frame(frame, filtered_frame, segment);
     
     //DO KALMAN FILTERS HERE
@@ -79,7 +84,7 @@ void NoveldaRadarSubscriber::receive_message(const NoveldaData_t & message) {
             message.id = username;
             message.device_id = hostname;
             
-            std::cout << "publish:" << message.sequence_number << "," << message.vec[0] << "," << message.vec[1] << std::endl;
+            //std::cout << "publish:" << message.sequence_number << "," << message.vec[0] << "," << message.vec[1] << std::endl;
             
             _publisher->publish("PLOT", message);
             

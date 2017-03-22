@@ -3,6 +3,7 @@
 
 #include <unistd.h>
 #include <cstring>
+#include "log.h"
 
 #define PREFIX_BUF_SIZE (1024)
 
@@ -25,9 +26,10 @@ public:
         _context = zmq_ctx_new();
         _publisher = zmq_socket (_context, ZMQ_PUB);
         zmq_bind(_publisher,target);
+        _target = target;
     }
 
-    bool publish(const char * prefix, const Message & message) {
+    bool publish(const char * prefix, const Message & message, bool logging = false) {
         char prefix_buf[PREFIX_BUF_SIZE] = {0};
         
         strncpy(prefix_buf,prefix,PREFIX_BUF_SIZE);
@@ -37,9 +39,7 @@ public:
         }
 
         if (prefix) {
-            int sent_size = s_sendmore (_publisher, (const uint8_t *)prefix,strnlen(prefix,PREFIX_BUF_SIZE));
-            
-            std::cout << "sent " << sent_size << " prefix bytes, ";
+            s_sendmore (_publisher, (const uint8_t *)prefix,strnlen(prefix,PREFIX_BUF_SIZE));
         }
         
         size_t message_size = 0;
@@ -48,8 +48,10 @@ public:
         if (null_terminated_bytes) {
             int sent_size = s_send (_publisher,null_terminated_bytes,message_size);
             
-            std::cout << "sent " << sent_size << " payload bytes" <<std::endl;
-
+            if (logging) {
+                static const char * nullstr = "NULL";
+                LOG("sent %d bytes to %s on channel %s", sent_size,_target.c_str(),prefix ? prefix : nullstr);
+            }
             
             free(null_terminated_bytes);
         }
@@ -70,6 +72,8 @@ private:
         int sent_size = zmq_send (socket, bytes, size, 0);
         return sent_size;
     }
+    
+    std::string _target;
 };
 
 

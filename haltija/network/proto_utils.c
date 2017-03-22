@@ -3,7 +3,7 @@
 bool decode_repeated_doubles(pb_istream_t *stream, const pb_field_t *field, void **arg) {
     BufferInfo_t * info = (BufferInfo_t *) *arg;
     
-    double * dbuf = (double *)info->buffer;
+    double * dbuf = (double *)(info->buffer + info->pos);
 
     while(stream->bytes_left > 0) {
         
@@ -13,10 +13,9 @@ bool decode_repeated_doubles(pb_istream_t *stream, const pb_field_t *field, void
         
         
         pb_decode_fixed64(stream, dbuf);
-        dbuf += 1;
         info->pos += sizeof(double);
     }
-    
+
     return true;
     
 }
@@ -24,7 +23,7 @@ bool decode_repeated_doubles(pb_istream_t *stream, const pb_field_t *field, void
 bool decode_repeated_floats(pb_istream_t *stream, const pb_field_t *field, void **arg) {
     BufferInfo_t * info = (BufferInfo_t *) *arg;
     
-    float * fbuf = (float *)info->buffer;
+    float * fbuf = (float *)(info->buffer + info->pos);
     
     while(stream->bytes_left > 0) {
         
@@ -33,7 +32,6 @@ bool decode_repeated_floats(pb_istream_t *stream, const pb_field_t *field, void 
         }
         
         pb_decode_fixed32(stream, fbuf);
-        fbuf += 1;
         info->pos += sizeof(float);
     }
     

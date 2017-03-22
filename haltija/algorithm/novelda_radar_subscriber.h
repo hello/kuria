@@ -23,6 +23,7 @@ private:
     RadarResultPublisherInterface * _publisher;
     
     int64_t _sequence_number;
+    int64_t _received_number;
 };
 
 #endif //_RADARSUBSCRIBER_H_

@@ -5,6 +5,8 @@ import novelda_pb2
 import scipy.io as io
 import sys
 
+Fs = 100.0
+
 def row_to_protobuf(vec,count):
     a = novelda_pb2.RadarFrame()
     a.base_band = True
@@ -35,7 +37,7 @@ def main():
 #                    f.write(s)
       
             publisher.send(s)
-            time.sleep(0.05)
+            time.sleep(1.0 / Fs)
 
     # We never get here but clean up anyhow
     publisher.close()
