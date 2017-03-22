@@ -107,12 +107,11 @@ void vApplicationIdleHook( void )
         fflush(stdout);
         xTaskNotify(h_task_radar, XEP_NOTIFY_TASK_END, eSetBits);
         
-        vTaskDelay(100);
         file_close();
-        vTaskEndScheduler();
+//        vTaskEndScheduler();
     }
     /* Makes the process more agreeable when using the Posix simulator. */
-    //vTaskDelay(1);
+//    vTaskDelay(1);
 }
 
 void vMainQueueSendPassed( void )
@@ -172,6 +171,7 @@ void x4driver_interrupt_notify_data_ready(void) {
     xTaskNotifyFromISR(h_task_radar, XEP_NOTIFY_RADAR_DATAREADY, eSetBits, 
             &xHigherPriorityTaskWoken);
     portYIELD_FROM_ISR(xHigherPriorityTaskWoken ); 
+    printf(".");
 
 }
 
@@ -414,8 +414,12 @@ static void x4driver_task(void* pvParameters){
         if( xTaskNotifyWait( 0x00, /* Dont clear any notification bits on entry */
                          0xffffffff, /* Reset the notification value to 0 on exit. */
                          &notify_value, /*Notified value pass out. */
-                         portMAX_DELAY) //500 / portTICK_PERIOD_MS ); /* Block indefinitely. */
-            == pdTRUE ){
+#if 1 
+                         portMAX_DELAY 
+#else
+               500 / portTICK_PERIOD_MS  /* Block indefinitely. */
+#endif
+            )  == pdTRUE ){
 
             if (notify_value & XEP_NOTIFY_RADAR_DATAREADY) {
 
@@ -438,7 +442,7 @@ static void x4driver_task(void* pvParameters){
                 printf("Ending radar task\n");
                 break;
             }
-        } else if (notify_value == 0){ //Timeout
+        } else{
             printf ("n");
         }
     }
@@ -484,7 +488,7 @@ static uint32_t read_and_send_radar_frame(X4Driver_t* x4driver) {
     else {
 //        printf("Frame read completed\n");
     }
-
+#if 1 
     // send radar data to file task
     //
     if(radar_data_queue ){
@@ -494,10 +498,13 @@ static uint32_t read_and_send_radar_frame(X4Driver_t* x4driver) {
             return -1;
         }
     }
-   
+#else
+    radar_data_frame_free( radar_packet);
+#endif
     printf("Message sent\n");
     return status;
 }
+
 int main() {
     stop_x4_read = 0;
 

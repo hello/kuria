@@ -10,7 +10,7 @@
 #include "radar_data_format.h"
 
 #define FILE_TASK_STACK_SIZE            (1500)
-#define FILE_TASK_PRIORITY        (tskIDLE_PRIORITY + 6)
+#define FILE_TASK_PRIORITY        (tskIDLE_PRIORITY + 7)
 
 
 FILE* fp;
