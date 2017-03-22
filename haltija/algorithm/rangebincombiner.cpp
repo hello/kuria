@@ -37,6 +37,8 @@ void RangebinCombiner::set_latest_segment(const Eigen::MatrixXcf & baseband_segm
         }
     }
     
+    _bins_we_care_about = bins_we_care_about;
+
     /* do principal component analysis on the subset of range bins that we care about */
 
     const MatrixXcf subset = get_subset(baseband_segment,bins_we_care_about);
@@ -56,8 +58,10 @@ void RangebinCombiner::set_latest_segment(const Eigen::MatrixXcf & baseband_segm
     
     //if the range bins changed at all, start over
     if (!is_bins_unchanged) {
+        LOG("INIT MAX EIGEN VECTOR");
         _max_vector = max_vector2;
         _is_ready = true;
+        get_max_rangebin();
     }
     
     Complex_t val = max_vector2.dot(_max_vector.conjugate());
@@ -66,10 +70,8 @@ void RangebinCombiner::set_latest_segment(const Eigen::MatrixXcf & baseband_segm
         LOG("CHANGE OF MAX EIGEN VECTOR");
         _max_vector = max_vector2;
         _is_ready = true;
+        get_max_rangebin();
     }
-
-    _bins_we_care_about = bins_we_care_about;
-    
 }
 
 //returns false if transformation is unavailable.
@@ -100,4 +102,34 @@ Eigen::MatrixXcf RangebinCombiner::get_subset(const Eigen::MatrixXcf & baseband_
     return subset;
     
     
+}
+
+int RangebinCombiner::get_max_rangebin() const {
+    
+    //print max range bin
+    float max = 0.0;
+    int imax = 0;
+    for (int i = 0; i < _max_vector.rows(); i++) {
+        Complex_t v = _max_vector(i,0);
+        float a = v.real() * v.real() + v.imag() * v.imag();
+        if (a > max) {
+            imax = i;
+            max = a;
+        }
+    }
+    
+    int index = 0;
+    int real_range_bin = -1;
+    for (auto it = _bins_we_care_about.begin(); it != _bins_we_care_about.end(); it++) {
+        if (index == imax) {
+            real_range_bin = *it;
+            break;
+        }
+        
+        index++;
+    }
+    
+    LOG("max eigenvector in bin %d",real_range_bin);
+
+    return real_range_bin;
 }
