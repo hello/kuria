@@ -26,16 +26,16 @@ int32_t file_task_init(void) {
     printf("Opening file: %s\n", filename);
     fp = fopen(filename,"w+");
     if(fp == NULL ){
-        perror("cannot open file \n");
+        printf("cannot open file \n");
         return -1;
     }
     xTaskCreate(file_task, (const char* const) "file_save", FILE_TASK_STACK_SIZE, \
            NULL , FILE_TASK_PRIORITY, &h_task_file);
 
-    radar_data_queue = xQueueCreate( 10, sizeof(radar_frame_packet* ) );
+    radar_data_queue = xQueueCreate( 25, sizeof(radar_frame_packet* ) );
 
     if( radar_data_queue == NULL ) {
-        perror("error creating radar data queue\n");
+        printf("error creating radar data queue\n");
         file_close();
         return -1;
     }
@@ -54,14 +54,14 @@ void file_task(void* pvParameters) {
     while(1) {
         // receive data from queue
         //
-        if( xQueueReceive( radar_data_queue, &packet, 0 ) ) {
+        packet = NULL;
+        if( xQueueReceive( radar_data_queue, &packet, portMAX_DELAY ) ) {
             if( !packet->fdata ) {
-                perror(" invalid data \n" );
+                printf(" invalid data \n" );
                 continue;
             }
            
-            printf("Data received for writing\n");
-            for(data_index = 0; data_index < packet->num_of_bins; data_index+=2) {
+            for(data_index = 0; data_index <= packet->num_of_bins-2; data_index+=2) {
                 // save to file
                 //
                 fprintf( fp, "%f%fi,",  packet->fdata[data_index], packet->fdata[data_index+1]);
@@ -72,6 +72,7 @@ void file_task(void* pvParameters) {
             // free pointers to radar frame data
             // 
             radar_data_frame_free( packet );
+            printf("freed\n");
         }
 
     }

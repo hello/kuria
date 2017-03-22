@@ -112,13 +112,13 @@ void vApplicationIdleHook( void )
         vTaskEndScheduler();
     }
     /* Makes the process more agreeable when using the Posix simulator. */
-    vTaskDelay(1);
+    //vTaskDelay(1);
 }
 
 void vMainQueueSendPassed( void )
 {
 	/* This is just an example implementation of the "queue send" trace hook. */
-	uxQueueSendPassedCount++;
+//	uxQueueSendPassedCount++;
 }
 
 /************************ X4Driver callbacks ******************************************/
@@ -238,7 +238,7 @@ static int32_t radar_data_frame_prepare( radar_frame_packet** packet, uint32_t d
     *packet = (radar_frame_packet*) pvPortMalloc( sizeof(radar_frame_packet) );
 
     if( !(*packet) ) {
-        perror( "Error creating radar packet \n");
+        printf( "Error creating radar packet \n");
         return -1;
     }
 
@@ -248,7 +248,7 @@ static int32_t radar_data_frame_prepare( radar_frame_packet** packet, uint32_t d
 
     (*packet)->fdata = (float32_t*) pvPortMalloc( sizeof(float32_t) * data_count );
     if( (*packet)->fdata == NULL ) {
-        perror( "fdata malloc error\n" );
+        printf( "fdata malloc error\n" );
         return -1;
     }
     return 0;
@@ -411,38 +411,40 @@ static void x4driver_task(void* pvParameters){
     while(1) {
         // poll x4 for data
         //
-        xTaskNotifyWait( 0x00, /* Dont clear any notification bits on entry */
+        if( xTaskNotifyWait( 0x00, /* Dont clear any notification bits on entry */
                          0xffffffff, /* Reset the notification value to 0 on exit. */
                          &notify_value, /*Notified value pass out. */
-                         500 / portTICK_PERIOD_MS ); /* Block indefinitely. */
+                         portMAX_DELAY) //500 / portTICK_PERIOD_MS ); /* Block indefinitely. */
+            == pdTRUE ){
 
-        if (notify_value & XEP_NOTIFY_RADAR_DATAREADY) {
+            if (notify_value & XEP_NOTIFY_RADAR_DATAREADY) {
 
-            printf("Radar Data Ready\n");
+    //            printf("Radar Data Ready\n");
 
-            if(x4driver->trigger_mode != SWEEP_TRIGGER_MANUAL) {
-                printf("Read and send\n"); 
-                read_and_send_radar_frame(x4driver);
+                if(x4driver->trigger_mode != SWEEP_TRIGGER_MANUAL) {
+                    printf("Read and send\n"); 
+                    read_and_send_radar_frame(x4driver);
+                }
+
+            } else if (notify_value & XEP_NOTIFY_RADAR_TRIGGER_SWEEP) {
+
+                printf("start sweep\n");
+                x4driver_start_sweep(x4driver);
+            } else if (notify_value & XEP_NOTIFY_X4DRIVER_ACTION) {
+
+                printf( "on action \n");
+                x4driver_on_action_event(x4driver);
+            } else if (notify_value & XEP_NOTIFY_TASK_END) {
+                printf("Ending radar task\n");
+                break;
             }
-
-        } else if (notify_value & XEP_NOTIFY_RADAR_TRIGGER_SWEEP) {
-
-            printf("start sweep\n");
-            x4driver_start_sweep(x4driver);
-        } else if (notify_value & XEP_NOTIFY_X4DRIVER_ACTION) {
-
-            printf( "on action \n");
-            x4driver_on_action_event(x4driver);
-        } else if (notify_value & XEP_NOTIFY_TASK_END) {
-            printf("Ending radar task\n");
-            break;
         } else if (notify_value == 0){ //Timeout
             printf ("n");
         }
     }
     printf("Ending X4 Test...\n");
     
-    vTaskDelete( NULL);
+    //vTaskDelete( NULL);
 
 }
 
@@ -468,10 +470,9 @@ static uint32_t read_and_send_radar_frame(X4Driver_t* x4driver) {
     radar_frame_packet* radar_packet = NULL;
 
     if( radar_data_frame_prepare(&radar_packet, fdata_count ) ) {
-        perror(" error creating radar data frame \n");
+        printf(" error creating radar data frame \n");
         return -1;
     }
-    printf("Prepare frame message done %d\n",fdata_count );
    
     // Read radar data into dispatch memory.
     status = x4driver_read_frame_normalized(x4driver, &radar_packet->frame_counter,radar_packet->fdata, radar_packet->num_of_bins);
@@ -481,14 +482,14 @@ static uint32_t read_and_send_radar_frame(X4Driver_t* x4driver) {
         return status;
     }
     else {
-        printf("Frame read completed\n");
+//        printf("Frame read completed\n");
     }
 
     // send radar data to file task
     //
     if(radar_data_queue ){
-        if( xQueueSend( radar_data_queue, &radar_packet, (TickType_t ) 10 ) != pdPASS ) {
-            perror( "Failed to send msg to queue \n");
+        if( xQueueSend( radar_data_queue, &radar_packet, (TickType_t ) 100 ) != pdPASS ) {
+            printf( "Failed to send msg to queue \n");
             radar_data_frame_free( radar_packet );
             return -1;
         }
@@ -498,6 +499,8 @@ static uint32_t read_and_send_radar_frame(X4Driver_t* x4driver) {
     return status;
 }
 int main() {
+    stop_x4_read = 0;
+
     if(signal(SIGINT, sig_handler) == SIG_ERR){
         printf("can't catch SIGINT\n");
     }

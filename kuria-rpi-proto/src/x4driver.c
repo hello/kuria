@@ -1273,17 +1273,11 @@ int x4driver_get_frame_area_offset(X4Driver_t* x4driver, float32_t * offset_in_m
 int x4driver_read_frame_normalized(X4Driver_t* x4driver, uint32_t* frame_counter, float32_t* data, uint32_t length)
 {   
 	uint32_t status = mutex_take(x4driver);
-    printf(" read normalized\n"); 
 	if (status != XEP_ERROR_X4DRIVER_OK) return status;	       		
 
-    if( (!x4driver->frame_buffer) || (!data) ){
-        printf("invalid pointer\n");
-        return -1;
-    }
 	//read_raw_data
     status = x4driver_read_frame_bytes(x4driver, frame_counter,x4driver->frame_buffer, x4driver->frame_read_size); 
 		
-    printf("Raw data read, normalize\n");	
 	if(x4driver->downconvertion_enabled == 0)
 	{
 		_x4driver_unpack_and_normalize_frame(x4driver,data,length,x4driver->frame_buffer,x4driver->frame_read_size);	
@@ -1293,7 +1287,6 @@ int x4driver_read_frame_normalized(X4Driver_t* x4driver, uint32_t* frame_counter
 		_x4driver_unpack_and_normalize_downconverted_frame(x4driver,data,length,x4driver->frame_buffer,x4driver->frame_read_size);	
 	}
 							
-    printf(" unpack done\n"); 
 	mutex_give(x4driver);
 	return status;
 }
