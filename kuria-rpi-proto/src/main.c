@@ -22,7 +22,7 @@
 
 
 #define TASK_RADAR_STACK_SIZE            (1500)
-#define TASK_RADAR_PRIORITY        (tskIDLE_PRIORITY + 6)
+#define TASK_RADAR_PRIORITY        (tskIDLE_PRIORITY + 5)
 
 #define XEP_NOTIFY_RADAR_DATAREADY		0x0001
 #define XEP_NOTIFY_RADAR_TRIGGER_SWEEP	0x0002
@@ -171,7 +171,7 @@ void x4driver_interrupt_notify_data_ready(void) {
     xTaskNotifyFromISR(h_task_radar, XEP_NOTIFY_RADAR_DATAREADY, eSetBits, 
             &xHigherPriorityTaskWoken);
     portYIELD_FROM_ISR(xHigherPriorityTaskWoken ); 
-    printf(".");
+    printf("INTR\n");
 
 }
 
@@ -345,13 +345,14 @@ static uint32_t x4driver_task_init(void){
 
     int status;
 
+#if 0
     status = x4driver_set_enable(x4driver, 0);
     for(uint32_t i =0; i < 2000; i++) {
         //wait
         printf("");
     }
     printf("\n");
-
+#endif
     status = x4driver_set_enable(x4driver, 1);
     for(uint32_t i =0; i < 2000; i++) {
         //wait
@@ -379,18 +380,17 @@ static uint32_t x4driver_task_init(void){
     printf("X4Driver init success\n");
 #endif
     
-#if 0
+#if 1
     // Configure the radar chip as needed
-    x4driver_set_dac_min(x4driver, 500);
-    x4driver_set_dac_max(x4driver, 1500);
-    x4driver_set_iterations(x4driver, 15);
-    x4driver_set_pulses_per_step(x4driver, 10);
+    x4driver_set_dac_min(x4driver, 800);
+    x4driver_set_dac_max(x4driver, 1254);
+    x4driver_set_iterations(x4driver, 64);
+    x4driver_set_pulses_per_step(x4driver, 6);
     x4driver_set_downconversion(x4driver, 1);
-    x4driver_set_frame_area_offset(x4driver, 0.6);
-    x4driver_set_frame_area(x4driver, 0.5, 4.0);
-    x4driver_set_fps(x4driver, 20);
+//    x4driver_set_frame_area_offset(x4driver, 0.6);
+ //   x4driver_set_frame_area(x4driver, 0.5, 4.0);
+    x4driver_set_fps(x4driver, 10);
 #endif
-    x4driver_set_downconversion(x4driver, 1);
     status = x4driver_check_configuration(x4driver);
     if( status != XEP_ERROR_X4DRIVER_OK) {
         printf(" check config fail %d \n", status);
@@ -423,7 +423,7 @@ static void x4driver_task(void* pvParameters){
 
             if (notify_value & XEP_NOTIFY_RADAR_DATAREADY) {
 
-    //            printf("Radar Data Ready\n");
+//                printf("Radar Data Ready\n");
 
                 if(x4driver->trigger_mode != SWEEP_TRIGGER_MANUAL) {
                     printf("Read and send\n"); 
@@ -445,6 +445,7 @@ static void x4driver_task(void* pvParameters){
         } else{
             printf ("n");
         }
+        x4driver_interrupt_notify_data_ready();
     }
     printf("Ending X4 Test...\n");
     
@@ -501,7 +502,6 @@ static uint32_t read_and_send_radar_frame(X4Driver_t* x4driver) {
 #else
     radar_data_frame_free( radar_packet);
 #endif
-    printf("Message sent\n");
     return status;
 }
 

@@ -10,7 +10,7 @@
 #include "radar_data_format.h"
 
 #define FILE_TASK_STACK_SIZE            (1500)
-#define FILE_TASK_PRIORITY        (tskIDLE_PRIORITY + 7)
+#define FILE_TASK_PRIORITY        (tskIDLE_PRIORITY + 6)
 
 
 FILE* fp;
@@ -32,7 +32,7 @@ int32_t file_task_init(void) {
     xTaskCreate(file_task, (const char* const) "file_save", FILE_TASK_STACK_SIZE, \
            NULL , FILE_TASK_PRIORITY, &h_task_file);
 
-    radar_data_queue = xQueueCreate( 25, sizeof(radar_frame_packet* ) );
+    radar_data_queue = xQueueCreate(50 , sizeof(radar_frame_packet* ) );
 
     if( radar_data_queue == NULL ) {
         printf("error creating radar data queue\n");
@@ -67,12 +67,11 @@ void file_task(void* pvParameters) {
                 fprintf( fp, "%f%fi,",  packet->fdata[data_index], packet->fdata[data_index+1]);
             }
             fprintf(fp, "\n");
-            printf("wrote\n");
             
             // free pointers to radar frame data
             // 
             radar_data_frame_free( packet );
-            printf("freed\n");
+            printf("wr done\n");
         }
 
     }
