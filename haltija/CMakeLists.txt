@@ -2,12 +2,10 @@ cmake_minimum_required (VERSION 3.1)
 
 PROJECT (Haltija)
 set (CMAKE_CXX_STANDARD 14)
-#set(CMAKE_OSX_DEPLOYMENT_TARGET "10.12")
+set (CMAKE_C_STANDARD 99)
 
 set(CMAKE_INCLUDE_PATH ${PROJECT_SOURCE_DIR}/)
 set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
-
-
 
 if (WIN32)
   set(ZLIB_LIBRARIES "${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/winlib/zlib/zlibstatic.lib")
