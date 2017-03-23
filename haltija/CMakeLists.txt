@@ -44,6 +44,9 @@ mateigen/matlabreader.cpp
 mateigen/matlabwriter.cpp
 )
 
+target_link_libraries(mateigen matio)
+
+
 add_library(algorithm STATIC
 algorithm/kiss_fft.c
 algorithm/haltijamath.cpp
