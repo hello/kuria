@@ -6,9 +6,16 @@
 #include "preprocessorIIR.h"
 
 #define EXPECTED_SAMPLE_RATE_HZ (20)
-#define NUM_FRAMES_IN_SEGMENT (5 * EXPECTED_SAMPLE_RATE_HZ)
+#define NUM_FRAMES_IN_SEGMENT (20 * EXPECTED_SAMPLE_RATE_HZ)
 #define NUM_FRAMES_TO_WAIT (5 * EXPECTED_SAMPLE_RATE_HZ)
 
+#ifndef HOST_NAME_MAX
+#define HOST_NAME_MAX (1024)
+#endif
+
+#ifndef LOGIN_NAME_MAX
+#define LOGIN_NAME_MAX (1024)
+#endif
 
 using namespace Eigen;
 
@@ -19,7 +26,7 @@ NoveldaRadarSubscriber::NoveldaRadarSubscriber(RadarResultPublisherInterface * p
 ,_received_number(0) {
     _preprocessor = PreprocessorPtr_t(NULL);
     
-    for (int i = 8; i < 38; i++) {
+    for (int i = 8; i < 100; i++) {
         _rangebins_we_care_about.insert(i);
     }
     
@@ -53,6 +60,9 @@ void NoveldaRadarSubscriber::receive_message(const NoveldaData_t & message) {
        
     MatrixXcf filtered_frame;
     MatrixXcf segment;
+    
+    
+    
     uint32_t flags = _preprocessor->add_frame(frame, filtered_frame, segment);
     
     //DO KALMAN FILTERS HERE
@@ -71,8 +81,7 @@ void NoveldaRadarSubscriber::receive_message(const NoveldaData_t & message) {
         //send frame over the wire, or process it or something
         
         if (_publisher) {
-#define HOST_NAME_MAX (1024)
-#define LOGIN_NAME_MAX (1024)
+
             char hostname[HOST_NAME_MAX] = {0};
             char username[LOGIN_NAME_MAX] = {0};
             gethostname(hostname, HOST_NAME_MAX);
