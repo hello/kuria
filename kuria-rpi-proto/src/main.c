@@ -48,7 +48,7 @@ static uint32_t read_and_send_radar_frame(X4Driver_t* x4driver);
 
 extern QueueHandle_t radar_data_queue; 
 
-
+SemaphoreHandle_t xRadarSem;
 
 void sig_handler(int sig) {
     if(sig == SIGINT || sig == SIGABRT)  {
@@ -167,12 +167,22 @@ void x4driver_notify_data_ready(void* user_reference){
 
 }
 
+static bool first = true;
 void x4driver_interrupt_notify_data_ready(void) {
+#if 0
     BaseType_t xHigherPriorityTaskWoken = pdFALSE;
-    xTaskNotifyFromISR(h_task_radar, XEP_NOTIFY_RADAR_DATAREADY, eSetBits, 
-            &xHigherPriorityTaskWoken);
-    portYIELD_FROM_ISR(xHigherPriorityTaskWoken ); 
-    printf("INTR: %d\n", xHigherPriorityTaskWoken);
+    if( first == true){
+        printf("first\n");
+        first = false;
+        return;
+    }
+    xTaskNotify(h_task_radar, XEP_NOTIFY_RADAR_DATAREADY, eSetBits); 
+#else
+    if( xSemaphoreGive(xRadarSem ) != pdTRUE ) {
+        printf("sem give fail \n");
+    }
+#endif
+    printf("INTR: \n");
 
 }
 
@@ -390,7 +400,7 @@ static uint32_t x4driver_task_init(void){
     x4driver_set_downconversion(x4driver, 1);
 //    x4driver_set_frame_area_offset(x4driver, 0.6);
  //   x4driver_set_frame_area(x4driver, 0.5, 4.0);
-    x4driver_set_fps(x4driver, 20);
+    x4driver_set_fps(x4driver, 10);
 #endif
     status = x4driver_check_configuration(x4driver);
     if( status != XEP_ERROR_X4DRIVER_OK) {
@@ -410,9 +420,9 @@ static void x4driver_task(void* pvParameters){
     uint32_t notify_value = 0;
     printf("X4 Test start...\n");
     while(1) {
+#if 0
         // poll x4 for data
         //
-        printf(" Wait for intr \n");
         xTaskNotifyWait( 0x00, /* Dont clear any notification bits on entry */
                          0xffffffff, /* Reset the notification value to 0 on exit. */
                          &notify_value, /*Notified value pass out. */
@@ -448,6 +458,13 @@ static void x4driver_task(void* pvParameters){
                 printf ("n");
             }
         //x4driver_interrupt_notify_data_ready();
+        vTaskDelay(1);
+#else
+        if( xSemaphoreTake(xRadarSem, portMAX_DELAY) ){
+            printf("Read and send\n"); 
+            read_and_send_radar_frame(x4driver);
+        }
+#endif
     }
     printf("Ending X4 Test...\n");
     
@@ -508,8 +525,14 @@ static uint32_t read_and_send_radar_frame(X4Driver_t* x4driver) {
 }
 
 int main() {
+    //if( piHiPri(1)) return -1;
     stop_x4_read = 0;
 
+    xRadarSem = xSemaphoreCreateBinary();
+    if(xRadarSem == NULL ){
+        printf("Could not create semaphore \n");
+        return -1;
+    }
     if(signal(SIGINT, sig_handler) == SIG_ERR){
         printf("can't catch SIGINT\n");
     }
