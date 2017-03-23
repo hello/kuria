@@ -54,6 +54,7 @@ void file_task(void* pvParameters) {
     while(1) {
         // receive data from queue
         //
+        printf("wait for data\n");
         packet = NULL;
         if( xQueueReceive( radar_data_queue, &packet, portMAX_DELAY ) ) {
             if( !packet->fdata ) {
@@ -61,6 +62,7 @@ void file_task(void* pvParameters) {
                 continue;
             }
            
+            printf("Data received\n");
             for(data_index = 0; data_index <= packet->num_of_bins-2; data_index+=2) {
                 // save to file
                 //

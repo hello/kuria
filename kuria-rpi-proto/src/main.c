@@ -22,7 +22,7 @@
 
 
 #define TASK_RADAR_STACK_SIZE            (1500)
-#define TASK_RADAR_PRIORITY        (tskIDLE_PRIORITY + 5)
+#define TASK_RADAR_PRIORITY        (tskIDLE_PRIORITY + 7)
 
 #define XEP_NOTIFY_RADAR_DATAREADY		0x0001
 #define XEP_NOTIFY_RADAR_TRIGGER_SWEEP	0x0002
@@ -83,6 +83,7 @@ void end_radar_data_capture(void) {
 /*************************** FreeRTOS application hooks**************************** */
 void vApplicationTickHook( void )
 {
+#if 0
     static unsigned long ulTicksSinceLastDisplay = 0;
     static unsigned long ulCalled = 0;
 
@@ -95,6 +96,7 @@ void vApplicationTickHook( void )
         ulCalled++;
         //printf("AppTickHook %ld\r\n", ulCalled);
     }
+#endif
 }
 
 void vApplicationIdleHook( void )
@@ -111,7 +113,6 @@ void vApplicationIdleHook( void )
 //        vTaskEndScheduler();
     }
     /* Makes the process more agreeable when using the Posix simulator. */
-//    vTaskDelay(1);
 }
 
 void vMainQueueSendPassed( void )
@@ -171,7 +172,7 @@ void x4driver_interrupt_notify_data_ready(void) {
     xTaskNotifyFromISR(h_task_radar, XEP_NOTIFY_RADAR_DATAREADY, eSetBits, 
             &xHigherPriorityTaskWoken);
     portYIELD_FROM_ISR(xHigherPriorityTaskWoken ); 
-    printf("INTR\n");
+    printf("INTR: %d\n", xHigherPriorityTaskWoken);
 
 }
 
@@ -359,7 +360,7 @@ static uint32_t x4driver_task_init(void){
         printf("");
     }
     printf("\n"); 
-    //dump_spi_reg();
+    dump_spi_reg();
 #if 1
     status =  x4driver_init(x4driver);
     if(status !=  XEP_ERROR_X4DRIVER_OK) {
@@ -389,7 +390,7 @@ static uint32_t x4driver_task_init(void){
     x4driver_set_downconversion(x4driver, 1);
 //    x4driver_set_frame_area_offset(x4driver, 0.6);
  //   x4driver_set_frame_area(x4driver, 0.5, 4.0);
-    x4driver_set_fps(x4driver, 10);
+    x4driver_set_fps(x4driver, 20);
 #endif
     status = x4driver_check_configuration(x4driver);
     if( status != XEP_ERROR_X4DRIVER_OK) {
@@ -406,12 +407,13 @@ static uint32_t x4driver_task_init(void){
 
 static void x4driver_task(void* pvParameters){
    
-    uint32_t notify_value;
+    uint32_t notify_value = 0;
     printf("X4 Test start...\n");
     while(1) {
         // poll x4 for data
         //
-        if( xTaskNotifyWait( 0x00, /* Dont clear any notification bits on entry */
+        printf(" Wait for intr \n");
+        xTaskNotifyWait( 0x00, /* Dont clear any notification bits on entry */
                          0xffffffff, /* Reset the notification value to 0 on exit. */
                          &notify_value, /*Notified value pass out. */
 #if 1 
@@ -419,11 +421,11 @@ static void x4driver_task(void* pvParameters){
 #else
                500 / portTICK_PERIOD_MS  /* Block indefinitely. */
 #endif
-            )  == pdTRUE ){
+            );
 
             if (notify_value & XEP_NOTIFY_RADAR_DATAREADY) {
 
-//                printf("Radar Data Ready\n");
+                printf("Radar Data Ready\n");
 
                 if(x4driver->trigger_mode != SWEEP_TRIGGER_MANUAL) {
                     printf("Read and send\n"); 
@@ -442,10 +444,10 @@ static void x4driver_task(void* pvParameters){
                 printf("Ending radar task\n");
                 break;
             }
-        } else{
-            printf ("n");
-        }
-        x4driver_interrupt_notify_data_ready();
+            else{
+                printf ("n");
+            }
+        //x4driver_interrupt_notify_data_ready();
     }
     printf("Ending X4 Test...\n");
     
