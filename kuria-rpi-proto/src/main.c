@@ -18,8 +18,11 @@
 #include "file_save.h"
 #include "radar_data_format.h"
 
-
-
+#if 1
+#define DISP printf
+#else
+#define DISP(...)
+#endif
 
 #define TASK_RADAR_STACK_SIZE            (1500)
 #define TASK_RADAR_PRIORITY        (tskIDLE_PRIORITY + 7)
@@ -182,7 +185,7 @@ void x4driver_interrupt_notify_data_ready(void) {
         printf("sem give fail \n");
     }
 #endif
-    printf("INTR: \n");
+    DISP("INTR: \n");
 
 }
 
@@ -461,7 +464,7 @@ static void x4driver_task(void* pvParameters){
         vTaskDelay(1);
 #else
         if( xSemaphoreTake(xRadarSem, portMAX_DELAY) ){
-            printf("Read and send\n"); 
+            DISP("Read and send\n"); 
             read_and_send_radar_frame(x4driver);
         }
 #endif
@@ -525,6 +528,7 @@ static uint32_t read_and_send_radar_frame(X4Driver_t* x4driver) {
 }
 
 int main() {
+    DISP("Does this ge printed: %d\n", stop_x4_read);
     //if( piHiPri(1)) return -1;
     stop_x4_read = 0;
 
