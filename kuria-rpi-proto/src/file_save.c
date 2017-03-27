@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <fcntl.h>
+#include <math.h>
 #include <time.h>
 #include "FreeRTOS.h"
 #include "task.h"
@@ -66,7 +67,10 @@ void file_task(void* pvParameters) {
             for(data_index = 0; data_index <= packet->num_of_bins-2; data_index+=2) {
                 // save to file
                 //
-                fprintf( fp, "%f%fi,",  packet->fdata[data_index], packet->fdata[data_index+1]);
+                fprintf( fp, "%f%c%fi",  packet->fdata[data_index],( (packet->fdata[data_index+1] >= 0) ? '+':'-') , fabs (packet->fdata[data_index+1]) );
+                if (data_index != packet->num_of_bins) {
+                    fprintf (fp, ",");
+                }
             }
             fprintf(fp, "\n");
             

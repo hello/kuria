@@ -607,7 +607,7 @@ int x4driver_create(X4Driver_t** x4driver, void* instance_memory, X4DriverCallba
     d->trigger_mode = SWEEP_TRIGGER_MANUAL;
 	d->region = X4DRIVER_REGION_EU;
 	d->downconvertion_enabled= 0;
-	d->iq_separate = 1;
+	d->iq_separate = 0;
 	d->configured_fps = 0;
 	d->frame_area_offset_meters =0;
 	d->frame_area_start = 0;
