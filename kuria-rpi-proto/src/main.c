@@ -1,19 +1,13 @@
 #include <stdio.h>
 #include <signal.h>
-#include <time.h>
-#include <sys/time.h>
 #include <unistd.h>
 #include <stdbool.h>
 #include "portmacro.h"
-#include "spidriver.h"
 #include "FreeRTOS.h"
 #include "task.h"
-#include "timers.h"
-#include "semphr.h"
 #include "queue.h"
 #include <string.h>
 #include "file_save.h"
-#include "radar_data_format.h"
 #include "radar_task.h"
 
 bool stop_x4_read = 0;

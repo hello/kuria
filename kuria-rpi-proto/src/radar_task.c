@@ -1,3 +1,4 @@
+#include <pthread.h>
 #include <stdio.h>
 #include <stdint.h>
 #include "radar_task.h"
@@ -11,6 +12,7 @@
 #include "gpio_hal.h"
 #include "radar_data_format.h"
 #include <string.h>
+
 
 /* Defines */
 #if 1
@@ -33,9 +35,9 @@ static X4Driver_t* x4driver;
 static TaskHandle_t h_task_radar = NULL;
 static bool en_intr = true;
 static SemaphoreHandle_t xRadarSem;
+static pthread_mutex_t radar_task_mutex;
 
 /* Static function declarations */
-static void x4driver_task(void* pvParameters);
 static uint32_t read_and_send_radar_frame(X4Driver_t* x4driver);
 void x4driver_timer_sweep_timeout(TimerHandle_t pxTimer) ;
 void x4driver_timer_action_timeout(TimerHandle_t pxTimer) ;
@@ -48,6 +50,9 @@ uint32_t x4driver_callback_pin_set_enable(void* user_reference, uint8_t value);
 void x4driver_interrupt_data_ready(void) ;
 static uint32_t x4driver_callback_take_sem(void * sem,uint32_t timeout);
 static void x4driver_callback_give_sem(void * sem);
+static int32_t radar_task_set_callbacks_timer( );
+static int32_t radar_task_set_callbacks_lock ();
+static int32_t radar_task_set_callbacks_driver ();
 
 /* Global Variables */
 extern QueueHandle_t radar_data_queue; 
@@ -89,18 +94,34 @@ uint32_t radar_task_init(void){
 
     // Initialize X4driver lock mechanism
     X4DriverLock_t lock;
-    lock.object = (void*)xSemaphoreCreateRecursiveMutex();
-    if(lock.object == NULL){ 
-        printf(" create rec mutex fail\n");
-        return -1;
+    status = radar_task_set_callbacks_lock (&lock);
+    if (status) {
+        printf ("error setting lock callbacks: %d\n", status);
+        return status;
     }
-    lock.lock = x4driver_callback_take_sem;
-    lock.unlock = x4driver_callback_give_sem;
 
     // X4Driver timer for generating sweep FPS on MCU. Not used when sweep FPS is generated on X4.
     uint32_t timer_id_sweep = 2;
     X4DriverTimer_t timer_sweep;
+#if USE_FREERTOS_TIMER
     timer_sweep.object = xTimerCreate("X4Driver_sweep_timer", 1000 / portTICK_PERIOD_MS, pdTRUE, (void*)timer_id_sweep, x4driver_timer_sweep_timeout);
+#else
+    // TODO - incomplete
+    // Use Linux timer
+    timer_t sweep_timer_id;
+    struct sigevent sev;
+
+    sev.sigev_notify = SIGEV_SIGNAL;
+    sev.sigev_signo = SIG;
+    sev.
+        status = timer_create (CLOCK_THREAD_CPUTIME_ID,NULL, &sweep_timer_id);
+    if (status) {
+        printf ("Error creating sweep timer\n");
+        return status;
+    }
+
+    timer_sweep.object = &sweep_timer_id;
+#endif
     timer_sweep.configure = x4driver_timer_set_timer_timeout_frequency;
 
     // X4Driver timer used for driver action timeout.
@@ -340,11 +361,67 @@ static uint32_t read_and_send_radar_frame(X4Driver_t* x4driver) {
 void dump_spi_reg(void){
     for(uint32_t i=ADDR_SPI_FORCE_ZERO_R; i<= ADDR_SPI_SPI_CONFIG_WE; i++){
         uint8_t value;
-     //   if(i== ADDR_SPI_RADAR_DATA_SPI_RE) continue;
+        //   if(i== ADDR_SPI_RADAR_DATA_SPI_RE) continue;
         x4driver_get_spi_register(x4driver,i ,&value );
         printf(" %d: %x\n", i, value);
     }
 
+}
+
+static int32_t radar_task_set_callbacks_timer( ) {
+
+}
+
+static int32_t radar_task_set_callbacks_lock (X4DriverLock_t* lock) {
+
+    int status = 0;
+
+#if USE_FREERTOS_LOCK
+
+    lock->object = (void*)xSemaphoreCreateRecursiveMutex();
+
+#else
+
+    printf(" Init pthread lock\n");
+
+    // set mutex attribute to be recursive
+    pthread_mutexattr_t attr;
+
+    status = pthread_mutexattr_init (&attr);
+    if (status) {
+        printf ("mutex attr init fail: %d\n", status);
+        return status;
+    }
+
+    status = pthread_mutexattr_settype (&attr, PTHREAD_MUTEX_RECURSIVE);
+    if (status) {
+        printf ("mutex attr set type fail: %d\n", status);
+        return status;
+    }
+
+    // initialize recursive mutex
+    status = pthread_mutex_init (&radar_task_mutex, &attr);
+    if (status) {
+        printf ("mutex init fail: %d\n", status);
+        return status;
+    }
+
+    // update x4driver lock
+    lock->object = (void*) &radar_task_mutex;
+
+#endif
+
+    if(lock->object == NULL){ 
+        printf(" create rec mutex fail\n");
+        return -1;
+    }
+    lock->lock = x4driver_callback_take_sem;
+    lock->unlock = x4driver_callback_give_sem;
+
+    return 0;
+}
+
+static int32_t radar_task_set_callbacks_driver () {
 }
 
 /************************ Callbacks ******************************************/
@@ -458,11 +535,25 @@ void x4driver_interrupt_data_ready(void) {
 /* X4driver lock mechanism callbacks */
 static uint32_t x4driver_callback_take_sem(void * sem,uint32_t timeout)
 {
+#if USE_FREERTOS_LOCK
     return xSemaphoreTakeRecursive((SemaphoreHandle_t)sem, timeout);
+#else
+    int status = pthread_mutex_lock ( (pthread_mutex_t*) sem );
+    if (status) {
+        return KURIA_FALSE;
+    }
+
+    // return true if lock successful
+    return KURIA_TRUE;
+#endif
 }
 
 static void x4driver_callback_give_sem(void * sem)
 {
+#if USE_FREERTOS_LOCK
     xSemaphoreGiveRecursive((SemaphoreHandle_t)sem);
+#else
+    (void) pthread_mutex_unlock ( (pthread_mutex_t*) sem );
+#endif
 }
 
