@@ -364,12 +364,11 @@ uint32_t _update_normalization_variables(X4Driver_t* x4driver)
 }
 
 
-#pragma optimize on
 /**
  * @brief unpacks bin. 
  * Note: returns 32 bit value, max 4 bytes per counter.
  */
-uint32_t _unpack_bin(uint8_t * data, uint8_t bytes_per_counter) 
+__attribute__ ((optimize("-O3"))) uint32_t _unpack_bin(uint8_t * data, uint8_t bytes_per_counter) 
 {
 	uint32_t val = 0;
 	for(uint32_t i = 0; i<bytes_per_counter;i++)
@@ -378,7 +377,6 @@ uint32_t _unpack_bin(uint8_t * data, uint8_t bytes_per_counter)
 	}
 	return val;
 }
-#pragma optimize off
 
 /**
  * @brief Gets mask for reading bins from buffer.  
@@ -623,7 +621,7 @@ int x4driver_spi_test(X4Driver_t* x4driver) {
     if( status != XEP_ERROR_X4DRIVER_OK) return status;
 
     uint8_t count = 0;
-    uint8_t reg;
+    uint8_t reg = 0;
 
     for(count=0xA5; count == 0xA5; count++) {
         x4driver_set_spi_register(x4driver, ADDR_SPI_DEBUG_RW, count);

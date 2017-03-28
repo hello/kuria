@@ -44,7 +44,6 @@ bool stop_x4_read = 0;
 static X4Driver_t* x4driver;
 static TaskHandle_t h_task_radar = NULL;
 static bool en_intr = true;
-static unsigned long long uxQueueSendPassedCount = 0;
 
 static void x4driver_task(void* pvParameters);
 static uint32_t read_and_send_radar_frame(X4Driver_t* x4driver);
@@ -110,7 +109,6 @@ void vApplicationIdleHook( void )
     if(stop_x4_read) {
         printf("Idle task end\n"); 
         fflush(stdout);
-        xTaskNotify(h_task_radar, XEP_NOTIFY_TASK_END, eSetBits);
         
         file_close();
 //        vTaskEndScheduler();
@@ -121,7 +119,6 @@ void vApplicationIdleHook( void )
 void vMainQueueSendPassed( void )
 {
 	/* This is just an example implementation of the "queue send" trace hook. */
-//	uxQueueSendPassedCount++;
 }
 
 /************************ X4Driver callbacks ******************************************/
@@ -170,21 +167,17 @@ void x4driver_notify_data_ready(void* user_reference){
 
 }
 
-static bool first = true;
 void x4driver_interrupt_notify_data_ready(void) {
-#if 0
-    BaseType_t xHigherPriorityTaskWoken = pdFALSE;
-    if( first == true){
-        printf("first\n");
-        first = false;
+    static bool first_intr = true;
+    // TODO ignore first interrupt since it writes junk data into file
+    if (first_intr) {
+        first_intr = false;
         return;
     }
-    xTaskNotify(h_task_radar, XEP_NOTIFY_RADAR_DATAREADY, eSetBits); 
-#else
+
     if( xSemaphoreGive(xRadarSem ) != pdTRUE ) {
         printf("sem give fail \n");
     }
-#endif
     DISP("INTR: \n");
 
 }
@@ -370,7 +363,7 @@ static uint32_t x4driver_task_init(void){
     status = x4driver_set_enable(x4driver, 1);
     for(uint32_t i =0; i < 2000; i++) {
         //wait
-        printf("");
+		__asm__ volatile ("nop");		
     }
     printf("\n"); 
     dump_spi_reg();
@@ -420,10 +413,10 @@ static uint32_t x4driver_task_init(void){
 
 static void x4driver_task(void* pvParameters){
    
-    uint32_t notify_value = 0;
     printf("X4 Test start...\n");
     while(1) {
 #if 0
+        uint32_t notify_value = 0;
         // poll x4 for data
         //
         xTaskNotifyWait( 0x00, /* Dont clear any notification bits on entry */

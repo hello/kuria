@@ -2,6 +2,7 @@
 #include <fcntl.h>
 #include <math.h>
 #include <time.h>
+#include <string.h>
 #include "FreeRTOS.h"
 #include "task.h"
 #include <unistd.h>
@@ -24,6 +25,7 @@ int32_t file_task_init(void) {
     char filename[40];
     time_t now = time(NULL);
     sprintf(filename, "data_%d", (int)now);
+    strcat(filename, ".csv");
     printf("Opening file: %s\n", filename);
     fp = fopen(filename,"w+");
     if(fp == NULL ){
@@ -63,6 +65,8 @@ void file_task(void* pvParameters) {
                 continue;
             }
            
+            fprintf(fp, "\r\n");
+
             //printf("Data received\n");
             for(data_index = 0; data_index <= packet->num_of_bins-2; data_index+=2) {
                 // save to file
@@ -72,7 +76,6 @@ void file_task(void* pvParameters) {
                     fprintf (fp, ",");
                 }
             }
-            fprintf(fp, "\n");
             
             // free pointers to radar frame data
             // 
