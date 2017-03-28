@@ -17,6 +17,7 @@ extern "C" {
         size_t pos;
     } BufferInfo_t;
 
+    bool decode_repeated_floats(pb_istream_t *stream, const pb_field_t *field, void **arg);
     
     bool decode_repeated_doubles(pb_istream_t *stream, const pb_field_t *field, void **arg);
     
@@ -28,7 +29,8 @@ extern "C" {
         
     bool encode_string_fields(pb_ostream_t * stream, const pb_field_t *field, void * const *arg);
     
-    
+    bool encode_repeated_floats(pb_ostream_t * stream, const pb_field_t *field, void * const *arg);
+
     
 #ifdef __cplusplus
 }

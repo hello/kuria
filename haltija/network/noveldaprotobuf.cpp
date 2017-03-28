@@ -35,7 +35,7 @@ bool NoveldaProtobuf::deserialize_protobuf(const uint8_t * protobuf_bytes, const
         return false;
     }
     
-    LOG("%d",num_items_received);
+    //LOG("%d",num_items_received);
     
     deserialized_data.frame_id = 0;
     deserialized_data.is_base_band = false;

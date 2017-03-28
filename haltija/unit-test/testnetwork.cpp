@@ -1,9 +1,12 @@
 #include "gtest/gtest.h"
 #include "network/protobuf_matrix_utils.h"
 #include "network/noveldaprotobuf.h"
+#include "network/radarmessageprotobuf.h"
 #include <string.h>
 #include <stdlib.h>
 #include <fstream>
+#include <cstdlib>
+#include <cstring>
 
 #define GET_TEST_FILE_PATH(x)\
     UNIT_TEST_DATA + std::string(x)
@@ -13,13 +16,16 @@ protected:
 
 
     virtual void SetUp() {
+        bytes = NULL;
     }
 
     virtual void TearDown() {
-        
+        if (bytes) {
+            free(bytes);
+        }
     }
     
-    
+    uint8_t * bytes;
 };
 
 class DISABLED_TestNetwork : public TestNetwork {};
@@ -104,4 +110,39 @@ TEST_F(TestNetwork, TestEncodeSimpleMatrix) {
 
 
 }
+
+TEST_F(TestNetwork,TestEncodeDecodeFeatVec) {
+    RadarMessage_t message;
+    message.id = "foo-id";
+    message.device_id = "device-id";
+    message.sequence_number = 42;
+
+    message.vec.push_back(3.14159);
+    message.vec.push_back(1.0);
+    message.vec.push_back(2.0);
+    message.vec.push_back(3.0);
+    message.vec.push_back(4.0);
+    
+    size_t message_size = 0;
+    bytes = RadarMessageProtobuf::serialize_protobuf(message,message_size);
+    
+    ASSERT_TRUE(bytes);
+    
+
+    
+    RadarMessage_t m;
+    ASSERT_TRUE(RadarMessageProtobuf::deserialize_protobuf(bytes, message_size,m));
+    
+    ASSERT_EQ(m.vec.size(),message.vec.size());
+    
+    for (int i = 0; i < m.vec.size(); i++) {
+        ASSERT_EQ(m.vec[i],message.vec[i]);
+    }
+    
+    ASSERT_EQ(m.id, message.id);
+    ASSERT_EQ(m.device_id, message.device_id);
+    ASSERT_EQ(m.sequence_number, message.sequence_number);
+
+}
+
 

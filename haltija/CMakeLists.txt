@@ -2,12 +2,10 @@ cmake_minimum_required (VERSION 3.1)
 
 PROJECT (Haltija)
 set (CMAKE_CXX_STANDARD 14)
-#set(CMAKE_OSX_DEPLOYMENT_TARGET "10.12")
+set (CMAKE_C_STANDARD 99)
 
 set(CMAKE_INCLUDE_PATH ${PROJECT_SOURCE_DIR}/)
 set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
-
-
 
 if (WIN32)
   set(ZLIB_LIBRARIES "${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/winlib/zlib/zlibstatic.lib")
@@ -46,6 +44,9 @@ mateigen/matlabreader.cpp
 mateigen/matlabwriter.cpp
 )
 
+target_link_libraries(mateigen matio)
+
+
 add_library(algorithm STATIC
 algorithm/kiss_fft.c
 algorithm/haltijamath.cpp
@@ -58,8 +59,10 @@ algorithm/rangebincombiner.cpp
 
 add_library(network STATIC
 network/noveldaprotobuf.cpp
+network/radarmessageprotobuf.cpp
 network/novelda.pb.c
 network/simple_matrix.pb.c
+network/radar_messages.pb.c
 network/protobuf_matrix_utils.c
 network/proto_utils.c
 )

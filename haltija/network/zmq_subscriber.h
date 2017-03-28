@@ -5,6 +5,10 @@
 #include <iostream>
 #include "log.h"
 
+void *zmq_ctx_new ();
+int zmq_ctx_destroy (void *context);
+int zmq_recv (void *socket, void *buf, size_t len, int flags);
+
 //example url "tcp://localhost:5563"
 
 template <class Deserializer,class Message,class Subscriber>
@@ -37,7 +41,7 @@ public:
 
         while (1) {
             
-            int size = zmq_recv (subscriber, _message_buf, _max_size, 0);
+            int size = zmq_recv (subscriber, (zmq_msg_t *)_message_buf, _max_size, 0);
             
             if (size == -1) {
                 LOG("error receiving data");

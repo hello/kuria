@@ -13,13 +13,13 @@ import radar_messages_pb2
 import zmq
 import collections
 
-server_address = "tcp://127.0.0.1:6543"
+server_address = "tcp://127.0.0.1:5564"
 
 np.set_printoptions(precision=3, suppress=True, threshold=np.nan)
 
-plot_samples = 100
-num_feats = 1
-plot_yrange = (-1, 1)
+plot_samples = 200
+num_feats = 2
+plot_yrange = (-1e7, 1e7)
 
 g_kill = False
 g_PlotQueue = Queue()
@@ -59,6 +59,8 @@ def update_plot():
         while True:
             index,vec = g_PlotQueue.get(False)            
             g_plotdata[0].append(vec[0]);
+            g_plotdata[1].append(vec[1]);
+
             for j in range(len(g_curves)):
                 g_curves[j].setData(list(g_plotdata[j]))
 
@@ -85,9 +87,11 @@ def subscribe_messages(publisher_url):
              vec.ParseFromString(message)
              index = vec.sequence_number
              x = [f for f in vec.floatfeats]
-             print((index,x))
+             #print((index,x))
              g_PlotQueue.put((index,x))
-                  
+             if (index % 100 == 0):
+                 print('got message %d' % (index))     
+
         except IOError:
              pass
           

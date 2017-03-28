@@ -26,11 +26,11 @@ void PreprocessorIIR::reset() {
 PreprocessorPtr_t PreprocessorIIR::createWithDefaultHighpassFilter(const int num_range_bins,const int num_frames_in_segment,const int num_frames_to_wait_between_segments) {
     
     
-    MatrixXf B(5,1);
-    MatrixXf A(5,1);
-    
-    B <<  0.85284624, -1.70569249,  0.85284624;
-    A << 1.        , -1.68391975,  0.72746523;
+    MatrixXf B(2,1);
+    MatrixXf A(2,1);
+    //0.1Hz
+    B <<  0.99601935, -0.99601935;
+    A <<  1.       , -0.9920387;
     
     
     return PreprocessorPtr_t(new PreprocessorIIR(B,A,num_range_bins,num_frames_in_segment,num_frames_to_wait_between_segments));
