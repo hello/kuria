@@ -22,7 +22,7 @@ Peakfinder::Peakfinder()
 {
     _prev_sample = 0;
     _prev_deriv = 0;
-    
+
     
 }
 
@@ -39,18 +39,18 @@ bool Peakfinder::isPeak(const MatrixXcf & transformed_sample, const int iframe, 
     deriv = filtered_sample(0,0) - _prev_sample;
     //std::cout << "deriv " << deriv << std::endl;
     //std::cout << "prev_deriv " << _prev_deriv << std::endl;
-    
+
     
     if ((_prev_deriv < 0) && (deriv > 0) ) {
         _minima.push_front(_prev_sample);
         _minimaind.push_front(iframe - 1);
-        
+
         // save the current sample for the next round
         _prev_sample = filtered_sample(0,0);
         _prev_deriv = deriv;
         //std::cout << "minima " << std::endl;
         return true;
-        
+
     }
     else if (_prev_deriv > 0 && deriv < 0 ) {
         _maxima.push_front(_prev_sample);
@@ -86,15 +86,15 @@ bool Peakfinder::isPeak(const MatrixXcf & transformed_sample, const int iframe, 
 
 // First filter with low pass filter before running peak detection
 void Peakfinder::lpFilter(const MatrixXcf & transformed_sample, MatrixXf & filtered_sample) {
-    
+
     MatrixXf B(3,1);
     MatrixXf A(3,1);
-    
+
     //B << 0.85284624, -1.70569249,  0.85284624;
     //A << 1.,         -1.68391975,  0.72746523;
     A << 1.000000000000000, -1.705552145544084, 0.743655195048866;
     B << 0.009525762376195,  0.019051524752390, 0.009525762376195;
-    
+
     
     IIRFilter<MatrixXf, MatrixXf> f(B,A,1);
     
@@ -143,9 +143,9 @@ void Peakfinder::lpFilter(const MatrixXcf & transformed_sample, MatrixXf & filte
 
 //Lets make sure, that there is no consecutive minimas
 /*if isempty(minimas_ind) || isempty(maximas_ind) || minimas_ind(end) < maximas_ind(end)
- minimas_ind = [minimas_ind; i];
- end
- */
+minimas_ind = [minimas_ind; i];
+end
+*/
 
 //No consecutive maximas
 //elseif temppi2(i) > 0 && temppi2(i+1) < 0

@@ -55,6 +55,7 @@ algorithm/preprocessorIIR.cpp
 algorithm/respiration.cpp
 algorithm/novelda_radar_subscriber.cpp
 algorithm/rangebincombiner.cpp
+algorithm/peakFinding.cpp
 )
 
 add_library(network STATIC

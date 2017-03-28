@@ -7,6 +7,8 @@
 
 #include "respiration.h"
 #include "pca.h"
+#include "peakFinding.h"
+
 
 using namespace Eigen;
 
@@ -45,6 +47,12 @@ int main(int argc, char * argv[]) {
     std::cout << baseband.rows() << " x " << baseband.cols() << std::endl;
     
     
+    Peakfinder respirationpeaks;
+    MatrixXf temp(1,300);
+    //float temp;
+    int peak_ind = 0;
+    int iframe_pros = 0; // index for processored frames
+
     for (int iframe = 0; iframe < baseband.rows(); iframe++) {
         
         BasebandDataFrame_t frame;
@@ -75,13 +83,28 @@ int main(int argc, char * argv[]) {
         
         
         MatrixXcf transformed_frame;
+        MatrixXf filtered_sample;
         if (combiner.get_latest_reduced_measurement(filtered_frame, transformed_frame)) {
             write_matrix_to_cell_array("t",transformed_frame);
+            //std::cout << "t " << transformed_frame.real() << std::endl;
+            
+            // added scaling here to test.
+            if (respirationpeaks.isPeak(1e-6 * transformed_frame, iframe_pros, filtered_sample)) {
+                
+                if (peak_ind <= 300) {
+                    temp(0,peak_ind) = (float)iframe_pros;
+                    peak_ind = peak_ind + 1;
+                    //std::cout << " extrema " << peak_ind << " :";
+                }
+                
+            }
+            iframe_pros++;
+            write_matrix_to_cell_array("filt",filtered_sample);
+            
         }
         
     }
-    
-    
+    write_matrix_to_cell_array("temp", temp);
     
     /*
     
