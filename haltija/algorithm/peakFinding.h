@@ -11,18 +11,19 @@
 
 #include <Eigen/Core>
 #include <list>
+#include "filters.h"
+#include <memory>
+
 //#include <vector> // needed?
 //#include <stdio.h>
 
-
-using namespace Eigen;
 
 class Peakfinder  {
 public:
     Peakfinder();
     ~Peakfinder();
-    bool isPeak(const MatrixXcf & transformed_frame, const int iframe, MatrixXf & filtered_sample);
-    void lpFilter(const MatrixXcf & transformed_frame, MatrixXf & filtered_sample); // could be also private func
+    bool isPeak(const Eigen::MatrixXcf & transformed_frame, const int iframe, Eigen::MatrixXf & filtered_sample);
+    void lpFilter(const Eigen::MatrixXcf & transformed_frame, Eigen::MatrixXf & filtered_sample); // could be also private func
   
     // functions to calculate respiration rate (RR)
     //float getInstantRR();
@@ -37,6 +38,9 @@ private:
     
     float _prev_sample;
     float _prev_deriv;
+    
+    typedef std::shared_ptr<IIRFilter<Eigen::MatrixXf, Eigen::MatrixXf>> FloatIIRSharedPtr_t;
+    FloatIIRSharedPtr_t _lpf;
     
 };
 

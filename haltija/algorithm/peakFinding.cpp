@@ -23,10 +23,20 @@ Peakfinder::Peakfinder()
     _prev_sample = 0;
     _prev_deriv = 0;
     
+    MatrixXf B(3,1);
+    MatrixXf A(3,1);
     
+    //B << 0.85284624, -1.70569249,  0.85284624;
+    //A << 1.,         -1.68391975,  0.72746523;
+    A << 1.000000000000000, -1.705552145544084, 0.743655195048866;
+    B << 0.009525762376195,  0.019051524752390, 0.009525762376195;
+    
+    _lpf = FloatIIRSharedPtr_t(new IIRFilter<MatrixXf, MatrixXf>(B,A,1));
+
 }
 
 Peakfinder::~Peakfinder() {
+    //don't have to delete IIR filter b/c of shared pointer
 }
 
 
@@ -87,16 +97,7 @@ bool Peakfinder::isPeak(const MatrixXcf & transformed_sample, const int iframe, 
 // First filter with low pass filter before running peak detection
 void Peakfinder::lpFilter(const MatrixXcf & transformed_sample, MatrixXf & filtered_sample) {
     
-    MatrixXf B(3,1);
-    MatrixXf A(3,1);
     
-    //B << 0.85284624, -1.70569249,  0.85284624;
-    //A << 1.,         -1.68391975,  0.72746523;
-    A << 1.000000000000000, -1.705552145544084, 0.743655195048866;
-    B << 0.009525762376195,  0.019051524752390, 0.009525762376195;
-    
-    
-    IIRFilter<MatrixXf, MatrixXf> f(B,A,1);
     
     MatrixXf temp(1,1);
     // add power calculation here!
@@ -104,7 +105,7 @@ void Peakfinder::lpFilter(const MatrixXcf & transformed_sample, MatrixXf & filte
     // temp = sqrt( transformed_frame.real() .^2 + transformed_frame.imag() .^2 );
     temp = transformed_sample.real();
     //std::cout << "temp " << temp << std::endl;
-    filtered_sample = f.filter(temp);
+    filtered_sample = _lpf->filter(temp);
     
     return;
 }
