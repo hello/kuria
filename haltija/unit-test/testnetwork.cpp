@@ -76,6 +76,7 @@ TEST_F(TestNetwork, TestDecodeSimpleMatrix) {
 
 }
 
+/*
 TEST_F(TestNetwork, TestEncodeSimpleMatrix) {
     const double mat[6] = {1,2,3,4,5,6};
     
@@ -110,6 +111,8 @@ TEST_F(TestNetwork, TestEncodeSimpleMatrix) {
 
 
 }
+ 
+ */
 
 TEST_F(TestNetwork,TestEncodeDecodeFeatVec) {
     RadarMessage_t message;
