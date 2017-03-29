@@ -25,6 +25,9 @@ void end_application(void) {
 
     // End radar task
     radar_task_end ();
+
+    // End Scheduler
+    vTaskEndScheduler();
 }
 
 
