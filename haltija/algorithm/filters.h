@@ -16,29 +16,61 @@ public:
         
     }
     
-    T filter(const T & x) {
-        _input_history.row(_time_index) = x;
+    T filter(const T & x, bool reverse=false) {
+        T output;
+        output.resizeLike(x);
         
-        size_t short_index = (_time_index + 1) % _B.rows();
+        int t = 0;
+        int incr = 1;
         
-        T sum = _input_history.row(_time_index) * _B(0,0);
-
-        
-        //increasing short_index means going from oldest to newest samples
-        for (size_t idelay = _B.rows() - 1; idelay > 0; idelay--) {
-            sum += _input_history.row(short_index) * _B(idelay,0);
-            sum -= _output_history.row(short_index) * _A(idelay,0);
-            short_index = (short_index + 1) % _B.rows();
+        if (reverse) {
+            t = x.rows() - 1;
+            incr = -1;
         }
         
-        sum *= (1.0 / _A(0,0));
+        while(t >= 0 && t < x.rows()) {
+            
+            _input_history.row(_time_index) = x.row(t);
+            
+            size_t short_index = (_time_index + 1) % _B.rows();
+            
+            T sum = _input_history.row(_time_index) * _B(0,0);
+            
+            
+            //increasing short_index means going from oldest to newest samples
+            for (size_t idelay = _B.rows() - 1; idelay > 0; idelay--) {
+                sum += _input_history.row(short_index) * _B(idelay,0);
+                sum -= _output_history.row(short_index) * _A(idelay,0);
+                short_index = (short_index + 1) % _B.rows();
+            }
+            
+            sum *= (1.0 / _A(0,0));
+            
+            _output_history.row(_time_index) = sum;
+            
+            _time_index = (_time_index + 1) % _B.rows();
+            
+            output.row(t) = sum;
+            
+            t += incr;
+        }
         
-        _output_history.row(_time_index) = sum;
-        
-        _time_index = (_time_index + 1) % _B.rows();
-        
-        return sum;
- 
+        return output;
+    }
+    
+    //UNTESTED
+    //UNTESTED
+    //UNTESTED
+    //UNTESTED
+    T filtfilt(const T & x) {
+        //UNTESTED
+        T x2 = x;
+        reset();
+        T yforwards = filter(x,false);
+        reset();
+        T ybackwards = filter(x,true);
+
+        return (yforwards + ybackwards) * 0.5;
     }
     
     void reset() {
