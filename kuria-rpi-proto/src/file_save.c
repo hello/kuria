@@ -4,8 +4,6 @@
 #include <math.h>
 #include <time.h>
 #include <string.h>
-#include <pthread.h>
-#include "kuria_config.h"
 
 #if USE_FREERTOS_TASKS
 #include "FreeRTOS.h"
@@ -76,7 +74,7 @@ int32_t file_task_init (pthread_t* thread_id) {
     }
     
     // TODO redundant variable can be removed 
-    thread_id = file_task_thread_id;
+    *thread_id = file_task_thread_id;
 
 #endif
     printf(" File init done\n");

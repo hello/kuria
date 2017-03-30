@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <signal.h>
+#include <stdlib.h>
 #include <unistd.h>
 #include <stdbool.h>
 #include "kuria_config.h"
@@ -19,9 +20,15 @@
 
 bool stop_x4_read = 0;
 
+void end_application(void); 
 void sig_handler(int sig) {
     if(sig == SIGINT || sig == SIGABRT)  {
+#if USE_FREERTOS_TASKS
         stop_x4_read = 1;
+#else
+        end_application();
+        exit(0);
+#endif
     }
 }
 
@@ -95,39 +102,44 @@ int main() {
     }
     setbuf(stdout, NULL);
 
-    if(radar_task_init()){
-        end_application();
-        return -1;
-    }
+#if USE_FREERTOS_TASKS
+    if(radar_task_init (NULL)){
+#else
+        pthread_t radar_task_thread_id;
+        if (radar_task_init (&radar_task_thread_id) ) {
+#endif
+            end_application();
+            return -1;
+        }
 
 #if USE_FREERTOS_TASKS
-    if( file_task_init() ) {
+        if( file_task_init() ) {
 #else
-    pthread_t file_thread_id;
-    if (file_task_init (&file_thread_id) ) {
+            pthread_t file_thread_id;
+            if (file_task_init (&file_thread_id) ) {
 #endif
-        printf("Error initializing file task\n");
-        end_application();
-        return -1;
-    }
+                printf("Error initializing file task\n");
+                end_application();
+                return -1;
+            }
 #if USE_FREERTOS_TASKS
 
-    vTaskStartScheduler();
+            vTaskStartScheduler();
 
 #else
 
-    for (;;) {
+            for (;;) {
 
-        pause ();
+                pause ();
 
-    }
+            }
 #endif
 
-    // Should never get here
-    printf("Exit from app \n");
+            // Should never get here
+            printf("Exit from app \n");
 
-    // TODO clean up if needed
+            // TODO clean up if needed
 
-    return 0;
+            return 0;
 
-}
+        }
