@@ -1,13 +1,19 @@
 #include <pthread.h>
 #include <stdio.h>
 #include <stdint.h>
+#include <stdlib.h>
 #include "radar_task.h"
 #include "x4driver.h"
+#include "kuria_config.h"
+
+#if USE_FREERTOS_TASKS
 #include "FreeRTOS.h"
 #include "task.h"
-#include <stdbool.h>
 #include "semphr.h"
 #include "timers.h"
+#endif
+
+#include <stdbool.h>
 #include "spidriver.h"
 #include "gpio_hal.h"
 #include "radar_data_format.h"
@@ -32,15 +38,23 @@
 
 /* Local Variables */
 static X4Driver_t* x4driver;
-static TaskHandle_t h_task_radar = NULL;
 static bool en_intr = true;
+
+#if USE_FREERTOS_TASKS
 static SemaphoreHandle_t xRadarSem;
+static TaskHandle_t h_task_radar = NULL;
+#endif
+
 static pthread_mutex_t radar_task_mutex;
 
 /* Static function declarations */
 static uint32_t read_and_send_radar_frame(X4Driver_t* x4driver);
+
+#if USE_FREERTOS_TASKS
 void x4driver_timer_sweep_timeout(TimerHandle_t pxTimer) ;
 void x4driver_timer_action_timeout(TimerHandle_t pxTimer) ;
+#endif
+
 uint32_t x4driver_timer_set_timer_timeout_frequency(void* timer , uint32_t frequency) ;
 void x4driver_notify_data_ready(void* user_reference);
 void x4driver_interrupt_notify_data_ready(void) ;
@@ -55,7 +69,10 @@ static int32_t radar_task_set_callbacks_lock ();
 static int32_t radar_task_set_callbacks_driver ();
 
 /* Global Variables */
+
+#if USE_FREERTOS_TASKS
 extern QueueHandle_t radar_data_queue; 
+#endif
 
 
 /* Function definitions */
@@ -73,11 +90,13 @@ uint32_t radar_task_init(void){
     // Init GPIO
     gpio_init();
 
+#if USE_FREERTOS_TASKS
     xRadarSem = xSemaphoreCreateBinary();
     if(xRadarSem == NULL ){
         printf("Could not create semaphore \n");
         return -1;
     }
+#endif
 
     // X4Driver calbacks
     X4DriverCallbacks_t x4driver_callbacks;
@@ -103,9 +122,11 @@ uint32_t radar_task_init(void){
     // X4Driver timer for generating sweep FPS on MCU. Not used when sweep FPS is generated on X4.
     uint32_t timer_id_sweep = 2;
     X4DriverTimer_t timer_sweep;
-#if USE_FREERTOS_TIMER
+#if USE_FREERTOS_TASKS
     timer_sweep.object = xTimerCreate("X4Driver_sweep_timer", 1000 / portTICK_PERIOD_MS, pdTRUE, (void*)timer_id_sweep, x4driver_timer_sweep_timeout);
 #else
+
+#if 0
     // TODO - incomplete
     // Use Linux timer
     timer_t sweep_timer_id;
@@ -122,16 +143,20 @@ uint32_t radar_task_init(void){
 
     timer_sweep.object = &sweep_timer_id;
 #endif
+
+#endif
     timer_sweep.configure = x4driver_timer_set_timer_timeout_frequency;
 
     // X4Driver timer used for driver action timeout.
     uint32_t timer_id_action = 3;
     X4DriverTimer_t timer_action;
+#if USE_FREERTOS_TASKS
     timer_action.object = xTimerCreate("X4Driver_action_timer", 1000 / portTICK_PERIOD_MS, pdTRUE, (void*)timer_id_action, x4driver_timer_action_timeout);
+#endif
     timer_action.configure = x4driver_timer_set_timer_timeout_frequency;
 
     // Allocate memory for X4driver instance
-    void* x4driver_instance_memory = pvPortMalloc(x4driver_get_instance_size());
+    void* x4driver_instance_memory = malloc(x4driver_get_instance_size());
     if(!x4driver_instance_memory){
         printf("malloc failed\n");
         return -1;
@@ -140,9 +165,11 @@ uint32_t radar_task_init(void){
     // Set X4driver instance variable to default values, initialize callbacks
     x4driver_create(&x4driver, x4driver_instance_memory, &x4driver_callbacks,&lock,&timer_sweep,&timer_action,NULL);
 
+#if USE_FREERTOS_TASKS
     // Create Radar task to read data from X4
     xTaskCreate(radar_task, (const char* const) "Radar", TASK_RADAR_STACK_SIZE, \
             NULL , TASK_RADAR_PRIORITY, &h_task_radar);
+#endif
 
     // Enable X4 chip
     status = x4driver_set_enable(x4driver, 1);
@@ -203,6 +230,8 @@ void radar_task(void* pvParameters){
     printf("X4 Test start...\n");
 
     while(1) {
+#if USE_FREERTOS_TASKS
+
 #if 0
         uint32_t notify_value = 0;
         // poll x4 for data
@@ -250,6 +279,8 @@ void radar_task(void* pvParameters){
         }
 #endif
 
+#endif // USE_FREERTOS_TASKS
+
     } // Task forever loop
 
     printf("Ending X4 Test...\n");
@@ -267,7 +298,7 @@ void radar_task_end (void) {
 
 static int32_t radar_data_frame_prepare( radar_frame_packet** packet, uint32_t data_count ){
 
-    *packet = (radar_frame_packet*) pvPortMalloc( sizeof(radar_frame_packet) );
+    *packet = (radar_frame_packet*) malloc( sizeof(radar_frame_packet) );
 
     if( !(*packet) ) {
         printf( "Error creating radar packet \n");
@@ -278,7 +309,8 @@ static int32_t radar_data_frame_prepare( radar_frame_packet** packet, uint32_t d
 
     (*packet)->num_of_bins = data_count;
 
-    (*packet)->fdata = (float32_t*) pvPortMalloc( sizeof(float32_t) * data_count );
+    (*packet)->fdata = (float32_t*) malloc( sizeof(float32_t) * data_count );
+
     if( (*packet)->fdata == NULL ) {
         printf( "fdata malloc error\n" );
         return -1;
@@ -289,18 +321,18 @@ static int32_t radar_data_frame_prepare( radar_frame_packet** packet, uint32_t d
 
 int32_t radar_data_frame_free( radar_frame_packet* packet ) {
     if( packet->fdata ) {
-        vPortFree(packet->fdata);
+        free(packet->fdata);
     }
 
     if( packet->sig_i ) {
-        vPortFree( packet->sig_i );
+        free( packet->sig_i );
     }
 
     if( packet->sig_q ) {
-        vPortFree( packet->sig_q );
+        free( packet->sig_q );
     }
 
-    vPortFree( packet );
+    free( packet );
 
     return 0;
 
@@ -342,9 +374,10 @@ static uint32_t read_and_send_radar_frame(X4Driver_t* x4driver) {
     else {
         //        printf("Frame read completed\n");
     }
-#if 1 
+    
     // send radar data to file task
-    //
+    
+#if USE_FREERTOS_TASKS
     if(radar_data_queue ){
         if( xQueueSend( radar_data_queue, &radar_packet, (TickType_t ) 100 ) != pdPASS ) {
             printf( "Failed to send msg to queue \n");
@@ -352,9 +385,8 @@ static uint32_t read_and_send_radar_frame(X4Driver_t* x4driver) {
             return -1;
         }
     }
-#else
-    radar_data_frame_free( radar_packet);
-#endif
+#endif // USE_FREERTOS_TASKS
+        
     return status;
 }
 
@@ -368,7 +400,7 @@ void dump_spi_reg(void){
 
 }
 
-static int32_t radar_task_set_callbacks_timer( ) {
+static int32_t radar_task_set_callbacks_timer (void ) {
 
 }
 
@@ -426,6 +458,7 @@ static int32_t radar_task_set_callbacks_driver () {
 
 /************************ Callbacks ******************************************/
 
+#if USE_FREERTOS_TASKS
 /* TIMER CALLBACKS */
 void x4driver_timer_sweep_timeout(TimerHandle_t pxTimer) {
     BaseType_t xHigherPriorityTaskWoken = pdFALSE;
@@ -483,6 +516,7 @@ void x4driver_interrupt_notify_data_ready(void) {
     DISP("INTR: \n");
 
 }
+#endif //USE_FREERTOS_TASKS
 
 void x4driver_enable_ISR(void* user_reference, uint32_t enable) {
     if(( enable == 1) && (en_intr ))  {
@@ -525,12 +559,14 @@ uint32_t x4driver_callback_pin_set_enable(void* user_reference, uint8_t value){
     return XEP_ERROR_X4DRIVER_OK;
 }
 
+#if USE_FREERTOS_TASKS
 void x4driver_interrupt_data_ready(void) {
     BaseType_t xHigherPriorityTaskWoken = pdFALSE;
     xTaskNotifyFromISR(h_task_radar, XEP_NOTIFY_RADAR_DATAREADY, eSetBits, 
             &xHigherPriorityTaskWoken);
     portYIELD_FROM_ISR( xHigherPriorityTaskWoken ); 
 }
+#endif
 
 /* X4driver lock mechanism callbacks */
 static uint32_t x4driver_callback_take_sem(void * sem,uint32_t timeout)

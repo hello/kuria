@@ -2,10 +2,17 @@
 #include <signal.h>
 #include <unistd.h>
 #include <stdbool.h>
+#include "kuria_config.h"
+
+#if USE_FREERTOS_TASKS
+
 #include "portmacro.h"
 #include "FreeRTOS.h"
 #include "task.h"
 #include "queue.h"
+
+#endif
+
 #include <string.h>
 #include "file_save.h"
 #include "radar_task.h"
@@ -26,10 +33,14 @@ void end_application(void) {
     // End radar task
     radar_task_end ();
 
+#if USE_FREERTOS_TASKS
     // End Scheduler
     vTaskEndScheduler();
+#endif
+
 }
 
+#if USE_FREERTOS_TASKS
 
 /*************************** FreeRTOS application hooks**************************** */
 void vApplicationTickHook( void )
@@ -69,7 +80,7 @@ void vMainQueueSendPassed( void )
     /* This is just an example implementation of the "queue send" trace hook. */
 }
 
-
+#endif
 
 int main() {
 
@@ -89,16 +100,33 @@ int main() {
         return -1;
     }
 
+#if USE_FREERTOS_TASKS
     if( file_task_init() ) {
+#else
+    pthread_t file_thread_id;
+    if (file_task_init (&file_thread_id) ) {
+#endif
         printf("Error initializing file task\n");
         end_application();
         return -1;
     }
+#if USE_FREERTOS_TASKS
 
     vTaskStartScheduler();
 
-    printf("Exit from scheduler\n");
+#else
 
+    for (;;) {
+
+        pause ();
+
+    }
+#endif
+
+    // Should never get here
+    printf("Exit from app \n");
+
+    // TODO clean up if needed
 
     return 0;
 
