@@ -310,7 +310,9 @@ void* radar_task (void* param) {
 #else
         // TODO use hlo notify here
         uint32_t notify_value = 0;
-        hlo_notify_wait (&radar_task_notify, &notify_value);
+        while (notify_value == 0) {
+            hlo_notify_wait (&radar_task_notify, &notify_value);
+        }
 
         printf ("received hlo_notify value: %x\n",notify_value);
         if (notify_value & XEP_NOTIFY_RADAR_DATAREADY) {
@@ -334,9 +336,6 @@ void* radar_task (void* param) {
             printf("Ending radar task\n");
             break;
         }
-        else{
-            printf ("n");
-        }
 
 #endif // USE_FREERTOS_TASKS
 
@@ -353,6 +352,11 @@ void radar_task_end (void) {
 
     // Close spi
     spi_close ();
+}
+
+void radar_task_en_intr (void) {
+
+    x4driver_enable_ISR(NULL,1);
 }
 
 static int32_t radar_data_frame_prepare( radar_frame_packet** packet, uint32_t data_count ){
@@ -444,6 +448,8 @@ static uint32_t read_and_send_radar_frame(X4Driver_t* x4driver) {
             return -1;
         }
     }
+#else
+    radar_data_frame_free (radar_packet);
 #endif // USE_FREERTOS_TASKS
 
     return status;
@@ -639,7 +645,7 @@ uint32_t x4driver_callback_pin_set_enable(void* user_reference, uint8_t value){
     if( value == 0 ) pin_write(X4_ENABLE_PIN, LOW);
     else if( value == 1) pin_write(X4_ENABLE_PIN, HIGH);
 
-    x4driver_enable_ISR(NULL,1);
+    x4driver_enable_ISR(NULL,0);
     return XEP_ERROR_X4DRIVER_OK;
 }
 

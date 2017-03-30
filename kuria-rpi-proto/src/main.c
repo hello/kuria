@@ -122,6 +122,7 @@ int main() {
                 end_application();
                 return -1;
             }
+    radar_task_en_intr ();
 #if USE_FREERTOS_TASKS
 
             vTaskStartScheduler();
