@@ -14,25 +14,16 @@
 #include <unistd.h>
 #include "radar_data_format.h"
 
-#if USE_FREERTOS_TASKS
-#define FILE_TASK_STACK_SIZE            (1500)
-#define FILE_TASK_PRIORITY        (tskIDLE_PRIORITY + 6)
-#endif
 
 FILE* fp;
 
 #if USE_FREERTOS_TASKS
-static TaskHandle_t h_task_file = NULL;
 QueueHandle_t radar_data_queue; 
 #endif
 
 extern int32_t radar_data_frame_free( radar_frame_packet* packet ); 
 
-#if USE_FREERTOS_TASKS
-int32_t file_task_init(void) {
-#else
 int32_t file_task_init (pthread_t* thread_id) {
-#endif
 
     char filename[40];
     time_t now = time(NULL);
@@ -45,8 +36,6 @@ int32_t file_task_init (pthread_t* thread_id) {
         return -1;
     }
 #if USE_FREERTOS_TASKS
-    xTaskCreate(file_task, (const char* const) "file_save", FILE_TASK_STACK_SIZE, \
-           NULL , FILE_TASK_PRIORITY, &h_task_file);
 
     radar_data_queue = xQueueCreate(50 , sizeof(radar_frame_packet* ) );
 
@@ -81,11 +70,7 @@ int32_t file_task_init (pthread_t* thread_id) {
     return 0;
 }
 
-#if USE_FREERTOS_TASKS
-void file_task(void* pvParameters) {
-#else
 void* file_task (void* param) {
-#endif
 
     radar_frame_packet* packet = NULL;
     uint32_t data_index;

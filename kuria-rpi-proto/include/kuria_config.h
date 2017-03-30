@@ -6,6 +6,6 @@
 #define USE_FREERTOS_TIMER 1
 #define USE_FREERTOS_LOCK 0
 #define USE_FREERTOS_SEM 1
-#define USE_FREERTOS_TASKS 0
+#define USE_FREERTOS_TASKS 1
 
 #endif

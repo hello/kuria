@@ -5,14 +5,6 @@
 #include <stdbool.h>
 #include "kuria_config.h"
 
-#if USE_FREERTOS_TASKS
-
-#include "portmacro.h"
-#include "FreeRTOS.h"
-#include "task.h"
-#include "queue.h"
-
-#endif
 
 #include <string.h>
 #include "file_save.h"
@@ -23,12 +15,9 @@ bool stop_x4_read = 0;
 void end_application(void); 
 void sig_handler(int sig) {
     if(sig == SIGINT || sig == SIGABRT)  {
-#if USE_FREERTOS_TASKS
         stop_x4_read = 1;
-#else
         end_application();
         exit(0);
-#endif
     }
 }
 
@@ -40,46 +29,12 @@ void end_application(void) {
     // End radar task
     radar_task_end ();
 
-#if USE_FREERTOS_TASKS
-    // End Scheduler
-    vTaskEndScheduler();
-#endif
-
 }
 
-#if USE_FREERTOS_TASKS
-
-/*************************** FreeRTOS application hooks**************************** */
-void vApplicationTickHook( void )
-{
-#if 0
-    static unsigned long ulTicksSinceLastDisplay = 0;
-    static unsigned long ulCalled = 0;
-
-    /* Called from every tick interrupt.  Have enough ticks passed to make it
-       time to perform our health status check again? */
-    ulTicksSinceLastDisplay++;
-    if( ulTicksSinceLastDisplay >= mainCHECK_DELAY )
-    {
-        ulTicksSinceLastDisplay = 0;
-        ulCalled++;
-        //printf("AppTickHook %ld\r\n", ulCalled);
-    }
-#endif
+void vApplicationTickHook (void) {
 }
 
-void vApplicationIdleHook( void )
-{
-    /* The co-routines are executed in the idle task using the idle task hook. */
-    /* vCoRoutineSchedule(); */ /* Comment this out if not using Co-routines. */
-
-    if(stop_x4_read) {
-        printf("Idle task end\n"); 
-        fflush(stdout);
-
-        end_application();
-    }
-    /* Makes the process more agreeable when using the Posix simulator. */
+void vApplicationIdleHook (void) {
 }
 
 void vMainQueueSendPassed( void )
@@ -87,7 +42,6 @@ void vMainQueueSendPassed( void )
     /* This is just an example implementation of the "queue send" trace hook. */
 }
 
-#endif
 
 int main() {
 
@@ -102,45 +56,31 @@ int main() {
     }
     setbuf(stdout, NULL);
 
-#if USE_FREERTOS_TASKS
-    if(radar_task_init (NULL)){
-#else
-        pthread_t radar_task_thread_id;
-        if (radar_task_init (&radar_task_thread_id) ) {
-#endif
-            end_application();
-            return -1;
-        }
+    pthread_t radar_task_thread_id;
+    if (radar_task_init (&radar_task_thread_id) ) {
+        end_application();
+        return -1;
+    }
 
-#if USE_FREERTOS_TASKS
-        if( file_task_init() ) {
-#else
-            pthread_t file_thread_id;
-            if (file_task_init (&file_thread_id) ) {
-#endif
-                printf("Error initializing file task\n");
-                end_application();
-                return -1;
-            }
+    pthread_t file_thread_id;
+    if (file_task_init (&file_thread_id) ) {
+        printf("Error initializing file task\n");
+        end_application();
+        return -1;
+    }
     radar_task_en_intr ();
-#if USE_FREERTOS_TASKS
 
-            vTaskStartScheduler();
+    for (;;) {
 
-#else
+        pause ();
 
-            for (;;) {
+    }
 
-                pause ();
+    // Should never get here
+    printf("Exit from app \n");
 
-            }
-#endif
+    // TODO clean up if needed
 
-            // Should never get here
-            printf("Exit from app \n");
+    return 0;
 
-            // TODO clean up if needed
-
-            return 0;
-
-        }
+}
