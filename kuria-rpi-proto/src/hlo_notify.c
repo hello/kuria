@@ -20,17 +20,19 @@ int32_t hlo_notify_init (hlo_notify_t* param) {
     param->notify_data = 0;
 
     return status;
-    
+
 }
 
-int32_t hlo_notify_wait (hlo_notify_t* param, uint32_t* data) {
+int32_t hlo_notify_wait (hlo_notify_t* param, uint32_t* data, uint32_t bits) {
     int32_t status = 0;
 
     if (!param) return -1;
 
     pthread_mutex_lock (&param->notify_mutex);
 
-    pthread_cond_signal (&param->notify_cv);
+    while (param->notify_data & bits == 0) {
+        pthread_cond_wait (&param->notify_cv, &param->notify_mutex);
+    }
 
     *data = param->notify_data;
 
@@ -57,7 +59,7 @@ int32_t hlo_notify_send (hlo_notify_t* param, uint32_t data) {
 
 int32_t hlo_notify_delete (hlo_notify_t* param) {
     int32_t status;
-    
+
     if (!param) return -1;
 
     status = pthread_mutex_destroy (&param->notify_mutex);

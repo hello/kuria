@@ -17,6 +17,6 @@ typedef struct {
     float32_t* sig_i; // array of num_of_bins float values of the signal I-channel
     float32_t* sig_q; // array of num_of_bins float values of the signal q-channel
     float32_t* fdata; // array of alternating I and Q channel float values
-}radar_frame_packet;
+}radar_frame_packet_t;
 #endif
 

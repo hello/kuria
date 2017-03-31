@@ -14,7 +14,7 @@ typedef struct {
 }hlo_notify_t;
 
 int32_t hlo_notify_init (hlo_notify_t* param);
-int32_t hlo_notify_wait (hlo_notify_t* param, uint32_t* data);
+int32_t hlo_notify_wait (hlo_notify_t* param, uint32_t* data, uint32_t bits);
 int32_t hlo_notify_send (hlo_notify_t* param, uint32_t data);
 int32_t hlo_notify_delete (hlo_notify_t* param);
 
