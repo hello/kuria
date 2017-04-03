@@ -17,12 +17,7 @@ int32_t hlo_queue_create (hlo_queue_t* queue, uint32_t num_of_items) {
 
     int32_t status = 0;
 
-    pthread_mutexattr_t attr;
-
-    pthread_mutexattr_init (&attr);
-    pthread_mutexattr_settype (&attr, PTHREAD_MUTEX_RECURSIVE);
-
-    status = pthread_mutex_init (&queue->queue_mutex, &attr);
+    status = pthread_mutex_init (&queue->queue_mutex, NULL);
     if (status) {
         return status;
     }
@@ -63,9 +58,9 @@ int32_t hlo_queue_send (hlo_queue_t* queue, radar_frame_packet_t* data, uint32_t
 
     if (!queue || !data ) return -1;
 
-    pthread_mutex_lock (&queue->queue_mutex);
+    pthread_mutex_lock (&(queue->queue_mutex));
 
-    if (hlo_queue_is_full (queue) ) return -1;
+    if (queue->queue_size == queue->number_of_items ) return -1;
 
     memcpy ( &queue->data[queue->write_index], data, sizeof (radar_frame_packet_t) );
 
@@ -85,7 +80,7 @@ int32_t hlo_queue_recv (hlo_queue_t* queue, radar_frame_packet_t* data, uint32_t
 
     pthread_mutex_lock (&queue->queue_mutex);
 
-    while (hlo_queue_is_empty (queue) ) {
+    while (0 == queue->number_of_items ) {
         pthread_cond_wait (&queue->queue_cv, &queue->queue_mutex);
     }
 

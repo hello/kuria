@@ -6,11 +6,6 @@
 #include <string.h>
 #include <stdlib.h>
 
-#if USE_FREERTOS_TASKS
-#include "FreeRTOS.h"
-#include "task.h"
-#include "queue.h"
-#endif
 
 #include <unistd.h>
 #include "radar_data_format.h"
@@ -18,11 +13,7 @@
 
 FILE* fp;
 
-#if USE_FREERTOS_TASKS
-QueueHandle_t radar_data_queue; 
-#else
 hlo_queue_t radar_data_queue;
-#endif
 
 extern int32_t radar_data_frame_free( radar_frame_packet_t* packet ); 
 
@@ -38,16 +29,6 @@ int32_t file_task_init (pthread_t* thread_id) {
         printf("cannot open file \n");
         return -1;
     }
-#if USE_FREERTOS_TASKS
-
-    radar_data_queue = xQueueCreate(50 , sizeof(radar_frame_packet_t* ) );
-
-    if( radar_data_queue == NULL ) {
-        printf("error creating radar data queue\n");
-        file_close();
-        return -1;
-    }
-#else
 
     pthread_attr_t file_task_attr;
 
@@ -75,18 +56,13 @@ int32_t file_task_init (pthread_t* thread_id) {
         return status;
     }
 
-#endif
     printf(" File init done\n");
     return 0;
 }
 
 void* file_task (void* param) {
 
-#if USE_FREERTOS_TASKS
-    radar_frame_packet_t* packet = NULL;
-#else
     radar_frame_packet_t packet;
-#endif
 
     uint32_t data_index;
 
@@ -96,35 +72,9 @@ void* file_task (void* param) {
         // receive data from queue
         //
         //printf("wait for data\n");
-#if USE_FREERTOS_TASKS
-        packet = NULL;
-        if( xQueueReceive( radar_data_queue, &packet, portMAX_DELAY ) ) 
-        {
-            if( !packet->fdata ) {
-                printf(" invalid data \n" );
-                continue;
-            }
-
-            fprintf(fp, "\r\n");
-
-            //printf("Data received\n");
-            for(data_index = 0; data_index <= packet->num_of_bins-2; data_index+=2) {
-                // save to file
-                //
-                fprintf( fp, "%f%c%fi",  packet->fdata[data_index],( (packet->fdata[data_index+1] >= 0) ? '+':'-') , fabs (packet->fdata[data_index+1]) );
-                if (data_index != packet->num_of_bins) {
-                    fprintf (fp, ",");
-                }
-            }
-
-            // free pointers to radar frame data
-            // 
-            radar_data_frame_free( packet );
-            //printf("wr done\n");
-        }
-#else
         if (hlo_queue_recv (&radar_data_queue, &packet, 0) == 0) {
 
+            printf ("hlo queue recv data\n");
             if( !packet.fdata ) {
                 printf(" invalid data \n" );
                 continue;
@@ -142,13 +92,13 @@ void* file_task (void* param) {
                 }
             }
 
+            printf ("hlo queue wrote data\n");
             free (packet.fdata);
             // free pointers to radar frame data
             // 
             //            radar_data_frame_free( packet );
             //printf("wr done\n");
         }
-#endif 
 
     }
 

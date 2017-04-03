@@ -6,12 +6,6 @@
 #include "x4driver.h"
 #include "kuria_config.h"
 
-#if USE_FREERTOS_TASKS
-#include "FreeRTOS.h"
-#include "task.h"
-#include "semphr.h"
-#include "timers.h"
-#endif
 
 #include <stdbool.h>
 #include "spidriver.h"
@@ -22,7 +16,7 @@
 #include "hlo_queue.h"
 
 /* Defines */
-#if 1
+#if 0
 #define DISP printf
 #else
 #define DISP(...)
@@ -48,15 +42,10 @@ static pthread_mutex_t radar_task_mutex;
 /* Static function declarations */
 static uint32_t read_and_send_radar_frame(X4Driver_t* x4driver);
 
-#if USE_FREERTOS_TASKS
-void x4driver_timer_sweep_timeout(TimerHandle_t pxTimer) ;
-void x4driver_timer_action_timeout(TimerHandle_t pxTimer) ;
-#else
 // TODO uint32_t is just a placeholder till timer functionality is ported to non-freertos
 // remove once fixed, this is just to compile
 void x4driver_timer_sweep_timeout(uint32_t pxTimer) ;
 void x4driver_timer_action_timeout(uint32_t pxTimer) ;
-#endif
 
 uint32_t x4driver_timer_set_timer_timeout_frequency(void* timer , uint32_t frequency) ;
 void x4driver_notify_data_ready(void* user_reference);
@@ -73,11 +62,7 @@ static int32_t radar_task_set_callbacks_driver ();
 
 /* Global Variables */
 
-#if USE_FREERTOS_TASKS
-extern QueueHandle_t radar_data_queue; 
-#else
 extern hlo_queue_t radar_data_queue;
-#endif
 
 
 /* Function definitions */
@@ -124,9 +109,6 @@ int32_t radar_task_init (pthread_t* thread_id) {
     // X4Driver timer for generating sweep FPS on MCU. Not used when sweep FPS is generated on X4.
     uint32_t timer_id_sweep = 2;
     X4DriverTimer_t timer_sweep;
-#if USE_FREERTOS_TASKS
-    timer_sweep.object = xTimerCreate("X4Driver_sweep_timer", 1000 / portTICK_PERIOD_MS, pdTRUE, (void*)timer_id_sweep, x4driver_timer_sweep_timeout);
-#else
 
 #if 0
     // TODO - incomplete
@@ -146,15 +128,11 @@ int32_t radar_task_init (pthread_t* thread_id) {
     timer_sweep.object = &sweep_timer_id;
 #endif
 
-#endif
     timer_sweep.configure = x4driver_timer_set_timer_timeout_frequency;
 
     // X4Driver timer used for driver action timeout.
     uint32_t timer_id_action = 3;
     X4DriverTimer_t timer_action;
-#if USE_FREERTOS_TASKS
-    timer_action.object = xTimerCreate("X4Driver_action_timer", 1000 / portTICK_PERIOD_MS, pdTRUE, (void*)timer_id_action, x4driver_timer_action_timeout);
-#endif
     timer_action.configure = x4driver_timer_set_timer_timeout_frequency;
 
     // Allocate memory for X4driver instance
@@ -219,7 +197,7 @@ int32_t radar_task_init (pthread_t* thread_id) {
     x4driver_set_downconversion(x4driver, 1);
     //  x4driver_set_frame_area_offset(x4driver, 0.6);
     //  x4driver_set_frame_area(x4driver, 0.5, 9.9);
-    x4driver_set_fps(x4driver, 10);
+    x4driver_set_fps(x4driver, 5);
 
     // Verify X4 configurations
     status = x4driver_check_configuration(x4driver);
@@ -248,13 +226,13 @@ void* radar_task (void* param) {
         uint32_t notify_value = 0;
         hlo_notify_wait (&radar_task_notify, &notify_value, 0xFFFFFFFF); // TODO remove magic number
 
-        printf ("received hlo_notify value: %x\n",notify_value);
+        //        printf ("received hlo_notify value: %x\n",notify_value);
         if (notify_value & XEP_NOTIFY_RADAR_DATAREADY) {
 
-            printf("Radar Data Ready\n");
+            //            printf("Radar Data Ready\n");
 
             if(x4driver->trigger_mode != SWEEP_TRIGGER_MANUAL) {
-                printf("Read and send\n"); 
+                //                printf("Read and send\n"); 
                 read_and_send_radar_frame(x4driver);
             }
 
@@ -319,11 +297,11 @@ int32_t radar_data_frame_free( radar_frame_packet_t* packet ) {
 
     // TODO this may have to be done in file thread
     /*
-    if( packet->fdata ) {
-        free(packet->fdata);
-    }
+       if( packet->fdata ) {
+       free(packet->fdata);
+       }
 
-    */
+*/
     if( packet->sig_i ) {
         free( packet->sig_i );
     }
@@ -376,18 +354,13 @@ static uint32_t read_and_send_radar_frame(X4Driver_t* x4driver) {
     }
 
     // send radar data to file task
-
-#if USE_FREERTOS_TASKS
-    if(radar_data_queue ){
-        if( xQueueSend( radar_data_queue, &radar_packet, (TickType_t ) 100 ) != pdPASS ) {
-            printf( "Failed to send msg to queue \n");
-            radar_data_frame_free( radar_packet );
-            return -1;
-        }
-    }
-#else
+#if 0
     radar_data_frame_free (radar_packet);
-#endif // USE_FREERTOS_TASKS
+#else
+    // Send to file task
+    status = hlo_queue_send (&radar_data_queue, radar_packet, 0);
+    radar_data_frame_free (radar_packet);
+#endif
 
     return status;
 }
@@ -453,17 +426,6 @@ static int32_t radar_task_set_callbacks_driver () {
 
 /************************ Callbacks ******************************************/
 
-#if USE_FREERTOS_TASKS
-/* TIMER CALLBACKS */
-void x4driver_timer_sweep_timeout(TimerHandle_t pxTimer) {
-    hlo_notify_send (&radar_task_notify, XEP_NOTIFY_RADAR_DATAREADY);
-}
-
-
-void x4driver_timer_action_timeout(TimerHandle_t pxTimer) {
-    hlo_notify_send (&radar_task_notify, XEP_NOTIFY_RADAR_DATAREADY);
-}
-#else
 
 // TODO use timer placeholder functions here
 //
@@ -473,7 +435,6 @@ void x4driver_timer_sweep_timeout(uint32_t pxTimer) {
 
 void x4driver_timer_action_timeout(uint32_t pxTimer) {
 }
-#endif // USE_FREERTOS_TASKS
 
 uint32_t x4driver_timer_set_timer_timeout_frequency(void* timer , uint32_t frequency) {
 
