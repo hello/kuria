@@ -19,7 +19,7 @@ add_executable(kuria_proto_test ${SOURCES})
 
 # TODO not sure if passing define _GNU_SOURCE is a good idea. But it seems to fix issues where
 # pthread recursive mutex attr functions throw an error
-target_compile_options(kuria_proto_test PRIVATE -Wall -std=c11 -mcpu=cortex-a53 -D_GNU_SOURCE)
+target_compile_options(kuria_proto_test PRIVATE -Wall -g -std=c11 -mcpu=cortex-a53 -D_GNU_SOURCE)
 
 # TODO - Added commands to build freertos static library from freertos source files
 # find_library(FREERTOS_1 freertos)
