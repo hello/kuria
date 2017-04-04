@@ -7,23 +7,33 @@ set (CMAKE_C_STANDARD 99)
 set(CMAKE_INCLUDE_PATH ${PROJECT_SOURCE_DIR}/)
 set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
 
+option(BUILD_MATLAB_RUNNER "build the matlab runner" true)
+
 if (WIN32)
+  set(BUILD_MATLAB_RUNNER true)
   set(ZLIB_LIBRARIES "${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/winlib/zlib/zlibstatic.lib")
   set(ZLIB_INCLUDE_DIRS "${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/winlib/zlib/include")
   set(HDF5_LIBRARIES  "${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/winlib/hdf5/hdf5.lib")
   set(HDF5_INCLUDE_DIRS  "${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/winlib/hdf5/include/")
 else()
-  find_package(ZLIB REQUIRED)
-  find_package(HDF5 REQUIRED)
+  if (BUILD_MATLAB_RUNNER)
+    find_package(ZLIB REQUIRED)
+    find_package(HDF5 REQUIRED)
+  endif()
+
   find_package(ZMQ REQUIRED)
+
 endif()
 
-add_subdirectory(thirdparty/matio)
+
+if (BUILD_MATLAB_RUNNER)
+  add_subdirectory(thirdparty/matio)
+  message(STATUS "ZLIB LIBRARIES:  ${ZLIB_LIBRARIES}")
+  message(STATUS "HDF5 LIBRARIES:  ${HDF5_LIBRARIES}")
+endif()
+
 add_subdirectory(thirdparty/nanopb)
 add_subdirectory(thirdparty/yaml-cpp)
-
-message(STATUS "ZLIB LIBRARIES:  ${ZLIB_LIBRARIES}")
-message(STATUS "HDF5 LIBRARIES:  ${HDF5_LIBRARIES}")
 
 include_directories (
 "include" 
@@ -39,13 +49,14 @@ ${ZLIB_INCLUDE_DIRS}
 ${HDF5_INCLUDE_DIRS} 
 ${ZMQ_INCLUDE_DIR})
 
+if (BUILD_MATLAB_RUNNER)
 add_library(mateigen STATIC
 mateigen/matlabreader.cpp
 mateigen/matlabwriter.cpp
 )
 
 target_link_libraries(mateigen matio)
-
+endif()
 
 add_library(algorithm STATIC
 algorithm/kiss_fft.c
@@ -75,25 +86,39 @@ thirdparty/gtest/gtest-all.cc)
 add_definitions(-DUNIT_TEST_DATA="${CMAKE_CURRENT_SOURCE_DIR}/unit-test/test-data/")
 
 ############
-add_executable(unit-test 
+set(UNIT_TEST_SRC
 unit-test/main.cpp 
-unit-test/testmatio.cpp
 unit-test/testfilter.cpp
 unit-test/testmatrixmath.cpp
 unit-test/testbuffers.cpp
-unit-test/testpreprocessor.cpp
 unit-test/testnetwork.cpp
 )
 
 
-target_link_libraries(unit-test gtest algorithm ${HDF5_LIBRARIES} ${ZLIB_LIBRARIES} matio mateigen network protobuf-nanopb)
+set(UNIT_TEST_LIBS gtest algorithm network protobuf-nanopb)
+
+if (BUILD_MATLAB_RUNNER)
+  set(UNIT_TEST_SRC ${UNIT_TEST_SRC} 
+                    unit-test/testmatio.cpp
+                    unit-test/testpreprocessor.cpp)
+
+  set(UNIT_TEST_LIBS ${UNIT_TEST_LIBS} ${HDF5_LIBRARIES} ${ZLIB_LIBRARIES} matio mateigen)
+endif()
+
+add_executable(unit-test 
+${UNIT_TEST_SRC}
+)
+
+target_link_libraries(unit-test ${UNIT_TEST_LIBS})
 
 
 ###########
+if (BUILD_MATLAB_RUNNER)
 add_executable(haltijarunner
 haltijarunner.cpp)
 
 target_link_libraries(haltijarunner algorithm ${HDF5_LIBRARIES} ${ZLIB_LIBRARIES} matio mateigen)
+endif()
 
 ############
 if (NOT WIN32)
