@@ -8,6 +8,7 @@ set(CMAKE_INCLUDE_PATH ${PROJECT_SOURCE_DIR}/)
 set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
 
 option(BUILD_MATLAB_RUNNER "build the matlab runner" true)
+option(BUILD_PUBLISHER "build the novelda publisher" true)
 
 if (WIN32)
   set(BUILD_MATLAB_RUNNER true)
@@ -22,7 +23,9 @@ else()
   endif()
 
   find_package(ZMQ REQUIRED)
-
+  if (BUILD_PUBLISHER)
+    find_package(ModuleConnector REQUIRED)
+  endif()
 endif()
 
 
@@ -47,7 +50,9 @@ include_directories (
 "mateigen/" 
 ${ZLIB_INCLUDE_DIRS} 
 ${HDF5_INCLUDE_DIRS} 
-${ZMQ_INCLUDE_DIR})
+${ZMQ_INCLUDE_DIR}
+${MODULECONNECTOR_INCLUDE_DIRS}
+)
 
 if (BUILD_MATLAB_RUNNER)
 add_library(mateigen STATIC
@@ -97,6 +102,10 @@ unit-test/testnetwork.cpp
 
 set(UNIT_TEST_LIBS gtest algorithm network protobuf-nanopb)
 
+if (UNIX)
+  set(UNIT_TEST_LIBS ${UNIT_TEST_LIBS} pthread)
+endif()
+
 if (BUILD_MATLAB_RUNNER)
   set(UNIT_TEST_SRC ${UNIT_TEST_SRC} 
                     unit-test/testmatio.cpp
@@ -127,6 +136,15 @@ if (NOT WIN32)
 
   target_link_libraries(haltijanetworkrunner algorithm network protobuf-nanopb zmq)
 endif()
+############
+if (BUILD_PUBLISHER)
+  add_executable(noveldapublisher
+                 noveldapublisher.cpp)
+
+  target_link_libraries(noveldapublisher ${MODULECONNECTOR_LIBRARIES} network protobuf-nanopb zmq)
+
+endif()
+
 
 #copy data for tests
 #this does not seem to work on windows
