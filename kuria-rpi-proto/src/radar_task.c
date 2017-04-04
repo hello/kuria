@@ -35,7 +35,7 @@
 static X4Driver_t* x4driver;
 static bool en_intr = true;
 
-static hlo_notify_t radar_task_notify;
+hlo_notify_t radar_task_notify;
 
 static pthread_mutex_t radar_task_mutex;
 
@@ -197,7 +197,7 @@ int32_t radar_task_init (pthread_t* thread_id) {
     x4driver_set_downconversion(x4driver, 1);
     //  x4driver_set_frame_area_offset(x4driver, 0.6);
     //  x4driver_set_frame_area(x4driver, 0.5, 9.9);
-    x4driver_set_fps(x4driver, 5);
+    x4driver_set_fps(x4driver, 20);
 
     // Verify X4 configurations
     status = x4driver_check_configuration(x4driver);
@@ -246,7 +246,8 @@ void* radar_task (void* param) {
             x4driver_on_action_event(x4driver);
         } else if (notify_value & XEP_NOTIFY_TASK_END) {
             printf("Ending radar task\n");
-            break;
+            radar_task_end ();
+            pthread_exit (NULL);
         }
 
 

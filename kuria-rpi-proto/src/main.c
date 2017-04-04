@@ -9,9 +9,12 @@
 #include <string.h>
 #include "file_save.h"
 #include "radar_task.h"
+#include "hlo_notify.h"
+
+
 
 bool stop_x4_read = 0;
-
+extern hlo_notify_t radar_task_notify;
 void end_application(void); 
 void sig_handler(int sig) {
     if(sig == SIGINT || sig == SIGABRT)  {
@@ -23,11 +26,12 @@ void sig_handler(int sig) {
 
 void end_application(void) {
 
+    // End radar task
+    hlo_notify_send (&radar_task_notify, 0x10);
+
     // Close files
     file_close();
 
-    // End radar task
-    radar_task_end ();
 
 }
 
@@ -50,10 +54,11 @@ int main() {
     if(signal(SIGINT, sig_handler) == SIG_ERR){
         printf("can't catch SIGINT\n");
     }
-
+/*
     if(signal(SIGABRT, sig_handler) == SIG_ERR){
         printf("can't catch SIGABRT\n");
     }
+    */
     setbuf(stdout, NULL);
 
     pthread_t radar_task_thread_id;
