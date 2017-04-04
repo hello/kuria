@@ -48,7 +48,7 @@ int main(int argc, char * argv[]) {
     
     
     Peakfinder respirationpeaks;
-    MatrixXf temp(1,300);
+    MatrixXf temp(1,1000);
     //float temp;
     int peak_ind = 0;
     int iframe_pros = 0; // index for processored frames
@@ -91,7 +91,7 @@ int main(int argc, char * argv[]) {
             // added scaling here to test.
             if (respirationpeaks.isPeak(1e-6 * transformed_frame, iframe_pros, filtered_sample)) {
                 
-                if (peak_ind <= 300) {
+                if (peak_ind <= 1000) {
                     temp(0,peak_ind) = (float)iframe_pros;
                     peak_ind = peak_ind + 1;
                     //std::cout << " extrema " << peak_ind << " :";
