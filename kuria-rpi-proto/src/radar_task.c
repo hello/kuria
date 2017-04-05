@@ -85,7 +85,7 @@ int32_t radar_task_init (pthread_t* thread_id) {
 
     status = hlo_notify_init (&radar_task_notify);
     if (status) {
-        printf (" error creating radar_task_notify: %d\n");
+        printf (" error creating radar_task_notify: %d\n", status);
     }
 
     // X4Driver calbacks
@@ -304,15 +304,13 @@ static int32_t radar_data_frame_prepare( radar_frame_packet_t** packet, uint32_t
 
 }
 
-int32_t radar_data_frame_free( radar_frame_packet_t* packet ) {
+int32_t radar_data_frame_free( radar_frame_packet_t* packet, bool free_fdata ) {
 
-    // TODO this may have to be done in file thread
-    /*
-       if( packet->fdata ) {
-       free(packet->fdata);
-       }
-
-*/
+    if (free_fdata) {
+        if( packet->fdata ) {
+            free(packet->fdata);
+        }
+    }
     if( packet->sig_i ) {
         free( packet->sig_i );
     }
@@ -357,7 +355,8 @@ static uint32_t read_and_send_radar_frame(X4Driver_t* x4driver) {
     status = x4driver_read_frame_normalized(x4driver, &radar_packet->frame_counter,radar_packet->fdata, radar_packet->num_of_bins);
 
     if (status != XEP_ERROR_X4DRIVER_OK) {
-        radar_data_frame_free( radar_packet );
+        printf ("error reading frame\n");
+        radar_data_frame_free( radar_packet, true );
         return status;
     }
     else {
@@ -366,11 +365,17 @@ static uint32_t read_and_send_radar_frame(X4Driver_t* x4driver) {
 
     // send radar data to file task
 #if 0
-    radar_data_frame_free (radar_packet);
+    radar_data_frame_free (radar_packet, true);
 #else
     // Send to file task
+    DISP ("queue send\n");
     status = hlo_queue_send (&radar_data_queue, radar_packet, 0);
-    radar_data_frame_free (radar_packet);
+    if (status != 0) {
+        printf ("hlo_queue_send err: %d\n", status);
+        radar_data_frame_free( radar_packet, true );
+        return status;
+    }
+    radar_data_frame_free (radar_packet, false);
 #endif
 
     return status;
@@ -389,6 +394,7 @@ void dump_spi_reg(void){
 
 static int32_t radar_task_set_callbacks_timer (void ) {
 
+    return 0;
 }
 
 static int32_t radar_task_set_callbacks_lock (X4DriverLock_t* lock) {
@@ -434,6 +440,8 @@ static int32_t radar_task_set_callbacks_lock (X4DriverLock_t* lock) {
 }
 
 static int32_t radar_task_set_callbacks_driver () {
+
+    return 0;
 }
 
 /************************ Callbacks ******************************************/

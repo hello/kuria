@@ -64,8 +64,8 @@ int32_t file_task_init (pthread_t* thread_id) {
 void* file_task (void* param) {
 
     radar_frame_packet_t packet;
-
     uint32_t data_index;
+    int32_t status;
 
     printf("Starting file task\n");
 
@@ -73,7 +73,7 @@ void* file_task (void* param) {
         // receive data from queue
         //
         //printf("wait for data\n");
-        if (hlo_queue_recv (&radar_data_queue, &packet, 0) == 0) {
+        if ( (status=hlo_queue_recv (&radar_data_queue, &packet, 0) ) == 0) {
 
             if( !packet.fdata ) {
                 printf(" invalid data \n" );
@@ -93,11 +93,16 @@ void* file_task (void* param) {
             }
 
             printf ("wrote\n");
-            free (packet.fdata);
+//            if( packet.fdata ) {
+                free(packet.fdata);
+//            }
             // free pointers to radar frame data
             // 
             //            radar_data_frame_free( packet );
             //printf("wr done\n");
+        }
+        else {
+            printf ("hlo_queue_recv err: %d\n", status);
         }
 
     }

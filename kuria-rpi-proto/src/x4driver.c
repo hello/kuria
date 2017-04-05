@@ -2884,10 +2884,8 @@ int _x4driver_set_rx_ram_last_line(X4Driver_t* x4driver,uint32_t last_line)
 	 x4driver_get_pif_segment(x4driver,ADDR_PIF_TRX_LFSR_TAPS_2_RW,0x70,&noiseless_ghost_order);
 	 uint8_t trx_auto_bidir_enable = 0;
 	 x4driver_get_pif_segment(x4driver,ADDR_PIF_TRX_DAC_STEP_RW,0x20,&trx_auto_bidir_enable);
-	 	 	 
 	 if(iterations % (uint32_t)(pow(2,noiseless_ghost_order) * pow(2,trx_auto_bidir_enable)) != 0)
 	   return XEP_ERROR_X4DRIVER_INVALID_CONFIGURATION_NOISELESS_GHOST;//"trx_iterations should be divisible by (2^noiseless_ghost_order) * (2^trx_auto_bidir_enable)"
-	   
 	   
 	   	
 	 

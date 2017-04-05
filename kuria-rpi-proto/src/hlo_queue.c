@@ -60,7 +60,7 @@ int32_t hlo_queue_send (hlo_queue_t* queue, radar_frame_packet_t* data, uint32_t
 
     pthread_mutex_lock (&(queue->queue_mutex));
 
-    if (queue->queue_size == queue->number_of_items ) return -1;
+    if (queue->queue_size == queue->number_of_items ) return -2;
 
     memcpy ( &queue->data[queue->write_index], data, sizeof (radar_frame_packet_t) );
 
@@ -71,6 +71,8 @@ int32_t hlo_queue_send (hlo_queue_t* queue, radar_frame_packet_t* data, uint32_t
     pthread_cond_signal (&queue->queue_cv);
 
     pthread_mutex_unlock (&queue->queue_mutex);
+
+    return 0;
 
 }
 
@@ -91,6 +93,8 @@ int32_t hlo_queue_recv (hlo_queue_t* queue, radar_frame_packet_t* data, uint32_t
     queue->number_of_items--;
 
     pthread_mutex_unlock (&queue->queue_mutex);
+
+    return 0;
 }
 
 bool hlo_queue_is_full (hlo_queue_t* queue) {

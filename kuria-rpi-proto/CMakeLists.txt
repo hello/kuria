@@ -2,6 +2,8 @@ cmake_minimum_required (VERSION 3.6.2)
 
 project (sati_kuria_proto)
 
+set (CMAKE_C_COMPILER   "/usr/bin/clang")
+
 set(CMAKE_BUILD_TYPE Release)
 
 set(CMAKE_POSITION_INDEPENDENT_CODE TRUE)
