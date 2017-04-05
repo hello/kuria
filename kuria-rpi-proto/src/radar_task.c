@@ -22,6 +22,8 @@
 #define DISP(...)
 #endif
 
+#define DUMP_SPI 0
+
 #define TASK_RADAR_STACK_SIZE            (1500)
 #define TASK_RADAR_PRIORITY        (tskIDLE_PRIORITY + 7)
 
@@ -41,6 +43,7 @@ static pthread_mutex_t radar_task_mutex;
 
 /* Static function declarations */
 static uint32_t read_and_send_radar_frame(X4Driver_t* x4driver);
+void dump_spi_reg(void);
 
 // TODO uint32_t is just a placeholder till timer functionality is ported to non-freertos
 // remove once fixed, this is just to compile
@@ -145,24 +148,6 @@ int32_t radar_task_init (pthread_t* thread_id) {
     // Set X4driver instance variable to default values, initialize callbacks
     x4driver_create(&x4driver, x4driver_instance_memory, &x4driver_callbacks,&lock,&timer_sweep,&timer_action,NULL);
 
-    pthread_attr_t radar_task_attr;
-
-    pthread_attr_init (&radar_task_attr);
-    pthread_attr_setdetachstate (&radar_task_attr, PTHREAD_CREATE_DETACHED);
-
-    printf ("creating file task thread\n");
-
-    pthread_t radar_task_thread_id;
-
-    status = pthread_create (&radar_task_thread_id, &radar_task_attr, radar_task, NULL);
-    if (status) {
-        printf ("error creating file task thread: %d\n", status);
-        return status;
-    }
-
-    // TODO redundant variable can be removed 
-    *thread_id = radar_task_thread_id;
-
     // Enable X4 chip
     status = x4driver_set_enable(x4driver, 1);
     for(uint32_t i =0; i < 2000; i++) {
@@ -171,15 +156,15 @@ int32_t radar_task_init (pthread_t* thread_id) {
     }
     printf("\n"); 
 
-#if DUMP_SPI
-    // Dump SPI register, for testing purposes only
-    dump_spi_reg();
-#endif
 
     // Initialize X4driver, update and verify firmware, set defaults
     status =  x4driver_init(x4driver);
     if(status !=  XEP_ERROR_X4DRIVER_OK) {
         printf ("Error initializing x4driver %d \n", status);
+#if (DUMP_SPI==1)
+        // Dump SPI register, for testing purposes only
+        dump_spi_reg();
+#endif
         return status;
     }
     else
@@ -214,6 +199,31 @@ int32_t radar_task_init (pthread_t* thread_id) {
 
     return status;
 
+}
+
+int32_t radar_task_start (pthread_t* thread_id) {
+
+    int32_t status;
+
+    pthread_attr_t radar_task_attr;
+
+    pthread_attr_init (&radar_task_attr);
+    pthread_attr_setdetachstate (&radar_task_attr, PTHREAD_CREATE_DETACHED);
+
+    printf ("creating radar task thread\n");
+
+    pthread_t radar_task_thread_id;
+
+    status = pthread_create (&radar_task_thread_id, &radar_task_attr, radar_task, NULL);
+    if (status) {
+        printf ("error creating radar task thread: %d\n", status);
+        return status;
+    }
+
+    // TODO redundant variable can be removed 
+    *thread_id = radar_task_thread_id;
+
+    return status;
 }
 
 /* RADAR TASK */
@@ -367,11 +377,12 @@ static uint32_t read_and_send_radar_frame(X4Driver_t* x4driver) {
 }
 
 void dump_spi_reg(void){
+    printf("SPI\n");
     for(uint32_t i=ADDR_SPI_FORCE_ZERO_R; i<= ADDR_SPI_SPI_CONFIG_WE; i++){
         uint8_t value;
         //   if(i== ADDR_SPI_RADAR_DATA_SPI_RE) continue;
         x4driver_get_spi_register(x4driver,i ,&value );
-        printf(" %d: %x\n", i, value);
+        printf(" %x: %x\n", i, value);
     }
 
 }
@@ -533,6 +544,7 @@ static uint32_t x4driver_callback_take_sem(void * sem,uint32_t timeout)
 {
     int status = pthread_mutex_lock ( (pthread_mutex_t*) sem );
     if (status) {
+        printf ("pthread take lock fail\n");
         return KURIA_FALSE;
     }
 

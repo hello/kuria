@@ -11,6 +11,11 @@
 #include <time.h>
 #include <unistd.h>
 
+#if 0
+#define DISP printf
+#else
+#define DISP(...)
+#endif
 
 #define START_OF_SRAM_LSB       0x00
 #define START_OF_SRAM_MSB       0x00
@@ -1001,7 +1006,9 @@ int x4driver_verify_firmware(X4Driver_t* x4driver, uint8_t * buffer, uint32_t si
 	while((fifo_status & FIFO_NOT_EMPTY_FLAG) == FIFO_NOT_EMPTY_FLAG)
 	{
 		status =  x4driver_get_spi_register(x4driver,ADDR_SPI_FROM_MEM_READ_DATA_RE,&read_back);
+        if (status) DISP("fail 1\n");
 		status =  x4driver_get_spi_register(x4driver,ADDR_SPI_SPI_MEM_FIFO_STATUS_R,&fifo_status);
+        if (status) DISP("fail 2\n");
         retries++;
         if(retries > max_retries)
         {            
@@ -1013,6 +1020,7 @@ int x4driver_verify_firmware(X4Driver_t* x4driver, uint8_t * buffer, uint32_t si
 	for(uint32_t i = 0; i< size; i++)
 	{
 		status =  x4driver_get_spi_register(x4driver,ADDR_SPI_FROM_MEM_READ_DATA_RE,&read_back);
+        if (status) DISP("readback fail\n");
 		if(buffer[i] != read_back)
 		{
 			// Store in dummy variables for debug purposes when optimization is enabled.
@@ -1021,13 +1029,17 @@ int x4driver_verify_firmware(X4Driver_t* x4driver, uint8_t * buffer, uint32_t si
 			#pragma GCC diagnostic push
 			volatile uint8_t buffer_value = buffer[i];
 			volatile uint8_t read_back_value = read_back;
+            DISP("%d: 0x%x != 0x%x\n",i, buffer_value, read_back_value);
 			#pragma GCC diagnostic pop
 			errors++;
 		}
+        else {
+            DISP("%d: 0x%x == 0x%x\n",i, buffer[i], read_back);
+        }
 	}
 	x4driver_set_spi_register(x4driver,ADDR_SPI_MEM_MODE_RW,SET_NORMAL_MODE);//set into read back mode                         
-    mutex_give(x4driver);
     printf("Verify errors: %d\n",errors);
+    mutex_give(x4driver);
     if(errors >0)
         return XEP_ERROR_X4DRIVER_8051_VERIFY_FAIL;
     return status;
@@ -2047,7 +2059,7 @@ int x4driver_init(X4Driver_t* x4driver)
 		__asm__ volatile ("nop");		
 	}
 
-	x4driver_cpu_reset(x4driver);
+//	x4driver_cpu_reset(x4driver);
 
     uint8_t force_one = 0x00;
 	uint8_t force_zero = 0x00;

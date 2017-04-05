@@ -19,6 +19,8 @@ extern int32_t radar_data_frame_free( radar_frame_packet_t* packet );
 
 int32_t file_task_init (pthread_t* thread_id) {
 
+    int status;
+    pthread_t file_task_thread_id;
     char filename[40];
     time_t now = time(NULL);
     sprintf(filename, "data_%d", (int)now);
@@ -30,24 +32,7 @@ int32_t file_task_init (pthread_t* thread_id) {
         return -1;
     }
 
-    pthread_attr_t file_task_attr;
 
-    pthread_attr_init (&file_task_attr);
-    pthread_attr_setdetachstate (&file_task_attr, PTHREAD_CREATE_DETACHED);
-
-    printf ("creating file task thread\n");
-
-    pthread_t file_task_thread_id;
-    int status;
-
-    status = pthread_create (&file_task_thread_id, &file_task_attr, file_task, NULL);
-    if (status) {
-        printf ("error creating file task thread: %d\n", status);
-        return status;
-    }
-
-    // TODO redundant variable can be removed 
-    *thread_id = file_task_thread_id;
 
     // Create queue for data transfer with radar task
     status = hlo_queue_create (&radar_data_queue, 25); // TODO remove magic number
@@ -55,6 +40,22 @@ int32_t file_task_init (pthread_t* thread_id) {
         printf ("error creating queue\n");
         return status;
     }
+
+    pthread_attr_t file_task_attr;
+
+    pthread_attr_init (&file_task_attr);
+    pthread_attr_setdetachstate (&file_task_attr, PTHREAD_CREATE_DETACHED);
+
+    printf ("creating file task thread\n");
+
+
+    status = pthread_create (&file_task_thread_id, &file_task_attr, file_task, NULL);
+    if (status) {
+        printf ("error creating file task thread: %d\n", status);
+        return status;
+    }
+    // TODO redundant variable can be removed 
+    *thread_id = file_task_thread_id;
 
     printf(" File init done\n");
     return 0;
@@ -74,7 +75,6 @@ void* file_task (void* param) {
         //printf("wait for data\n");
         if (hlo_queue_recv (&radar_data_queue, &packet, 0) == 0) {
 
-            printf ("hlo queue recv data\n");
             if( !packet.fdata ) {
                 printf(" invalid data \n" );
                 continue;
@@ -92,7 +92,7 @@ void* file_task (void* param) {
                 }
             }
 
-            printf ("hlo queue wrote data\n");
+            printf ("wrote\n");
             free (packet.fdata);
             // free pointers to radar frame data
             // 

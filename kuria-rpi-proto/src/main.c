@@ -73,6 +73,8 @@ int main() {
         end_application();
         return -1;
     }
+
+    radar_task_start (&radar_task_thread_id);
     radar_task_en_intr ();
 
     for (;;) {
