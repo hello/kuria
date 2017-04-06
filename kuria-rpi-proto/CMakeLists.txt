@@ -2,9 +2,11 @@ cmake_minimum_required (VERSION 3.6.2)
 
 project (sati_kuria_proto)
 
-if (UNIX)
-    message ("UNIX")
-endif (UNIX)
+if (UNIX AND NOT APPLE)
+    message ("LINUX")
+elseif (APPLE)
+    message ("APPLE")
+endif (UNIX AND NOT APPLE)
 
 if (LINUX)
     message ("LINUX")
