@@ -5,7 +5,7 @@ set (CMAKE_CXX_STANDARD 14)
 set (CMAKE_C_STANDARD 99)
 
 set(CMAKE_INCLUDE_PATH ${PROJECT_SOURCE_DIR}/)
-set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${PROJECT_SOURCE_DIR}/cmake)
 
 option(BUILD_MATLAB_RUNNER "build the matlab runner" true)
 option(BUILD_PUBLISHER "build the novelda publisher" true)
@@ -17,6 +17,8 @@ if (WIN32)
   set(HDF5_LIBRARIES  "${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/winlib/hdf5/hdf5.lib")
   set(HDF5_INCLUDE_DIRS  "${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/winlib/hdf5/include/")
 else()
+  link_directories("/usr/local/lib")
+
   if (BUILD_MATLAB_RUNNER)
     find_package(ZLIB REQUIRED)
     find_package(HDF5 REQUIRED)
@@ -25,6 +27,7 @@ else()
   find_package(ZMQ REQUIRED)
   if (BUILD_PUBLISHER)
     find_package(ModuleConnector REQUIRED)
+#link_directories("${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/novelda/lib/osx")
   endif()
 endif()
 
@@ -52,6 +55,7 @@ ${ZLIB_INCLUDE_DIRS}
 ${HDF5_INCLUDE_DIRS} 
 ${ZMQ_INCLUDE_DIR}
 ${MODULECONNECTOR_INCLUDE_DIRS}
+"thirdparty/yaml-cpp/include/"
 )
 
 if (BUILD_MATLAB_RUNNER)
@@ -141,7 +145,7 @@ if (BUILD_PUBLISHER)
   add_executable(noveldapublisher
                  noveldapublisher.cpp)
 
-  target_link_libraries(noveldapublisher ${MODULECONNECTOR_LIBRARIES} network protobuf-nanopb zmq)
+  target_link_libraries(noveldapublisher ${MODULECONNECTOR_LIBRARIES} network protobuf-nanopb zmq yaml-cpp)
 
 endif()
 

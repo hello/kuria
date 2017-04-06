@@ -1,0 +1,9 @@
+---
+#config file
+pulses_per_step: 550
+frame_rate: 20
+dac_max: 1100
+dac_min: 950
+
+device: /dev/cu.usbmodem1421
+#device: /dev/tty.usbmodem1421
