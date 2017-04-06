@@ -92,14 +92,10 @@ void* file_task (void* param) {
                 }
             }
 
-            printf ("wrote\n");
-//            if( packet.fdata ) {
+            printf (".");
+            if( packet.fdata ) {
                 free(packet.fdata);
-//            }
-            // free pointers to radar frame data
-            // 
-            //            radar_data_frame_free( packet );
-            //printf("wr done\n");
+            }
         }
         else {
             printf ("hlo_queue_recv err: %d\n", status);

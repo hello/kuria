@@ -182,7 +182,7 @@ int32_t radar_task_init (pthread_t* thread_id) {
     x4driver_set_downconversion(x4driver, 1);
     //  x4driver_set_frame_area_offset(x4driver, 0.6);
     //  x4driver_set_frame_area(x4driver, 0.5, 9.9);
-    x4driver_set_fps(x4driver, 20);
+    x4driver_set_fps(x4driver,20);
 
     // Verify X4 configurations
     status = x4driver_check_configuration(x4driver);
