@@ -40,7 +40,7 @@ int32_t hlo_queue_create (hlo_queue_t* queue, uint32_t num_of_items) {
 int32_t hlo_queue_delete (hlo_queue_t* queue){
 
     int32_t status;
-    
+
     if (!queue) return -1;
 
     status = pthread_mutex_destroy (&queue->queue_mutex);
@@ -60,11 +60,14 @@ int32_t hlo_queue_send (hlo_queue_t* queue, radar_frame_packet_t* data, uint32_t
 
     pthread_mutex_lock (&(queue->queue_mutex));
 
-    if (queue->queue_size == queue->number_of_items ) return -2;
+    if (queue->queue_size == queue->number_of_items ){ 
+        pthread_mutex_unlock (&queue->queue_mutex);
+        return -2;
+    }
 
     memcpy ( &queue->data[queue->write_index], data, sizeof (radar_frame_packet_t) );
 
-//    queue->write_index = (queue->write_index + 1) % queue->queue_size;
+    queue->write_index = (queue->write_index + 1) % queue->queue_size;
 
     queue->number_of_items++;
 
@@ -88,7 +91,7 @@ int32_t hlo_queue_recv (hlo_queue_t* queue, radar_frame_packet_t* data, uint32_t
 
     memcpy (data, &queue->data[queue->read_index], sizeof (radar_frame_packet_t) );
 
-//    queue->read_index = (queue->read_index + 1) % queue->queue_size;
+    queue->read_index = (queue->read_index + 1) % queue->queue_size;
 
     queue->number_of_items--;
 
@@ -119,7 +122,7 @@ bool hlo_queue_is_empty (hlo_queue_t* queue) {
     pthread_mutex_lock (&queue->queue_mutex);
 
     if (0 == queue->number_of_items) return true;
-     
+
     pthread_mutex_unlock (&queue->queue_mutex);
 
     return false;
