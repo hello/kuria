@@ -2,6 +2,14 @@ cmake_minimum_required (VERSION 3.6.2)
 
 project (sati_kuria_proto)
 
+if (UNIX)
+    message ("UNIX")
+endif (UNIX)
+
+if (LINUX)
+    message ("LINUX")
+endif (LINUX)
+
 set (CMAKE_C_COMPILER   "/usr/bin/clang")
 
 set(CMAKE_BUILD_TYPE Release)
