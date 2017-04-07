@@ -1,64 +1,119 @@
 #include "preprocessorIIR.h"
-
+#include <iostream>
 using namespace Eigen;
 
-PreprocessorIIR::PreprocessorIIR(const Eigen::MatrixXf & B,const Eigen::MatrixXf & A, const int num_range_bins,const int num_frames_in_segment,const int num_frames_to_wait_between_segments)
+PreprocessorIIR::PreprocessorIIR(RealCoeffComplexDataFilt_t * phpf, RealCoeffComplexDataFilt_t * plpf, const int num_range_bins,const int num_frames_in_segment,const int num_frames_to_wait_between_segments, float scale)
 :_num_frames_in_segment(num_frames_in_segment)
 ,_num_frames_to_wait_between_segments(num_frames_to_wait_between_segments)
 ,_output_idx(0)
 ,_idx_sample(0)
+,_phpf(phpf)
+,_plpf(plpf)
+,_scale(scale)
 {
 
-    _output_circular_buffer = MatrixXcf::Zero(_num_frames_in_segment,num_range_bins);
-    _num_frames_to_wait_between_segments = num_frames_in_segment;
-    _num_frames_in_segment = num_frames_in_segment;
-    _phpf = new IIRFilter<Eigen::MatrixXf, Eigen::MatrixXcf>(B,A,num_range_bins);
+    _raw_segment = MatrixXcf::Zero(_num_frames_in_segment,num_range_bins);
+
 }
 
 PreprocessorIIR::~PreprocessorIIR() {
-    delete _phpf;
+    
+    if (_phpf)
+        delete _phpf;
+
+    if (_plpf)
+        delete _plpf;
 }
 
 void PreprocessorIIR::reset() {
-    _phpf->reset();
+    
+    if (_phpf)
+        _phpf->reset();
+    
+    if (_plpf)
+        _plpf->reset();
 }
 
-PreprocessorPtr_t PreprocessorIIR::createWithDefaultHighpassFilter(const int num_range_bins,const int num_frames_in_segment,const int num_frames_to_wait_between_segments) {
+PreprocessorPtr_t PreprocessorIIR::createWithDefaultHighpassFilter(const int num_range_bins,const int num_frames_in_segment,const int num_frames_to_wait_between_segments, float scale) {
     
     
-    MatrixXf B(2,1);
-    MatrixXf A(2,1);
-    //0.1Hz
-    B <<  0.99601935, -0.99601935;
-    A <<  1.       , -0.9920387;
+    MatrixXf Bhpf(2,1);
+    MatrixXf Ahpf(2,1);
     
     
-    return PreprocessorPtr_t(new PreprocessorIIR(B,A,num_range_bins,num_frames_in_segment,num_frames_to_wait_between_segments));
+
+    Bhpf <<  0.99601935, -0.99601935;
+    Ahpf <<  1.       , -0.9920387;
+
+    
+    /*
+    //In [78]: B,A = sig.iirdesign(wp=0.2/10.0,ws=0.02 / 10.0,gpass=2.0,gstop = 10.0,ftype='butter')
+    Bhpf <<  0.97652981, -0.97652981;
+    Ahpf <<  1.        , -0.95305962;
+*/
+    
+    /*
+    //In [81]: B,A = sig.iirdesign(wp=0.1/10.0,ws=0.01 / 10.0,gpass=2.0,gstop = 10.0,ftype='butter')
+    Bhpf <<  0.98812845, -0.98812845;
+    Ahpf <<  1.        , -0.97625691;
+     */
+    
+    auto phpf = new IIRFilter<Eigen::MatrixXf, Eigen::MatrixXcf>(Bhpf,Ahpf,num_range_bins);
+
+    return PreprocessorPtr_t(new PreprocessorIIR(phpf,NULL,num_range_bins,num_frames_in_segment,num_frames_to_wait_between_segments,scale));
   
 }
 
-
-
-uint32_t PreprocessorIIR::add_frame(const BasebandDataFrame_t &input, Eigen::MatrixXcf &filtered_frame, Eigen::MatrixXcf &segment) {
+PreprocessorPtr_t PreprocessorIIR::createWithDefaultHighpassFilterAndLowpass(const int num_range_bins,const int num_frames_in_segment,const int num_frames_to_wait_between_segments,float scale) {
 
     
+    MatrixXf Bhpf(2,1);
+    MatrixXf Ahpf(2,1);
+    
+    Bhpf <<  0.99601935, -0.99601935;
+    Ahpf <<  1.       , -0.9920387;
+    MatrixXf Blpf(2,1);
+    MatrixXf Alpf(2,1);
+    
+    //B,A = sig.iirdesign(wp=0.2/10.0,ws=4.0 / 10.0,gpass=2.0,gstop = 20.0,ftype='butter')
+    Blpf <<   0.03946985,  0.03946985;
+    Alpf << 1.       , -0.9210603;
+    
+    auto phpf = new IIRFilter<Eigen::MatrixXf, Eigen::MatrixXcf>(Bhpf,Ahpf,num_range_bins);
+    auto plpf = new IIRFilter<Eigen::MatrixXf, Eigen::MatrixXcf>(Blpf,Alpf,num_range_bins);
+    
+    return PreprocessorPtr_t(new PreprocessorIIR(phpf,plpf,num_range_bins,num_frames_in_segment,num_frames_to_wait_between_segments,scale));
+
+    
+}
+
+uint32_t PreprocessorIIR::add_frame(const BasebandDataFrame_t &input, Eigen::MatrixXcf &filtered_frame, Eigen::MatrixXcf &segment) {
+    
     uint32_t flags = PREPROCESSOR_FLAGS_NOT_READY;
-    MatrixXcf input_row(1,input.data.size());
+    MatrixXcf raw(1,input.data.size());
     
     //copy
     for (int i = 0; i < input.data.size(); i++) {
-        input_row(0,i) = input.data[i];
+        raw(0,i) = input.data[i] * _scale;
     }
 
     //highpass filter
-    filtered_frame = _phpf->filter(input_row);
+    filtered_frame = _phpf->filter(raw);
+    
     flags |= PREPROCESSOR_FLAGS_FRAME_READY;
 
     
-     //insert
-    _output_circular_buffer.row(_output_idx) = filtered_frame;
+     //insert raw and optionall lowpass filtered segment
+    _raw_segment.row(_output_idx) = filtered_frame;
     
-    if (++_output_idx >= _output_circular_buffer.rows()) {
+    /*
+    if (_plpf) {
+        _lpf_segment.row(_output_idx) = _plpf->filter(raw);
+    }
+     */
+
+    
+    if (++_output_idx >= _raw_segment.rows()) {
         _output_idx = 0;
     }
     
@@ -77,7 +132,7 @@ uint32_t PreprocessorIIR::add_frame(const BasebandDataFrame_t &input, Eigen::Mat
     flags |= PREPROCESSOR_FLAGS_SEGMENT_READY;
     
     //copy
-    segment = _output_circular_buffer;
+    segment = _raw_segment;
     
     return flags;
 

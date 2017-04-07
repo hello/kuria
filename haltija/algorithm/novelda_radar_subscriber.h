@@ -5,6 +5,7 @@
 #include "preprocessor_interface.h"
 #include "rangebincombiner.h"
 #include "radar_result_publisher_interface.h"
+#include "filters.h"
 
 class NoveldaRadarSubscriber {
 public:
@@ -24,6 +25,9 @@ private:
     
     int64_t _sequence_number;
     int64_t _received_number;
+    
+    IIRFilter<Eigen::MatrixXf, Eigen::MatrixXcf> * lpf;
+
 };
 
 #endif //_RADARSUBSCRIBER_H_

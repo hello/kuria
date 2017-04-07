@@ -7,7 +7,7 @@
 
 #define EXPECTED_SAMPLE_RATE_HZ (20)
 #define NUM_FRAMES_IN_SEGMENT (20 * EXPECTED_SAMPLE_RATE_HZ)
-#define NUM_FRAMES_TO_WAIT (5 * EXPECTED_SAMPLE_RATE_HZ)
+#define NUM_FRAMES_TO_WAIT (20 * EXPECTED_SAMPLE_RATE_HZ)
 
 #ifndef HOST_NAME_MAX
 #define HOST_NAME_MAX (1024)
@@ -26,7 +26,7 @@ NoveldaRadarSubscriber::NoveldaRadarSubscriber(RadarResultPublisherInterface * p
 ,_received_number(0) {
     _preprocessor = PreprocessorPtr_t(NULL);
     
-    for (int i = 8; i < 100; i++) {
+    for (int i = 12; i < 70; i++) {
         _rangebins_we_care_about.insert(i);
     }
     
@@ -41,7 +41,8 @@ void NoveldaRadarSubscriber::receive_message(const NoveldaData_t & message) {
     
     if (!_preprocessor.get()) {
         //TODO configure this from constructor
-        _preprocessor = PreprocessorIIR::createWithDefaultHighpassFilter(message.range_bins.size(), NUM_FRAMES_IN_SEGMENT, NUM_FRAMES_TO_WAIT);
+        
+        _preprocessor = PreprocessorIIR::createWithDefaultHighpassFilterAndLowpass(message.range_bins.size(), NUM_FRAMES_IN_SEGMENT, NUM_FRAMES_TO_WAIT,1e-6);
         
         LOG("initialized preprocessor");
     }
@@ -72,6 +73,7 @@ void NoveldaRadarSubscriber::receive_message(const NoveldaData_t & message) {
     
     if (flags & PREPROCESSOR_FLAGS_SEGMENT_READY) {
         //DO FRAME PROCESSING HERE
+        std::cout << "got new segment...." << std::endl;
         _combiner.set_latest_segment(segment, _rangebins_we_care_about);
     }
     

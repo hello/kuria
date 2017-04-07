@@ -19,7 +19,7 @@ np.set_printoptions(precision=3, suppress=True, threshold=np.nan)
 
 plot_samples = 200
 num_feats = 2
-plot_yrange = (-1e7, 1e7)
+
 
 g_kill = False
 g_PlotQueue = Queue()
@@ -28,12 +28,16 @@ global g_graphicsitems
 global g_p6
 global g_plotdata
 global g_curves
+global g_yrangemax
 
 g_curves = []
 g_graphicsitems = []
 g_p6 = None
+g_yrangemax = 1e2
+g_yrangemin = 2e0
 
-    
+plot_yrange = (-g_yrangemax, g_yrangemax)
+
 def CreatePlotCurves(p6):
      p6.setRange(xRange=(0, plot_samples-1), yRange=plot_yrange)
 
@@ -53,13 +57,21 @@ def update_plot():
     global g_p6
     global g_plotdata
     global g_curves
-
+    global g_yrangemax
     
     try:
         while True:
             index,vec = g_PlotQueue.get(False)            
             g_plotdata[0].append(vec[0]);
             g_plotdata[1].append(vec[1]);
+         
+            the_max = max([max(g_plotdata[0]),max(g_plotdata[1])])
+            the_min = min([min(g_plotdata[0]),min(g_plotdata[1])])
+            #print(the_max,the_min)
+            yrangemax = max((the_max,-the_min,g_yrangemin))
+            plot_yrange = (-yrangemax,yrangemax)
+            if g_p6 != None:
+                g_p6.setRange(xRange=(0, plot_samples-1), yRange=plot_yrange)
 
             for j in range(len(g_curves)):
                 g_curves[j].setData(list(g_plotdata[j]))
@@ -103,7 +115,7 @@ def main_plotter():
     global g_plotdata
     global g_curves
     global g_kill
-    
+    global g_p6    
     argc = len(sys.argv)
     #signal.signal(signal.SIGINT, signal_handler)
     app = QtGui.QApplication([])
@@ -116,10 +128,10 @@ def main_plotter():
     
     win = pg.GraphicsWindow(title="Basic plotting examples")
     win.resize(640,480)
-    win.setWindowTitle('oy vey!')
+    win.setWindowTitle('plotter')
     pg.setConfigOptions(antialias=True)
 
-    g_p6 = win.addPlot(title="my title")
+    g_p6 = win.addPlot(title="baseband signal")
 
     g_p6.setRange(xRange=(0, plot_samples-1), yRange=plot_yrange)
         
