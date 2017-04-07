@@ -97,6 +97,10 @@ uint32_t PreprocessorIIR::add_frame(const BasebandDataFrame_t &input, Eigen::Mat
         raw(0,i) = input.data[i] * _scale;
     }
 
+    if (_idx_sample == 0) {
+        _phpf->reset_to_output(raw, MatrixXcf::Zero(raw.rows(),raw.cols())); // force hpf
+    }
+    
     //highpass filter
     filtered_frame = _phpf->filter(raw);
     

@@ -79,6 +79,21 @@ public:
         _time_index = 0;
     }
     
+    void reset_to_output(const T & x, const T & y) {
+        int i;
+        
+        for (i = 0; i < _input_history.rows(); i++) {
+            _input_history.row(i) = x;
+        }
+        
+        for (i = 0; i < _output_history.rows(); i++) {
+            _output_history.row(i) = y;
+        }
+        
+        _time_index = 0;
+
+    }
+    
 private:
     T _input_history;
     T _output_history;
