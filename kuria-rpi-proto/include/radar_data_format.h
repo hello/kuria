@@ -8,6 +8,7 @@
 typedef struct {
     uint32_t content_id; // indicates if data is IQ or amplitude/phase
     uint32_t frame_counter;
+    // NOTE: num_of_bins 2x actual bin number if downconvertion enabled
     uint32_t num_of_bins; // number of bins in dataset
     int64_t timestamp; // 64 bit epoch
     float32_t bin_length; // length in meters between each bin

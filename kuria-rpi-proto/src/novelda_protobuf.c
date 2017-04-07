@@ -22,6 +22,7 @@ int32_t radar_data_encode (novelda_RadarFrame* radar_frame, radar_frame_packet_t
     //    size_t protobuf_size = sizeof (double) * packet->num_of_bins + sizeof (bool) + sizeof (
 
     // open output stream 
+    // TODO should this be open from socket instead
     pb_ostream_t ostream = pb_ostream_from_buffer (buf,sizeof (buf));
 
     // initialize to 0
@@ -66,7 +67,7 @@ static bool _encode_range_bins (pb_ostream_t* stream, const pb_field_t* field, v
 
     // encode the double repeated field for range bins
     for (uint32_t i=0; i<packet->num_of_bins;i++) {
-        // TODO Need to make sure data is double, or should proto be float
+        // all data in this driver is float32_t. only protobuf is double
         double value;
         value = (double) packet->fdata[i];
         if (!pb_encode_fixed64 (stream, &value )) {

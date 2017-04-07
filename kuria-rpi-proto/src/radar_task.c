@@ -354,6 +354,9 @@ static uint32_t read_and_send_radar_frame(X4Driver_t* x4driver) {
     // Read radar data into dispatch memory.
     status = x4driver_read_frame_normalized(x4driver, &radar_packet->frame_counter,radar_packet->fdata, radar_packet->num_of_bins);
 
+    // TODO what does the frame counter indicate
+//    printf ("frame counter: %d\n", radar_packet->frame_counter);
+
     if (status != XEP_ERROR_X4DRIVER_OK) {
         printf ("error reading frame\n");
         radar_data_frame_free( radar_packet, true );
