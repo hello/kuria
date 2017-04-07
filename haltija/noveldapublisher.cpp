@@ -1,12 +1,18 @@
 #include "ModuleConnector.hpp"
 #include "XEP.hpp"
 #include "Data.hpp"
+#include "Datarecorder.hpp"
 #include "datatypes.h"
 #include <unistd.h>
 #include <iostream>
 #include "yaml-cpp/yaml.h"
 
 using namespace XeThru;
+
+#define SUCCESS_ERROR_CODE
+
+#define CHECK_ERROR_OR_GOTO_CLEANUP(x)\
+  if (x != 1) goto CLEANUP;
 
 int main(int argc, char * argv[])
 {
@@ -59,28 +65,30 @@ int main(int argc, char * argv[])
     std::cout << "start..." << std::endl;
     const unsigned int log_level = 5;
     ModuleConnector mc(device.c_str(), log_level);
+    usleep(500000);
+    mc.open(device.c_str());
     mc.set_default_timeout(60);
-    
-    usleep(10*1000000);
 
     XEP & xep = mc.get_xep();
-    
-    xep.x4driver_set_enable(<#uint8_t value#>)
-  
-    std::cout << "init..." << std::endl;
-    if (xep.x4driver_init() != 0) {
-        return 0;
-    }
 
     usleep(500000);
     
-    xep.x4driver_set_pulses_per_step(pulses_per_step);
-    xep.x4driver_set_fps(frame_rate);
-    xep.x4driver_set_dac_max(1100);
-    xep.x4driver_set_dac_min(950);
+    std::cout << "init..." << std::endl;
+    CHECK_ERROR_OR_GOTO_CLEANUP(xep.x4driver_init());
+    
+    std::cout << "setting options..." << std::endl;
+    CHECK_ERROR_OR_GOTO_CLEANUP(xep.x4driver_set_dac_max(1100));
+    CHECK_ERROR_OR_GOTO_CLEANUP(xep.x4driver_set_dac_min(950));
+    CHECK_ERROR_OR_GOTO_CLEANUP(xep.x4driver_set_enable(1));
+
+    CHECK_ERROR_OR_GOTO_CLEANUP(xep.x4driver_set_downconversion(1));
+    CHECK_ERROR_OR_GOTO_CLEANUP(xep.x4driver_set_pulses_per_step(pulses_per_step));
+    CHECK_ERROR_OR_GOTO_CLEANUP(xep.x4driver_set_fps(frame_rate));
+    
     //xep.x4driver_set_iterations(uint32_t iterations) ???
 
-    
+
+
     usleep(500000);
 
     while (1) {
@@ -133,5 +141,9 @@ int main(int argc, char * argv[])
     }
     
     */
+    
+CLEANUP:
+    usleep(1000000);
+
     return 0;
 }

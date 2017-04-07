@@ -49,6 +49,55 @@ TEST_F(TestMatrixMath,TestPCAReals) {
 
 }
 
+TEST_F(TestMatrixMath,TestPCAComplex) {
+    Eigen::MatrixXcf A(10,2);
+    A <<
+    Complex_t(0.47837943,0.84938962),
+    Complex_t(-1.83079997,2.3900644),
+    Complex_t(-1.58943112,0.41812988),
+    Complex_t(-1.91636042,2.67415351),
+    Complex_t(2.07226756,3.39165796),
+    Complex_t(0.27881882,3.25907788),
+    Complex_t(0.04400696,1.02441223),
+    Complex_t(-2.24373993,0.96957763),
+    Complex_t(1.22039051,2.0936234),
+    Complex_t(-4.58645149,3.54934144),
+    Complex_t(1.63074863,-1.19770075),
+    Complex_t(-1.23502301,2.83018114),
+    Complex_t(-0.33796550,2.22497448),
+    Complex_t(-3.49572277,1.95620416),
+    Complex_t(3.95641312,2.00079622),
+    Complex_t(-1.06304623,2.16188159),
+    Complex_t(0.52027377,0.92429317),
+    Complex_t(0.28508555,2.30775933),
+    Complex_t(-0.66495270,-0.16302931),
+    Complex_t(0.88713586,0.55588004);
+
+    Eigen::MatrixXcf principal_components;
+    Eigen::MatrixXcf transform;
+    Eigen::MatrixXcf transformed_values;
+    
+    
+    ASSERT_TRUE(pca(A,principal_components,transform,transformed_values));
+    
+    ASSERT_NEAR(principal_components(0,0).imag(),0,1e-5);
+    ASSERT_NEAR(principal_components(1,0).imag(),0,1e-5);
+
+    ASSERT_NEAR(principal_components(0,0).real(),2.50676344,1e-5);
+    ASSERT_NEAR(principal_components(1,0).real(),4.74644158,1e-5);
+
+     Eigen::MatrixXcf testmat = transformed_values.transpose().conjugate() * transformed_values;
+    
+    ASSERT_NEAR(testmat(0,1).real(),0,1e-5);
+    ASSERT_NEAR(testmat(1,0).real(),0,1e-5);
+    ASSERT_NEAR(testmat(0,1).imag(),0,1e-5);
+    ASSERT_NEAR(testmat(1,0).imag(),0,1e-5);
+
+  
+    
+}
+
+
 TEST_F(TestMatrixMath,TestPCAComplexToReal) {
     MatrixXcf c = MatrixXcf::Zero(10,1);
     MatrixXcf c2 = MatrixXcf::Zero(10,2);

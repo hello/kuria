@@ -29,7 +29,7 @@ bool pca(const T & x, R & principal_components, R & transform, R & transformed_v
 
     //   S = EIGEN_VEC * EIGEN_VAL * EIGEN_VEC'
     //   [T x N]  * [N x N] ====> [T x N]
-    transformed_values = x_zero_mean * eigensolver.eigenvectors();
+    transformed_values = x_zero_mean * eigensolver.eigenvectors().conjugate();
     principal_components = eigensolver.eigenvalues();
     transform = eigensolver.eigenvectors();
     

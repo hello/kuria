@@ -54,7 +54,7 @@ void RangebinCombiner::set_latest_segment(const Eigen::MatrixXcf & baseband_segm
     }
 
     //get last column, which is associated with the maximum variance principle component
-    VectorXcf max_vector2 = eigen_vectors.col(eigen_vectors.cols()-1);
+    VectorXcf max_vector2 = eigen_vectors.col(eigen_vectors.cols()-1).conjugate();
     
     //if the range bins changed at all, start over
     if (!is_bins_unchanged) {
