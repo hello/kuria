@@ -12,7 +12,11 @@ using namespace XeThru;
 #define SUCCESS_ERROR_CODE
 
 #define CHECK_ERROR_OR_GOTO_CLEANUP(x)\
-  if (x != 1) goto CLEANUP;
+  if ( (x) != 0)  { \
+      std::cout << "error with " << #x << std::endl;\
+      goto CLEANUP;\
+   }\
+
 
 int main(int argc, char * argv[])
 {
@@ -55,18 +59,17 @@ int main(int argc, char * argv[])
     
 
     
-    std::cout << "pulses_per_step" << pulses_per_step << std::endl;
-    std::cout << "frame_rate" << frame_rate << std::endl;
-    std::cout << "dac_max" << dac_max << std::endl;
-    std::cout << "dac_min" << dac_min << std::endl;
+    std::cout << "pulses_per_step" << ": " << pulses_per_step << std::endl;
+    std::cout << "frame_rate" << ": "  << frame_rate << std::endl;
+    std::cout << "dac_max" << ": "  << dac_max << std::endl;
+    std::cout << "dac_min" << ": "  << dac_min << std::endl;
 
     
     
-    std::cout << "start..." << std::endl;
-    const unsigned int log_level = 5;
+    const unsigned int log_level = 3;
     ModuleConnector mc(device.c_str(), log_level);
     usleep(500000);
-    mc.open(device.c_str());
+    //mc.open(device.c_str());
     mc.set_default_timeout(60);
 
     XEP & xep = mc.get_xep();
@@ -81,31 +84,35 @@ int main(int argc, char * argv[])
     CHECK_ERROR_OR_GOTO_CLEANUP(xep.x4driver_set_dac_min(950));
     CHECK_ERROR_OR_GOTO_CLEANUP(xep.x4driver_set_enable(1));
 
-    CHECK_ERROR_OR_GOTO_CLEANUP(xep.x4driver_set_downconversion(1));
+    //CHECK_ERROR_OR_GOTO_CLEANUP(xep.x4driver_set_downconversion(1));
     CHECK_ERROR_OR_GOTO_CLEANUP(xep.x4driver_set_pulses_per_step(pulses_per_step));
     CHECK_ERROR_OR_GOTO_CLEANUP(xep.x4driver_set_fps(frame_rate));
-    
+    //CHECK_ERROR_OR_GOTO_CLEANUP(xep.x4driver_set_frame_area(0,2.0));
     //xep.x4driver_set_iterations(uint32_t iterations) ???
 
 
-
+    
+    
     usleep(500000);
+    {
+        uint32_t pong = 1234;
+        CHECK_ERROR_OR_GOTO_CLEANUP(xep.ping(&pong));
+        std::cout << pong << std::endl;
+
+    }
 
     while (1) {
         
-        DataFloat data;
+        uint32_t content_id = BasebandIqDataType;
+        uint32_t info = 0;
+        std::string data;
         
-        int code = xep.read_message_data_float(&data);
+        std::cout << "WAITING FOR MESSAGE..." <<std::endl;
+        std::cout << xep.peek_message_data_string() << std::endl;
+        int code = xep.read_message_data_string(&content_id, &info, &data);
         
-        std::cout << code << std::endl;
+        std::cout << code << "," << content_id << "," << data << std::endl;
         
-        if (data.content_id != BasebandIqDataType) {
-            continue;
-        }
-        
-        //xep.read_message_data_string(<#uint32_t *content_id#>, <#uint32_t *info#>, <#std::string *data#>)
-        std::cout << data.content_id << "," << data.data.size() << std::endl;
-
         usleep((0.5 / (float)frame_rate) * 1000000);
         
     }
