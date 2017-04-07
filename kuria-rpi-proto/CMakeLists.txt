@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 3.6.2)
+cmake_minimum_required (VERSION 3.5.1)
 
 project (sati_kuria_proto)
 
@@ -12,8 +12,8 @@ if (LINUX)
     message ("LINUX")
 endif (LINUX)
 
-set (CMAKE_C_COMPILER   "/usr/bin/clang")
-
+# set (CMAKE_C_COMPILER   "/usr/bin/clang")
+set (CMAKE_C_COMPILER	"/usr/bin/arm-linux-gnueabihf-gcc")
 set(CMAKE_BUILD_TYPE Release)
 
 set(CMAKE_POSITION_INDEPENDENT_CODE TRUE)
