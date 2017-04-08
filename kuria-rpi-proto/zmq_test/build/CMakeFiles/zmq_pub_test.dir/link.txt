@@ -1,1 +1,0 @@
-/usr/bin/clang  -O3 -DNDEBUG   CMakeFiles/zmq_pub_test.dir/test_pub.c.o  -o zmq_pub_test -rdynamic -lzmq 
