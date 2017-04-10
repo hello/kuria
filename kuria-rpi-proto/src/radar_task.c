@@ -247,6 +247,9 @@ void radar_task (void) {
 
 void radar_task_end (void) {
 
+    // close dispatcher
+    dispatcher_close ();
+
     // Disable X4
     x4driver_set_enable(x4driver, 0);
 
