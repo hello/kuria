@@ -32,11 +32,11 @@ public:
     }
     
     void publish(const std::string & id, const Eigen::MatrixXcf & mat) {
-        write_matrix(id,mat);
+        write_matrix_to_cell_array(id,mat);
     }
     
     void publish(const std::string & id, const Eigen::MatrixXf & mat) {
-        write_matrix(id,mat);
+        write_matrix_to_cell_array(id,mat);
     }
 };
 
@@ -67,8 +67,8 @@ int main(int argc, char * argv[]) {
         novelda_data.range_bins.reserve(baseband.cols()*2);
         
         for (int irangebin = 0; irangebin < baseband.cols(); irangebin++) {
-            novelda_data.range_bins.push_back(baseband(iframe,irangebin).real());
-            novelda_data.range_bins.push_back(baseband(iframe,irangebin).imag());
+            Complex128_t complex_data(baseband(iframe,irangebin).real(),baseband(iframe,irangebin).imag());
+            novelda_data.range_bins.push_back(complex_data);
         }
         
         subscriber.receive_message(novelda_data);
