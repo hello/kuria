@@ -1,6 +1,8 @@
-#include "file_save.h"
 #include <stdio.h>
 #include <fcntl.h>
+#include <pthread.h>
+#include <stdint.h>
+#include "kuria_config.h"
 #include <math.h>
 #include <time.h>
 #include <string.h>
@@ -9,13 +11,13 @@
 
 #include <unistd.h>
 #include "radar_data_format.h"
-#include "hlo_queue.h"
 
 FILE* fp;
 
-hlo_queue_t radar_data_queue;
 
-extern int32_t radar_data_frame_free( radar_frame_packet_t* packet ); 
+int32_t file_task_init (pthread_t* thread_id);
+void* file_task (void* param); 
+int32_t file_close(void);
 
 int32_t file_task_init (pthread_t* thread_id) {
 
@@ -32,12 +34,6 @@ int32_t file_task_init (pthread_t* thread_id) {
         return -1;
     }
 
-    // Create queue for data transfer with radar task
-    status = hlo_queue_create (&radar_data_queue, 25); // TODO remove magic number
-    if (status) {
-        printf ("error creating queue\n");
-        return status;
-    }
 
     pthread_attr_t file_task_attr;
 
@@ -68,9 +64,9 @@ void* file_task (void* param) {
     printf("Starting file task\n");
 
     while(1) {
-        // receive data from queue
         //
         //printf("wait for data\n");
+        /*
         if ( (status=hlo_queue_recv (&radar_data_queue, &packet, 0) ) == 0) {
 
             if( !packet.fdata ) {
@@ -99,18 +95,23 @@ void* file_task (void* param) {
             printf ("hlo_queue_recv err: %d\n", status);
         }
 
+        */
     }
 
 }
 
 int32_t file_close(void){
-#if USE_FREERTOS_TASKS
-    if( radar_data_queue) vQueueDelete( radar_data_queue );
-#endif
     int32_t status = 0;
     if(fp){
         status = fclose(fp);
     }
     return status;
 
+}
+
+int main (void) {
+
+
+
+    return 0;
 }

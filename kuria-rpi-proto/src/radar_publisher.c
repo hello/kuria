@@ -7,7 +7,6 @@
 
 
 #include <string.h>
-#include "file_save.h"
 #include "radar_task.h"
 #include "hlo_notify.h"
 
@@ -28,10 +27,6 @@ void end_application(void) {
 
     // End radar task
     hlo_notify_send (&radar_task_notify, 0x10);
-
-    // Close files
-    file_close();
-
 
 }
 
@@ -63,13 +58,6 @@ int main() {
 
     pthread_t radar_task_thread_id;
     if (radar_task_init (&radar_task_thread_id) ) {
-        end_application();
-        return -1;
-    }
-
-    pthread_t file_thread_id;
-    if (file_task_init (&file_thread_id) ) {
-        printf("Error initializing file task\n");
         end_application();
         return -1;
     }

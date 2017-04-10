@@ -13,7 +13,6 @@
 #include "radar_data_format.h"
 #include <string.h>
 #include "hlo_notify.h"
-#include "hlo_queue.h"
 
 /* Defines */
 #if 0
@@ -64,8 +63,6 @@ static int32_t radar_task_set_callbacks_lock ();
 static int32_t radar_task_set_callbacks_driver ();
 
 /* Global Variables */
-
-extern hlo_queue_t radar_data_queue;
 
 
 /* Function definitions */
@@ -367,19 +364,7 @@ static uint32_t read_and_send_radar_frame(X4Driver_t* x4driver) {
     }
 
     // send radar data to file task
-#if 0
     radar_data_frame_free (radar_packet, true);
-#else
-    // Send to file task
-    DISP ("queue send\n");
-    status = hlo_queue_send (&radar_data_queue, radar_packet, 0);
-    if (status != 0) {
-        printf ("hlo_queue_send err: %d\n", status);
-        radar_data_frame_free( radar_packet, true );
-        return status;
-    }
-    radar_data_frame_free (radar_packet, false);
-#endif
 
     return status;
 }
