@@ -138,6 +138,9 @@ uint32_t PreprocessorIIR::add_frame(const BasebandDataFrame_t &input, Eigen::Mat
     //copy
     segment = _raw_segment;
     
+    //circular shift
+    //circular_shift_columns(segment, -(_idx_sample % _num_frames_in_segment));
+    
     return flags;
 
 }

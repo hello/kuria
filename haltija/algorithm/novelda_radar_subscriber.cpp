@@ -4,6 +4,7 @@
 #include "log.h"
 #include <unistd.h>
 #include "preprocessorIIR.h"
+#include "debug_publisher.h"
 
 #define EXPECTED_SAMPLE_RATE_HZ (20)
 #define NUM_FRAMES_IN_SEGMENT (20 * EXPECTED_SAMPLE_RATE_HZ)
@@ -20,20 +21,28 @@
 using namespace Eigen;
 
 
-NoveldaRadarSubscriber::NoveldaRadarSubscriber(RadarResultPublisherInterface * publisher)
+NoveldaRadarSubscriber::NoveldaRadarSubscriber(RadarResultPublisherInterface * publisher,DebugPublisherInterface * debug_publisher)
 :_publisher(publisher)
+,_debug_publisher(debug_publisher)
 ,_sequence_number(0)
 ,_received_number(0) {
     _preprocessor = PreprocessorPtr_t(NULL);
     
-    for (int i = 12; i < 70; i++) {
+    for (int i = 12; i < 38; i++) {
         _rangebins_we_care_about.insert(i);
     }
+    
+    DebugPublisher::initialize(debug_publisher);
     
 }
 
 NoveldaRadarSubscriber::~NoveldaRadarSubscriber() {
+    DebugPublisher::deinitialize();
     
+    if (_publisher) {
+        delete _publisher;
+        _publisher = NULL;
+    }
 }
 
 
@@ -75,11 +84,20 @@ void NoveldaRadarSubscriber::receive_message(const NoveldaData_t & message) {
         //DO FRAME PROCESSING HERE
         std::cout << "got new segment...." << std::endl;
         _combiner.set_latest_segment(segment, _rangebins_we_care_about);
+    
+        debug_save("segment",segment);
     }
     
     MatrixXcf transformed_frame;
     if (_combiner.get_latest_reduced_measurement(filtered_frame, transformed_frame)) {
 
+        debug_save("transformed_frames",transformed_frame);
+        
+        Eigen::MatrixXf foo;
+        if (_peakfinder.isPeak(transformed_frame, _received_number, foo)) {
+            std::cout << "PEAK!" << std::endl;
+        }
+        
         //send frame over the wire, or process it or something
         
         if (_publisher) {

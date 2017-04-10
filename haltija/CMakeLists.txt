@@ -76,6 +76,8 @@ algorithm/respiration.cpp
 algorithm/novelda_radar_subscriber.cpp
 algorithm/rangebincombiner.cpp
 algorithm/peakFinding.cpp
+algorithm/ekf.cpp
+algorithm/debug_publisher.cpp
 )
 
 add_library(network STATIC
