@@ -8,4 +8,6 @@
 #define USE_FREERTOS_SEM 1
 #define USE_FREERTOS_TASKS 0
 
+#define ZMQ_ENDPOINT "ipc://~/mylocal.ipc"
+
 #endif

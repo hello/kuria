@@ -23,7 +23,6 @@ int main (void) {
         char buffer[10] = {0};
         int size = zmq_recv (subscriber, buffer, 10, 0);
         printf ("Received: %s of size:%d\n", buffer, size);
-        sleep (5);
     }
 
     zmq_close (subscriber);
