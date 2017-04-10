@@ -30,17 +30,6 @@ void end_application(void) {
 
 }
 
-void vApplicationTickHook (void) {
-}
-
-void vApplicationIdleHook (void) {
-}
-
-void vMainQueueSendPassed( void )
-{
-    /* This is just an example implementation of the "queue send" trace hook. */
-}
-
 
 int main() {
 
@@ -56,25 +45,19 @@ int main() {
     */
     setbuf(stdout, NULL);
 
-    pthread_t radar_task_thread_id;
-    if (radar_task_init (&radar_task_thread_id) ) {
+    if (radar_task_init () ) {
         end_application();
         return -1;
     }
 
-    radar_task_start (&radar_task_thread_id);
+    // enable interrupts
     radar_task_en_intr ();
 
-    for (;;) {
-
-        pause ();
-
-    }
+    // run radar data publisher
+    radar_task ();
 
     // Should never get here
     printf("Exit from app \n");
-
-    // TODO clean up if needed
 
     return 0;
 

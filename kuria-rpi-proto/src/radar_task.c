@@ -5,7 +5,7 @@
 #include "radar_task.h"
 #include "x4driver.h"
 #include "kuria_config.h"
-
+#include "dispatch_radar_frame.h"
 
 #include <stdbool.h>
 #include "spidriver.h"
@@ -68,7 +68,7 @@ static int32_t radar_task_set_callbacks_driver ();
 /* Function definitions */
 
 /* RADAR TASK INIT */
-int32_t radar_task_init (pthread_t* thread_id) {
+int32_t radar_task_init (void) {
 
     int status;
 
@@ -83,6 +83,12 @@ int32_t radar_task_init (pthread_t* thread_id) {
     status = hlo_notify_init (&radar_task_notify);
     if (status) {
         printf (" error creating radar_task_notify: %d\n", status);
+    }
+
+
+    // initialize dispatcher to publish radar data
+    if (dispatcher_init ()) {
+        printf ("dispatcher init failed\n");
     }
 
     // X4Driver calbacks
@@ -198,33 +204,8 @@ int32_t radar_task_init (pthread_t* thread_id) {
 
 }
 
-int32_t radar_task_start (pthread_t* thread_id) {
-
-    int32_t status;
-
-    pthread_attr_t radar_task_attr;
-
-    pthread_attr_init (&radar_task_attr);
-    pthread_attr_setdetachstate (&radar_task_attr, PTHREAD_CREATE_DETACHED);
-
-    printf ("creating radar task thread\n");
-
-    pthread_t radar_task_thread_id;
-
-    status = pthread_create (&radar_task_thread_id, &radar_task_attr, radar_task, NULL);
-    if (status) {
-        printf ("error creating radar task thread: %d\n", status);
-        return status;
-    }
-
-    // TODO redundant variable can be removed 
-    *thread_id = radar_task_thread_id;
-
-    return status;
-}
-
 /* RADAR TASK */
-void* radar_task (void* param) {
+void radar_task (void) {
 
     printf("X4 Test start...\n");
 
@@ -254,7 +235,7 @@ void* radar_task (void* param) {
         } else if (notify_value & XEP_NOTIFY_TASK_END) {
             printf("Ending radar task\n");
             radar_task_end ();
-            pthread_exit (NULL);
+            exit (0);
         }
 
 
@@ -363,7 +344,12 @@ static uint32_t read_and_send_radar_frame(X4Driver_t* x4driver) {
         //        printf("Frame read completed\n");
     }
 
-    // send radar data to file task
+    // TODO publish radar data
+    status = dispatch_radar_frame (radar_packet);
+    if (status) {
+        printf ("radar fram could not be dispatched\n");
+    }
+
     radar_data_frame_free (radar_packet, true);
 
     return status;

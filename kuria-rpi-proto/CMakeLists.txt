@@ -35,6 +35,7 @@ set (PUB_UTILS_SOURCES
 set (PUB_SOURCES 
     src/radar_publisher.c
     src/radar_task.c
+    src/dispatch_radar_frame.c
     )
 set (PUB_ALL_SRCS
     ${PUB_PB_SOURCES}
