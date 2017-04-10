@@ -1,7 +1,7 @@
 #! /bin/sh
 
 cd build
+cmake ..
 make clean
 make
 cd ..
-build/kuria_proto_test

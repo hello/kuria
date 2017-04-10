@@ -5,7 +5,7 @@
 #include <stdio.h>
 
 static bool _encode_range_bins (pb_ostream_t* stream, const pb_field_t* field, void* const* arg); 
-
+bool decode_repeated_doubles(pb_istream_t *stream, const pb_field_t *field, void **arg); 
 
 
 int32_t radar_data_encode (novelda_RadarFrame* radar_frame, radar_frame_packet_t* packet){
@@ -77,3 +77,80 @@ static bool _encode_range_bins (pb_ostream_t* stream, const pb_field_t* field, v
 
     return true;
 }
+
+// TODO define this only for radar_subscriber
+// #define RADAR_DATA_TESTING 1
+#if RADAR_DATA_TESTING
+#include "pb_decode.h"
+
+typedef struct {
+    uint8_t * buffer;
+    size_t buf_size_bytes;
+    size_t pos;
+} BufferInfo_t;
+
+int32_t radar_data_decode (uint8_t* protobuf_bytes, const size_t protobuf_size, radar_frame_packet_t* packet ) {
+
+
+    double buf[1024] = {0};
+    novelda_RadarFrame frame;
+    BufferInfo_t* info;
+    info = (BufferInfo_t*) &buf[0];
+    pb_istream_t istream = pb_istream_from_buffer (protobuf_bytes, protobuf_size);
+
+    memset (&frame, 0, sizeof (frame) );
+
+    frame.range_bins.funcs.decode = decode_repeated_doubles;
+    frame.range_bins.arg = (void*) info;
+
+    if (!pb_decode (&istream, novelda_RadarFrame_fields, &frame) ) {
+        printf ("failed to decide\n");
+        return -1;
+    }
+
+    const size_t num_items_received = info->pos / sizeof (double);
+
+    if (num_items_received == 0) {
+        printf ("items received is zero\n");
+        return false;
+    }
+
+    packet->frame_counter = 0 ;
+    packet->content_id = 0;
+
+    if (frame.has_frame_id) {
+        packet->frame_counter = frame.frame_id;
+    }
+
+    if (frame.has_base_band) {
+        packet->content_id = frame.base_band;
+    }
+
+    for (int i = 0; i < num_items_received/2; i++) {
+        packet->fdata[2*i] = buf[2*i];
+        packet->fdata[2*i+1] = buf[2*i+1];
+    }
+
+    return 0;
+}
+
+bool decode_repeated_doubles(pb_istream_t *stream, const pb_field_t *field, void **arg) {
+    BufferInfo_t * info = (BufferInfo_t *) *arg;
+
+    while(stream->bytes_left > 0) {
+        double * dbuf = (double *)(info->buffer + info->pos);
+
+        if (info->pos + sizeof(double) > info->buf_size_bytes) {
+            return false;
+        }
+
+
+        pb_decode_fixed64(stream, dbuf);
+        info->pos += sizeof(double);
+    }
+
+    return true;
+
+}
+
+#endif
