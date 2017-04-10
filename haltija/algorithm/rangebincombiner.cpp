@@ -1,7 +1,9 @@
 #include "rangebincombiner.h"
 #include "pca.h"
 #include "log.h"
-
+#include "respiration_classifier.h"
+#include "debug_publisher.h"
+#include <iostream>
 using namespace Eigen;
 
 RangebinCombiner::RangebinCombiner()
@@ -53,8 +55,29 @@ void RangebinCombiner::set_latest_segment(const Eigen::MatrixXcf & baseband_segm
         return;
     }
 
+    
+    std::cout << principal_components.block(principal_components.rows() - 5,0,5,1) << std::endl;
+    //testing
+    
+#define NUM_BINS_TO_CONSIDER (2)
+    int ibin = RespirationClassifier::is_respiration(transformed_values.block(0,transformed_values.cols() - NUM_BINS_TO_CONSIDER,transformed_values.rows(),NUM_BINS_TO_CONSIDER),20);
+    
+    Eigen::MatrixXf pick(1,1);
+    pick(0,0) = ibin;
+    
+    debug_save("picked_pin",pick);
+    
+    if (ibin == -1) {
+        _is_ready = false;
+        return;
+    }
+    
+    ibin += transformed_values.cols() - NUM_BINS_TO_CONSIDER;
+    
+    ibin = transformed_values.cols() - 1;
+    
     //get last column, which is associated with the maximum variance principle component
-    VectorXcf max_vector2 = eigen_vectors.col(eigen_vectors.cols()-1).conjugate();
+    VectorXcf max_vector2 = eigen_vectors.col(ibin).conjugate();
     
     //if the range bins changed at all, start over
     if (!is_bins_unchanged) {

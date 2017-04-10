@@ -78,6 +78,7 @@ algorithm/rangebincombiner.cpp
 algorithm/peakFinding.cpp
 algorithm/ekf.cpp
 algorithm/debug_publisher.cpp
+algorithm/respiration_classifier.cpp
 )
 
 add_library(network STATIC

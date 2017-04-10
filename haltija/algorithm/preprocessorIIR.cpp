@@ -139,7 +139,18 @@ uint32_t PreprocessorIIR::add_frame(const BasebandDataFrame_t &input, Eigen::Mat
     segment = _raw_segment;
     
     //circular shift
-    //circular_shift_columns(segment, -(_idx_sample % _num_frames_in_segment));
+    segment = circular_shift_columns(segment, -(_idx_sample % _num_frames_in_segment));
+
+    /*
+    MatrixXf Blpf(2,1);
+    MatrixXf Alpf(2,1);
+
+    Blpf <<   0.03946985,  0.03946985;
+    Alpf << 1.       , -0.9210603;
+
+    IIRFilter<MatrixXf,MatrixXcf> lpf(Blpf,Alpf,segment.cols());
+    segment = lpf.filtfilt(segment);
+    */
     
     return flags;
 

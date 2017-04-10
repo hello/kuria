@@ -167,7 +167,7 @@ TEST_F(TestFilter, TestComplexFft) {
         ASSERT_NEAR(ref(i,0).imag(),output(i,0).imag(),1e-4);
     }
     
-    Eigen::MatrixXf output2;
+    VectorXf output2;
     ASSERT_TRUE(HaltijaMath::psd(16,vec,output2));
 
     Eigen::MatrixXf ref2(16,1);

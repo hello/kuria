@@ -57,7 +57,7 @@ bool fft(const int nfft, const T & x, Eigen::MatrixXcf & output) {
 
 //no averaging, so expect the output to be different than pwelch
 template <class T>
-bool psd(const int nfft, const T & x, Eigen::MatrixXf & output) {
+bool psd(const int nfft, const T & x, Eigen::VectorXf & output) {
     
     T xwindowed = x;
     
