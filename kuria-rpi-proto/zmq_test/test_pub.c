@@ -11,7 +11,11 @@ int main (void) {
     // socket to talk to clients
     void* context = zmq_ctx_new();
     void* publisher = zmq_socket (context,ZMQ_PUB );
+#if USE_IPC
+    int rc = zmq_bind (publisher,ZMQ_ENDPOINT); 
+#else
     int rc = zmq_bind (publisher, "tcp://*:5556");
+#endif
     assert (rc == 0);
 
 
