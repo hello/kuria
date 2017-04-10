@@ -30,7 +30,7 @@ int main(int argc, char * argv[]) {
     
     ZmqSubscriber<NoveldaProtobuf,NoveldaData_t,NoveldaRadarSubscriber> zmq_subscriber(100000,subscribe_host_port);
     
-    zmq_subscriber.add_subscriber("foobars", new NoveldaRadarSubscriber(new RadarMessagePublisher()));
+    zmq_subscriber.add_subscriber("foobars", new NoveldaRadarSubscriber(new RadarMessagePublisher(),NULL));
     
     zmq_subscriber.run();
     

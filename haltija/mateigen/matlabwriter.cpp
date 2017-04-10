@@ -4,7 +4,7 @@
 
 MatlabWriter * MatlabWriter::_instance = nullptr;
 
-void atexit_handler() {
+static void atexit_handler() {
     MatlabWriter::deinitialize();
 }
 

@@ -86,7 +86,7 @@ TEST_F(TestMatrixMath,TestPCAComplex) {
     ASSERT_NEAR(principal_components(0,0).real(),2.50676344,1e-5);
     ASSERT_NEAR(principal_components(1,0).real(),4.74644158,1e-5);
 
-     Eigen::MatrixXcf testmat = transformed_values.transpose().conjugate() * transformed_values;
+     Eigen::MatrixXcf testmat = transformed_values.transpose() * transformed_values.conjugate();
     
     ASSERT_NEAR(testmat(0,1).real(),0,1e-5);
     ASSERT_NEAR(testmat(1,0).real(),0,1e-5);
