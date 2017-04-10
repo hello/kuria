@@ -32,8 +32,6 @@ int32_t file_task_init (pthread_t* thread_id) {
         return -1;
     }
 
-
-
     // Create queue for data transfer with radar task
     status = hlo_queue_create (&radar_data_queue, 25); // TODO remove magic number
     if (status) {
