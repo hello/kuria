@@ -24,7 +24,7 @@ private:
     IntSet_t _bins_we_care_about;
     
     Eigen::MatrixXcf get_subset(const Eigen::MatrixXcf & baseband_segment,const IntSet_t & bins_we_care_about) const;
- 
+    Eigen::MatrixXcf normalize_by_free_space_loss(const Eigen::MatrixXcf & baseband_segment) const;
     int get_max_rangebin() const;
 
 };

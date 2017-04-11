@@ -4,7 +4,10 @@
 #include "respiration_classifier.h"
 #include "debug_publisher.h"
 #include <iostream>
+#include <cmath>
 using namespace Eigen;
+
+#define MAX_SCALE (1000.0f)
 
 RangebinCombiner::RangebinCombiner()
 :_is_ready(false) {
@@ -14,6 +17,29 @@ RangebinCombiner::~RangebinCombiner() {
     
 }
 
+//scale data to attenuate near signals
+Eigen::MatrixXcf RangebinCombiner::normalize_by_free_space_loss(const Eigen::MatrixXcf & baseband_segment) const {
+    
+    Eigen::MatrixXcf scaled_baseband = baseband_segment;
+    
+    int idx = 0;
+    const float begin_bin = (float)*_bins_we_care_about.begin();
+    for (auto it = _bins_we_care_about.begin(); it != _bins_we_care_about.end(); it++) {
+        float scale = pow(begin_bin / (float)(*it),-4.0) / MAX_SCALE;
+        
+        if (scale > 1.0) {
+            scale = 1.0;
+        }
+        
+        
+        scaled_baseband.col(idx).array() *= scale;
+        
+        idx++;
+    }
+    
+    return scaled_baseband;
+    
+}
 
 //triggers PCA computation
 void RangebinCombiner::set_latest_segment(const Eigen::MatrixXcf & baseband_segment,const IntSet_t & bins_we_care_about) {
@@ -43,7 +69,9 @@ void RangebinCombiner::set_latest_segment(const Eigen::MatrixXcf & baseband_segm
 
     /* do principal component analysis on the subset of range bins that we care about */
 
-    const MatrixXcf subset = get_subset(baseband_segment,bins_we_care_about);
+    const MatrixXcf scaled_baseband = normalize_by_free_space_loss(baseband_segment);
+    
+    const MatrixXcf subset = get_subset(scaled_baseband,bins_we_care_about);
     
     
     MatrixXcf principal_components;
@@ -56,9 +84,6 @@ void RangebinCombiner::set_latest_segment(const Eigen::MatrixXcf & baseband_segm
     }
 
     
-    std::cout << principal_components.block(principal_components.rows() - 5,0,5,1) << std::endl;
-    
-    //TODO normalize variance by free space loss????
     for (int i = 0 ; i < 5; i++) {
         auto this_col = eigen_vectors.col(eigen_vectors.cols() - i - 1);
         auto magintudes = this_col.array().real() * this_col.array().real() +  this_col.array().imag()*this_col.array().imag();
@@ -69,7 +94,7 @@ void RangebinCombiner::set_latest_segment(const Eigen::MatrixXcf & baseband_segm
             sum += magintudes(j) * j;
         }
         
-        std::cout << sum << std::endl;
+        std::cout << principal_components(principal_components.rows() - i - 1) << "," << sum << std::endl;
     }
     
     //testing
