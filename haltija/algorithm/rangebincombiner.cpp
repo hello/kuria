@@ -57,6 +57,21 @@ void RangebinCombiner::set_latest_segment(const Eigen::MatrixXcf & baseband_segm
 
     
     std::cout << principal_components.block(principal_components.rows() - 5,0,5,1) << std::endl;
+    
+    //TODO normalize variance by free space loss????
+    for (int i = 0 ; i < 5; i++) {
+        auto this_col = eigen_vectors.col(eigen_vectors.cols() - i - 1);
+        auto magintudes = this_col.array().real() * this_col.array().real() +  this_col.array().imag()*this_col.array().imag();
+        //std::cout << magintudes.transpose() << std::endl;
+        //std::cout << myvec.transpose() << std::endl;
+        float sum = 0.0;
+        for (int j = 0; j < magintudes.rows(); j++) {
+            sum += magintudes(j) * j;
+        }
+        
+        std::cout << sum << std::endl;
+    }
+    
     //testing
     
 #define NUM_BINS_TO_CONSIDER (2)
@@ -67,10 +82,12 @@ void RangebinCombiner::set_latest_segment(const Eigen::MatrixXcf & baseband_segm
     
     debug_save("picked_pin",pick);
     
+    /*
     if (ibin == -1) {
         _is_ready = false;
         return;
     }
+     */
     
     ibin += transformed_values.cols() - NUM_BINS_TO_CONSIDER;
     
