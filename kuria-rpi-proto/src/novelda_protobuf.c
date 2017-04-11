@@ -4,7 +4,7 @@
 
 #include <stdio.h>
 
-static bool _encode_range_bins (pb_ostream_t* stream, const pb_field_t* field, void* const* arg); 
+bool _encode_range_bins (pb_ostream_t* stream, const pb_field_t* field, void* const* arg); 
 bool decode_repeated_doubles(pb_istream_t *stream, const pb_field_t *field, void **arg); 
 
 
@@ -38,7 +38,7 @@ int32_t radar_data_encode (novelda_RadarFrame* radar_frame, radar_frame_packet_t
 
     // set callbacks to encode the radar data
     radar_frame->range_bins.funcs.encode = _encode_range_bins;
-    radar_frame->range_bins.arg = packet;
+    radar_frame->range_bins.arg = &packet;
 
     if (!pb_encode (&ostream, novelda_RadarFrame_fields, &radar_frame)) {
         printf (" failed to encode radar data: %d\n", packet->frame_counter);
@@ -49,9 +49,11 @@ int32_t radar_data_encode (novelda_RadarFrame* radar_frame, radar_frame_packet_t
 
 }
 
-static bool _encode_range_bins (pb_ostream_t* stream, const pb_field_t* field, void* const* arg) {
+bool _encode_range_bins (pb_ostream_t* stream, const pb_field_t* field, void* const* arg) {
 
     radar_frame_packet_t* packet = (radar_frame_packet_t*) arg;
+
+    printf ("encode range bins\n");
 
     // encode wire type and tag of the field
     if (!pb_encode_tag_for_field (stream, field) ) {

@@ -34,7 +34,8 @@ int32_t dispatch_radar_frame (radar_frame_packet_t* packet) {
     }
 
     // publish radar data
-    status = zmq_send (publisher, "Hello", strlen ("Hello"), 0);
+    printf ("sending radar pb\n");
+    status = zmq_send (publisher, &frame, sizeof (novelda_RadarFrame), 0);
     if (status) {
         printf ("zmq send fail\n");
         return status;

@@ -10,6 +10,7 @@
 #include <assert.h>
 #include <unistd.h>
 #include "radar_data_format.h"
+#include "novelda_protobuf.h"
 
 // file for radar data
 FILE* fp;
@@ -69,10 +70,10 @@ void* file_task (void) {
 
     while(1) {
 
-        char buffer[10];
+        novelda_RadarFrame frame;
 
-        int size = zmq_recv (subscriber, buffer, 10, 0);
-        printf ("Received: %s of size:%d\n", buffer, size);
+        int size = zmq_recv (subscriber, &frame, sizeof (novelda_RadarFrame), 0);
+        printf ("Received pb of size:%d\n",size);
 
         /*
         if( !packet.fdata ) {
