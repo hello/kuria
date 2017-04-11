@@ -2,6 +2,10 @@
 #include <float.h>
 #include "haltijamath.h"
 #include "debug_publisher.h"
+#include "filters.h"
+#include "haltijamath.h"
+
+
 /*
  
  breaths per minute
@@ -17,6 +21,9 @@
  
  
  */
+
+using Eigen::MatrixXcf;
+using Eigen::MatrixXf;
 
 //these are in hz
 #define FREQUENCY_CUTOFF (1.1f)
@@ -121,4 +128,48 @@ int RespirationClassifier::is_respiration(const Eigen::MatrixXcf & range_bins_of
     }
     
     return -1;
+}
+
+bool RespirationClassifier::get_respiration_stats(const Eigen::MatrixXcf & probable_respiration_linear_combinations, RespirationStats_t & result) {
+    //TODO bandpass signal
+    //TODO find indices of increasing zero crossings
+    //TODO compute delta time of increasing zero crossings
+    //TODO compute mean delta time, std dev of delta time
+    
+    MatrixXf B(5,1);
+    MatrixXf A(5,1);
+    //B,A = sig.iirdesign(wp=[0.2/10.0,1.0/10.0],ws=[0.1/10.0,4.0 / 10.0],gpass=1.0,gstop = 6.0,ftype='butter')
+    B << 0.02446784,  0.        , -0.04893569,  0.        ,  0.02446784;
+    A << 1.        , -3.47656882,  4.57040766, -2.70275474,  0.60922209;
+    
+    IIRFilter<MatrixXf, MatrixXf> bandpass_filter(B,A,probable_respiration_linear_combinations.cols());
+    
+    const int idx = 0;
+
+    
+    const Eigen::MatrixXf projected_real_signal = HaltijaMath::project_complex_cols_into_reals(probable_respiration_linear_combinations.col(idx));
+
+    
+    const Eigen::MatrixXf filtered_signal = bandpass_filter.filtfilt(projected_real_signal);
+    
+    const int T = filtered_signal.rows();
+    
+    IntVec_t positive_crossings;
+    
+    for (int t = 1; t < T; t++) {
+        float prev = filtered_signal(t - 1,idx);
+        float current = filtered_signal(t,idx);
+        
+        if (prev < 0.0f && current >= 0.0f) {
+            positive_crossings.push_back(t);
+        }
+    }
+    
+    IntVec_t diffs;
+    
+    for (int i = 1; i < positive_crossings.size(); i++) {
+        diffs.push_back(positive_crossings[i] - positive_crossings[i-1]);
+    }
+    
+    return false;
 }

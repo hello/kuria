@@ -15,17 +15,22 @@ MatrixXf HaltijaMath::project_complex_cols_into_reals(const MatrixXcf & c) {
         complex_column.col(0) = c.col(icol).real();
         complex_column.col(1) = c.col(icol).imag();
         
-        MatrixXf principal_component_vec;
-        MatrixXf transform;
-        MatrixXf transformed_values;
-        
-        pca(complex_column,principal_component_vec,transform,transformed_values);
-        
-        if (principal_component_vec(0,0) > principal_component_vec(1,0)) {
-            std::cout << principal_component_vec << std::endl;
-            assert (false);
 
+        
+        Pca<MatrixXf> pca;
+        pca.fit(complex_column);
+
+        MatrixXf transformed_values = pca.get_transformed_values(complex_column);
+
+        if (pca.get_principal_components()(0,0) > pca.get_principal_components()(1,0)) {
+            std::cout << pca.get_principal_components() << std::endl;
+            //this should never happen
+            //but leaving this assert in here is bad bad bad,
+            //TODO remove this
+            assert (false);
         }
+        
+
         reals.col(icol) = transformed_values.col(1);
     }
     

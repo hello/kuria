@@ -74,14 +74,13 @@ void RangebinCombiner::set_latest_segment(const Eigen::MatrixXcf & baseband_segm
     const MatrixXcf subset = get_subset(scaled_baseband,bins_we_care_about);
     
     
-    MatrixXcf principal_components;
-    MatrixXcf eigen_vectors;
-    MatrixXcf transformed_values;
+    Pca<MatrixXcf> pca;
     
-    if (!pca(subset,principal_components,eigen_vectors,transformed_values)) {
-        LOG("pca failed for some reason");
-        return;
-    }
+    pca.fit(subset);
+    
+    MatrixXcf principal_components = pca.get_principal_components();
+    MatrixXcf eigen_vectors = pca.get_transform();
+    MatrixXcf transformed_values = pca.get_transformed_values(subset);
 
     principal_components.array() /= principal_components.sum();
     

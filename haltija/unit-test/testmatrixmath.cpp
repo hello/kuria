@@ -28,12 +28,14 @@ TEST_F(TestMatrixMath,TestPCAReals) {
     A <<  1.17025654, -0.28766909,0.13481309, -0.43398725,0.98603634, -1.44139354;
     //std::cout << A << std::endl << std::endl;
 
-    Eigen::MatrixXf principal_components;
-    Eigen::MatrixXf transform;
-    Eigen::MatrixXf transformed_values;
 
+    Pca<MatrixXf> pca;
+    pca.fit(A);
     
-    ASSERT_TRUE(pca(A,principal_components,transform,transformed_values));
+    Eigen::MatrixXf principal_components = pca.get_principal_components();
+    Eigen::MatrixXf transform = pca.get_transform();
+    Eigen::MatrixXf transformed_values = pca.get_transformed_values(A);
+
     
     //std::cout << principal_components << std::endl << std::endl;
     //std::cout << transform << std::endl;
@@ -73,13 +75,16 @@ TEST_F(TestMatrixMath,TestPCAComplex) {
     Complex_t(-0.66495270,-0.16302931),
     Complex_t(0.88713586,0.55588004);
 
-    Eigen::MatrixXcf principal_components;
-    Eigen::MatrixXcf transform;
-    Eigen::MatrixXcf transformed_values;
     
     
-    ASSERT_TRUE(pca(A,principal_components,transform,transformed_values));
+    Pca<MatrixXcf> pca;
+    pca.fit(A);
     
+    Eigen::MatrixXcf principal_components = pca.get_principal_components();
+    Eigen::MatrixXcf transform = pca.get_transform();
+    Eigen::MatrixXcf transformed_values = pca.get_transformed_values(A);
+    
+
     ASSERT_NEAR(principal_components(0,0).imag(),0,1e-5);
     ASSERT_NEAR(principal_components(1,0).imag(),0,1e-5);
 
