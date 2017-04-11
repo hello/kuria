@@ -1,9 +1,0 @@
-#include "novelda_protobuf.h"
-#include "novelda.pb.h"
-
-int32_t radar_data_encode (void){
-
-
-    return 0;
-
-}

@@ -19,11 +19,11 @@ FILE* fp;
 void* context;
 void* subscriber;
 
-int32_t file_task_init (void);
-void* file_task (void); 
+int32_t radar_subscriber_init (void);
+void* radar_subscriber (void); 
 int32_t file_close(void);
 
-int32_t file_task_init (void) {
+int32_t radar_subscriber_init (void) {
 
     int status;
     char filename[40];
@@ -55,12 +55,12 @@ int32_t file_task_init (void) {
     assert (rc == 0);
 
     // TODO how to set this for radar data
-    zmq_setsockopt (subscriber, ZMQ_SUBSCRIBE, "Hello", strlen ("Hello"));
+    zmq_setsockopt (subscriber, ZMQ_SUBSCRIBE, "", 0);
 
     return 0;
 }
 
-void* file_task (void) {
+void* radar_subscriber (void) {
 
     radar_frame_packet_t packet;
     uint32_t data_index;
@@ -70,11 +70,20 @@ void* file_task (void) {
 
     while(1) {
 
+        uint8_t pb_buf[4096];
         novelda_RadarFrame frame;
-
-        int size = zmq_recv (subscriber, &frame, sizeof (novelda_RadarFrame), 0);
+#if 1
+        int size = zmq_recv (subscriber, pb_buf, 4096, 0);
         printf ("Received pb of size:%d\n",size);
-
+#else
+        char buffer[10] = {0};
+        int size = zmq_recv (subscriber, buffer, 10, 0);
+        printf ("Received: %s of size:%d\n", buffer, size);
+#endif
+#if 0
+        status = radar_data_decode ((uint8_t*) &frame, size, &packet);
+        printf ("radar data decoded with :%d\n", status);
+#endif
         /*
         if( !packet.fdata ) {
             printf(" invalid data \n" );
@@ -120,10 +129,10 @@ int32_t file_close(void){
 int main (void) {
 
     // initialize radar subcriber
-    file_task_init ();
+    radar_subscriber_init ();
 
     // start radar subscriber
-    file_task ();
+    radar_subscriber ();
 
     return 0;
 }

@@ -5,7 +5,7 @@
 #include <stdint.h>
 #include "kuria_config.h"
 #include "novelda_protobuf.h"
-
+#include <stdlib.h>
 
 void* context;
 void* publisher;
@@ -24,21 +24,27 @@ int32_t dispatcher_init (void) {
 
 int32_t dispatch_radar_frame (radar_frame_packet_t* packet) {
     int32_t status;
-    novelda_RadarFrame frame;
+    uint8_t* pb_buf;
 
     // encode protbuf
-    status = radar_data_encode (&frame, packet);
-    if (status) {
+    status = radar_data_encode (&pb_buf, packet);
+    if (status == -1) {
         printf ("radar data encode fail\n");
         return status;
     }
 
+    size_t len = (size_t) status;
+    printf ("Radar data encoded. size: %d, len: %u\n", status, len);
+
     // publish radar data
-    printf ("sending radar pb\n");
-    status = zmq_send (publisher, &frame, sizeof (novelda_RadarFrame), 0);
-    if (status) {
-        printf ("zmq send fail\n");
+    status = zmq_send (publisher, pb_buf , len, 0);
+    free (pb_buf);
+    if (status == -1) {
+        perror ("zmq send fail ");
         return status;
+    }
+    else {
+        printf ("zmq sent: %d\n", status);
     }
     
     return 0;

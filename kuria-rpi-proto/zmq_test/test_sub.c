@@ -4,9 +4,6 @@
 #include <string.h>
 #include "zmq_endpoint.h"
 
-
-char endpoint[] = "ipc://~/mylocal.ipc";
-
 int main (void) {
 
     // socket to talk to clients

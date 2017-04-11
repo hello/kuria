@@ -350,7 +350,7 @@ static uint32_t read_and_send_radar_frame(X4Driver_t* x4driver) {
     // TODO publish radar data
     status = dispatch_radar_frame (radar_packet);
     if (status) {
-        printf ("radar fram could not be dispatched\n");
+//        printf ("radar fram could not be dispatched\n");
     }
 
     radar_data_frame_free (radar_packet, true);

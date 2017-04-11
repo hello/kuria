@@ -1,57 +1,56 @@
 #include "novelda_protobuf.h"
 #include "novelda.pb.h"
 #include "pb_encode.h"
-
+#include <stdlib.h>
 #include <stdio.h>
 
-bool _encode_range_bins (pb_ostream_t* stream, const pb_field_t* field, void* const* arg); 
 bool decode_repeated_doubles(pb_istream_t *stream, const pb_field_t *field, void **arg); 
 
+#if (RADAR_DATA_TESTING == 0)
+int32_t radar_data_encode (uint8_t** buf, radar_frame_packet_t* packet){
 
-int32_t radar_data_encode (novelda_RadarFrame* radar_frame, radar_frame_packet_t* packet){
+    novelda_RadarFrame radar_frame;
 
-    if (!radar_frame || !packet){
+    if (!packet){
         printf ("invalid data to encode\n");
         return -1;
     }
 
-    // should this be double or uint8_t TODO
-    uint8_t buf[1024];// randomly chosen to match kuria decode function, TODO change later if needed
-
-    // TODO not sure how to compute size of ostream buffer
-    //    size_t protobuf_size = sizeof (double) * packet->num_of_bins + sizeof (bool) + sizeof (
-
-    // open output stream 
-    // TODO should this be open from socket instead
-    pb_ostream_t ostream = pb_ostream_from_buffer (buf,sizeof (buf));
-
     // initialize to 0
-    memset (radar_frame, 0, sizeof (novelda_RadarFrame));
+    memset (&radar_frame, 0, sizeof (novelda_RadarFrame));
 
     // initialize frame id, sequential counter, incremented for every message
-    radar_frame->has_frame_id = true;
-    radar_frame->frame_id = packet->frame_counter; // TODO verify this is populated by radar task 
+    radar_frame.has_frame_id = true;
+    radar_frame.frame_id = packet->frame_counter; // TODO verify this is populated by radar task 
 
     // Indicates if baseband data or raw
-    radar_frame->has_base_band = true;
-    radar_frame->base_band = packet->content_id;// TODO verify this is populated by radar task
+    radar_frame.has_base_band = true;
+    radar_frame.base_band = packet->content_id;// TODO verify this is populated by radar task
 
     // set callbacks to encode the radar data
-    radar_frame->range_bins.funcs.encode = _encode_range_bins;
-    radar_frame->range_bins.arg = &packet;
+    radar_frame.range_bins.funcs.encode = _encode_range_bins;
+    radar_frame.range_bins.arg = packet;
+
+    size_t size;
+    bool ret = pb_get_encoded_size (&size, novelda_RadarFrame_fields, &radar_frame);
+    printf ("Encoded size: %d, ret:%d\n", size, ret);
+
+    *buf = (uint8_t*) malloc (size);
+
+    pb_ostream_t ostream = pb_ostream_from_buffer (*buf,size);
 
     if (!pb_encode (&ostream, novelda_RadarFrame_fields, &radar_frame)) {
         printf (" failed to encode radar data: %d\n", packet->frame_counter);
         return -1;
     }
 
-    return 0;
+    return ostream.bytes_written;
 
 }
 
 bool _encode_range_bins (pb_ostream_t* stream, const pb_field_t* field, void* const* arg) {
 
-    radar_frame_packet_t* packet = (radar_frame_packet_t*) arg;
+    radar_frame_packet_t* packet = (radar_frame_packet_t*) (*arg);
 
     printf ("encode range bins\n");
 
@@ -67,8 +66,9 @@ bool _encode_range_bins (pb_ostream_t* stream, const pb_field_t* field, void* co
         return false;
     }
 
+    uint32_t i;
     // encode the double repeated field for range bins
-    for (uint32_t i=0; i<packet->num_of_bins;i++) {
+    for (i=0; i<packet->num_of_bins;i++) {
         // all data in this driver is float32_t. only protobuf is double
         double value;
         value = (double) packet->fdata[i];
@@ -76,10 +76,11 @@ bool _encode_range_bins (pb_ostream_t* stream, const pb_field_t* field, void* co
             return false;
         }
     }
+    printf ("encoded: %d, bytes written:%d\n", i, stream->bytes_written);
 
     return true;
 }
-
+#endif
 // TODO define this only for radar_subscriber
 // #define RADAR_DATA_TESTING 1
 #if RADAR_DATA_TESTING
@@ -114,6 +115,7 @@ int32_t radar_data_decode (uint8_t* protobuf_bytes, const size_t protobuf_size, 
 
     if (num_items_received == 0) {
         printf ("items received is zero\n");
+        printf ("Frame id: %d\n", frame.frame_id);
         return false;
     }
 

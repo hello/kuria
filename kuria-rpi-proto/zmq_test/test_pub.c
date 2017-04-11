@@ -4,8 +4,6 @@
 #include "zmq_endpoint.h"
 #include "string.h"
 
-char endpoint[] = "ipc://~/mylocal.ipc";
-
 int main (void) {
 
     // socket to talk to clients
@@ -13,6 +11,7 @@ int main (void) {
     void* publisher = zmq_socket (context,ZMQ_PUB );
 #if USE_IPC
     int rc = zmq_bind (publisher,ZMQ_ENDPOINT); 
+    printf ("using ipc\n");
 #else
     int rc = zmq_bind (publisher, "tcp://*:5556");
 #endif
