@@ -83,18 +83,23 @@ void RangebinCombiner::set_latest_segment(const Eigen::MatrixXcf & baseband_segm
         return;
     }
 
+    principal_components.array() /= principal_components.sum();
     
     for (int i = 0 ; i < 5; i++) {
         auto this_col = eigen_vectors.col(eigen_vectors.cols() - i - 1);
-        auto magintudes = this_col.array().real() * this_col.array().real() +  this_col.array().imag()*this_col.array().imag();
+        auto magnitudes = this_col.array().real() * this_col.array().real() +  this_col.array().imag()*this_col.array().imag();
         //std::cout << magintudes.transpose() << std::endl;
         //std::cout << myvec.transpose() << std::endl;
         float sum = 0.0;
-        for (int j = 0; j < magintudes.rows(); j++) {
-            sum += magintudes(j) * j;
+        int significant_magnitudes = 0;
+        for (int j = 0; j < magnitudes.rows(); j++) {
+            sum += magnitudes(j) * j;
+            if (magnitudes(j) > 0.05) {
+                significant_magnitudes++;
+            }
         }
         
-        std::cout << principal_components(principal_components.rows() - i - 1) << "," << sum << std::endl;
+        std::cout << principal_components(principal_components.rows() - i - 1).real() << "," << sum << "," << significant_magnitudes <<std::endl;
     }
     
     //testing

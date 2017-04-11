@@ -28,7 +28,7 @@ NoveldaRadarSubscriber::NoveldaRadarSubscriber(RadarResultPublisherInterface * p
 ,_received_number(0) {
     _preprocessor = PreprocessorPtr_t(NULL);
     
-    for (int i = 12; i < 80; i++) {
+    for (int i = 8; i < 70; i++) {
         _rangebins_we_care_about.insert(i);
     }
     
