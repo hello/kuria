@@ -5,10 +5,11 @@
 #include <unistd.h>
 #include "preprocessorIIR.h"
 #include "debug_publisher.h"
+#include "respiration_classifier.h"
 
 #define EXPECTED_SAMPLE_RATE_HZ (20)
-#define NUM_FRAMES_IN_SEGMENT (20 * EXPECTED_SAMPLE_RATE_HZ)
-#define NUM_FRAMES_TO_WAIT (20 * EXPECTED_SAMPLE_RATE_HZ)
+#define NUM_FRAMES_IN_SEGMENT (30 * EXPECTED_SAMPLE_RATE_HZ)
+#define NUM_FRAMES_TO_WAIT (10 * EXPECTED_SAMPLE_RATE_HZ)
 
 #ifndef HOST_NAME_MAX
 #define HOST_NAME_MAX (1024)
@@ -83,8 +84,18 @@ void NoveldaRadarSubscriber::receive_message(const NoveldaData_t & message) {
     if (flags & PREPROCESSOR_FLAGS_SEGMENT_READY) {
         //DO FRAME PROCESSING HERE
         std::cout << "got new segment...." << std::endl;
-        _combiner.set_latest_segment(segment, _rangebins_we_care_about);
-    
+        const MatrixXcf significant_signals = _combiner.set_latest_segment(segment, _rangebins_we_care_about);
+        
+        RespirationStats stats = RespirationClassifier::get_respiration_stats(significant_signals,EXPECTED_SAMPLE_RATE_HZ);
+        
+        if (stats.is_valid) {
+            //publish them
+            
+            std::cout << "breaths per min: " << 60.0 / stats.peak_to_peak_mean_seconds << ", " << "std dev seconds: " << stats.peak_to_peak_stddev_seconds << std::endl;
+
+        }
+        
+        
         debug_save("segment",segment);
     }
     

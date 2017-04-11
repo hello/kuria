@@ -42,7 +42,7 @@ Eigen::MatrixXcf RangebinCombiner::normalize_by_free_space_loss(const Eigen::Mat
 }
 
 //triggers PCA computation
-void RangebinCombiner::set_latest_segment(const Eigen::MatrixXcf & baseband_segment,const IntSet_t & bins_we_care_about) {
+Eigen::MatrixXcf RangebinCombiner::set_latest_segment(const Eigen::MatrixXcf & baseband_segment,const IntSet_t & bins_we_care_about) {
     
     /* Determine if the range bins we care about has changed */
     bool is_bins_unchanged = false;
@@ -101,26 +101,8 @@ void RangebinCombiner::set_latest_segment(const Eigen::MatrixXcf & baseband_segm
         std::cout << principal_components(principal_components.rows() - i - 1).real() << "," << sum << "," << significant_magnitudes <<std::endl;
     }
     
-    //testing
     
-#define NUM_BINS_TO_CONSIDER (2)
-    int ibin = RespirationClassifier::is_respiration(transformed_values.block(0,transformed_values.cols() - NUM_BINS_TO_CONSIDER,transformed_values.rows(),NUM_BINS_TO_CONSIDER),20);
-    
-    Eigen::MatrixXf pick(1,1);
-    pick(0,0) = ibin;
-    
-    debug_save("picked_pin",pick);
-    
-    /*
-    if (ibin == -1) {
-        _is_ready = false;
-        return;
-    }
-     */
-    
-    ibin += transformed_values.cols() - NUM_BINS_TO_CONSIDER;
-    
-    ibin = transformed_values.cols() - 1;
+    int ibin = transformed_values.cols() - 1;
     
     //get last column, which is associated with the maximum variance principle component
     VectorXcf max_vector2 = eigen_vectors.col(ibin).conjugate();
@@ -141,6 +123,8 @@ void RangebinCombiner::set_latest_segment(const Eigen::MatrixXcf & baseband_segm
         _is_ready = true;
         get_max_rangebin();
     }
+    
+    return pca.get_most_significant_signals(subset, 1e-1);
 }
 
 //returns false if transformation is unavailable.

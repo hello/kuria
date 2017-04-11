@@ -130,21 +130,21 @@ int RespirationClassifier::is_respiration(const Eigen::MatrixXcf & range_bins_of
     return -1;
 }
 
-bool RespirationClassifier::get_respiration_stats(const Eigen::MatrixXcf & probable_respiration_linear_combinations, RespirationStats_t & result) {
+RespirationStats RespirationClassifier::get_respiration_stats(const Eigen::MatrixXcf & probable_respiration_linear_combinations, const float sample_rate_hz) {
     //TODO bandpass signal
     //TODO find indices of increasing zero crossings
     //TODO compute delta time of increasing zero crossings
     //TODO compute mean delta time, std dev of delta time
     
-    MatrixXf B(5,1);
-    MatrixXf A(5,1);
+    MatrixXf B(3,1);
+    MatrixXf A(3,1);
     //B,A = sig.iirdesign(wp=[0.2/10.0,1.0/10.0],ws=[0.1/10.0,4.0 / 10.0],gpass=1.0,gstop = 6.0,ftype='butter')
-    B << 0.02446784,  0.        , -0.04893569,  0.        ,  0.02446784;
-    A << 1.        , -3.47656882,  4.57040766, -2.70275474,  0.60922209;
+    B << 0.21856269,  0.        , -0.21856269;
+    A << 1.        , -1.55511674,  0.56287462;
     
-    IIRFilter<MatrixXf, MatrixXf> bandpass_filter(B,A,probable_respiration_linear_combinations.cols());
+    IIRFilter<MatrixXf, MatrixXf> bandpass_filter(B,A,1);
     
-    const int idx = 0;
+    const int idx = probable_respiration_linear_combinations.cols() - 1;
 
     
     const Eigen::MatrixXf projected_real_signal = HaltijaMath::project_complex_cols_into_reals(probable_respiration_linear_combinations.col(idx));
@@ -152,13 +152,17 @@ bool RespirationClassifier::get_respiration_stats(const Eigen::MatrixXcf & proba
     
     const Eigen::MatrixXf filtered_signal = bandpass_filter.filtfilt(projected_real_signal);
     
+    debug_save("orig",projected_real_signal);
+    debug_save("bandpassed",filtered_signal);
+
+    
     const int T = filtered_signal.rows();
     
     IntVec_t positive_crossings;
     
     for (int t = 1; t < T; t++) {
-        float prev = filtered_signal(t - 1,idx);
-        float current = filtered_signal(t,idx);
+        float prev = filtered_signal(t - 1,0);
+        float current = filtered_signal(t,0);
         
         if (prev < 0.0f && current >= 0.0f) {
             positive_crossings.push_back(t);
@@ -171,5 +175,27 @@ bool RespirationClassifier::get_respiration_stats(const Eigen::MatrixXcf & proba
         diffs.push_back(positive_crossings[i] - positive_crossings[i-1]);
     }
     
-    return false;
+    if (diffs.empty()) {
+        return RespirationStats();
+    }
+    
+    float sum = 0.0;
+    for (auto it = diffs.begin(); it != diffs.end(); it++) {
+        sum += *it;
+    }
+    
+    float mean = sum / (float)diffs.size();
+    float var = 0.0;
+    for (auto it = diffs.begin(); it != diffs.end(); it++) {
+        var += (*it - mean)*(*it - mean);
+    }
+    
+    var /= (float)diffs.size();
+    float stddev = sqrt(var);
+
+    stddev /= sample_rate_hz;
+    mean /= sample_rate_hz;
+    
+    return RespirationStats(mean,stddev);
+     
 }

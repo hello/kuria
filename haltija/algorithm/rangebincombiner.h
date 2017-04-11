@@ -3,6 +3,7 @@
 
 #include "haltija_types.h"
 #include <Eigen/Core>
+
 /* Does PCA to reduce the dimensions multiple baseband rangebins 
    into a single dimension. It's in a class because it has state */
 class RangebinCombiner {
@@ -12,7 +13,8 @@ public:
     
     
     //triggers PCA computation
-    void set_latest_segment(const Eigen::MatrixXcf & baseband_segment,const IntSet_t & bins_we_care_about);
+    //returns most significant columns of baseband segment
+    Eigen::MatrixXcf set_latest_segment(const Eigen::MatrixXcf & baseband_segment,const IntSet_t & bins_we_care_about);
     
     //returns false if transformation is unavailable.
     //transformed frame is complex measurement of size 1x1
