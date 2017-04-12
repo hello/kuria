@@ -56,22 +56,25 @@ int32_t radar_data_encode (uint8_t** buf, radar_frame_packet_t* packet){
 bool _encode_range_bins (pb_ostream_t* stream, const pb_field_t* field, void* const* arg) {
 
     radar_frame_packet_t* packet = (radar_frame_packet_t*) (*arg);
-
-    // encode wire type and tag of the field
-    if (!pb_encode_tag_for_field (stream, field) ) {
-        printf ("pb_encode_tag_for_field failed\n");
-        return false;
-    }
+/*
 
     // encode payload size
     if (!pb_encode_varint (stream, packet->num_of_bins) ) {
         printf ("pb encode payload size failed\n");
         return false;
     }
-
+*/
     uint32_t i;
+
     // encode the double repeated field for range bins
     for (i=0; i<packet->num_of_bins;i++) {
+        
+        // encode wire type and tag of the field
+        if (!pb_encode_tag_for_field (stream, field) ) {
+            printf ("pb_encode_tag_for_field failed\n");
+            return false;
+        }
+        
         // all data in this driver is float32_t. only protobuf is double
         double value;
         value = (double) packet->fdata[i];
@@ -114,7 +117,7 @@ int32_t radar_data_decode (uint8_t* protobuf_bytes, const size_t protobuf_size, 
 
     const size_t num_items_received = info.pos / sizeof (double);
 
-//    printf ("items received is %d\n", num_items_received);
+    printf ("items received is %d\n", num_items_received);
     printf ("Frame id: %d\n", frame.frame_id);
     if (num_items_received == 0) {
         return -1;
