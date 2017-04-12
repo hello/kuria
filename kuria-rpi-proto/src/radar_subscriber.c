@@ -89,22 +89,15 @@ void* radar_subscriber (void) {
         int encoded_len = Base64encode_len(size);
 
         // create buf to store base64 encoded data
-        uint8_t* base64_buf = malloc (sizeof(uint8_t) * encoded_len);
+        char* base64_buf = malloc (sizeof(char) * encoded_len);
         assert (base64_buf);
 
         // encode pb data as base64
         int len = Base64encode (base64_buf, pb_buf, size);
 
-        if (len == encoded_len) {
-            printf ("encoded length same\n");
-        }
-        else {
-            printf ("len doesn't match\n");
-        }
-
         // save to file 
         for (data_index = 0; data_index < len; data_index++) {
-            fprintf (fp, "%u", base64_buf[data_index);
+            fprintf (fp, "%u", base64_buf[data_index]);
         }
         fprintf (fp, "\r\n");
 

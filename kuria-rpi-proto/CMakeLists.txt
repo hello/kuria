@@ -56,9 +56,10 @@ set (SUB_SOURCES src/radar_subscriber.c
     src/pb_common.c
     src/novelda.pb.c
     src/novelda_protobuf.c
+    src/base64.c
     )
 add_executable(radar_subscriber ${SUB_SOURCES})
 
-target_compile_options(radar_subscriber PRIVATE -Wall -g -std=gnu++11 -std=c11 -mcpu=cortex-a53 -D_GNU_SOURCE -DRADAR_DATA_TESTING )
+target_compile_options(radar_subscriber PRIVATE -Wall -g -std=gnu++11 -std=c11 -mcpu=cortex-a53 -D_GNU_SOURCE -DRADAR_DATA_TESTING -DWRITE_PB_TO_FILE)
 
 target_link_libraries( radar_subscriber -lzmq -lpthread)
