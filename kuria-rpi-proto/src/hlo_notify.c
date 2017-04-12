@@ -30,7 +30,7 @@ int32_t hlo_notify_wait (hlo_notify_t* param, uint32_t* data, uint32_t bits) {
 
     pthread_mutex_lock (&param->notify_mutex);
 
-    while (param->notify_data & bits == 0) {
+    while ( (param->notify_data & bits) == 0) {
         pthread_cond_wait (&param->notify_cv, &param->notify_mutex);
     }
 

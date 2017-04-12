@@ -25,7 +25,6 @@ int32_t file_close(void);
 
 int32_t radar_subscriber_init (void) {
 
-    int status;
     char filename[40];
     time_t now = time(NULL);
 
@@ -66,9 +65,7 @@ int32_t radar_subscriber_init (void) {
 
 void* radar_subscriber (void) {
 
-    radar_frame_packet_t packet;
     uint32_t data_index;
-    int32_t status;
 
     printf("Starting file task\n");
 
@@ -104,6 +101,9 @@ void* radar_subscriber (void) {
         free (base64_buf);
 
 #else
+        radar_frame_packet_t packet;
+        int32_t status;
+
         //        printf ("size:%d\n",size);
         status = radar_data_decode (pb_buf, size, &packet);
         //        printf ("radar data decoded with :%d\n", status);
