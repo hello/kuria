@@ -16,6 +16,7 @@ import collections
 server_address = "tcp://127.0.0.1:5564"
 signal_target = "maxvarresp"
 histogram_target = "modes"
+stats_target = "respiration"
 np.set_printoptions(precision=3, suppress=True, threshold=np.nan)
 
 plot_samples = 200
@@ -34,6 +35,7 @@ global g_plotdata
 global g_curves
 global g_yrangemax
 global g_prev_histogram_index
+global g_text
 
 g_curves = []
 g_graphicsitems = []
@@ -44,6 +46,7 @@ g_histogram_data = []
 g_yrangemax = 1e2
 g_yrangemin = 2e0
 g_prev_histogram_index = 0
+g_text = None
 
 plot_yrange = (-g_yrangemax, g_yrangemax)
 
@@ -66,7 +69,7 @@ def CreateHistogramCurves(p7):
      return curves
 
      
-def plot_signal(index,vec,plotdata,plt,curves,x_range,y_range,y_range_min):
+def plot_signal(index,vec,plotdata,plt,curves,x_range,y_range,y_range_min,text_item):
     plotdata[0].append(vec[0]);
     plotdata[1].append(vec[1]);
 
@@ -76,6 +79,7 @@ def plot_signal(index,vec,plotdata,plt,curves,x_range,y_range,y_range_min):
     plot_yrange = (-yrangemax,yrangemax)
     if plt != None:
         plt.setRange(xRange=x_range, yRange=plot_yrange)
+        text_item.setPos(1,-yrangemax*1.0)
 
     for j in range(len(curves)):
         curves[j].setData(list(plotdata[j]))
@@ -96,7 +100,11 @@ def plot_histogram(index,prev_index,data,vec,curves):
                break;
 
           curves[i].setData(x,d)
-          
+
+
+def update_text(text_item,vec):
+    text_item.setText("mean breath dur: %.1f seconds, stddev: %.1f" % (vec[0],vec[1]))
+     
 def update_plot():
     global g_graphicsitems
     global g_p6
@@ -107,16 +115,19 @@ def update_plot():
     global g_prev_histogram_index
     global g_histogram_data
     global g_p7_curves
+    global g_text
     
     try:
         while True:
             message_id,index,vec = g_PlotQueue.get(False)
 
             if (message_id == signal_target):
-                 plot_signal(index,vec,g_plotdata,g_p6,g_curves,(0, plot_samples - 1),None,g_yrangemin)
+                 plot_signal(index,vec,g_plotdata,g_p6,g_curves,(0, plot_samples - 1),None,g_yrangemin,g_text)
             if (message_id == histogram_target):
                  plot_histogram(index,g_prev_histogram_index,g_histogram_data,vec,g_p7_curves)
                  g_prev_histogram_index = index
+            if (message_id == stats_target):
+                 update_text(g_text,vec)
           
     except Empty:
         pass
@@ -160,6 +171,7 @@ def main_plotter():
     global g_p6
     global g_p7
     global g_p7_curves
+    global g_text
     
     argc = len(sys.argv)
     #signal.signal(signal.SIGINT, signal_handler)
@@ -170,13 +182,15 @@ def main_plotter():
     plotTimer.start(10)
     
 
-    
+    g_text = pg.TextItem("",anchor=(-0.3,1.3), border='w', fill=(0, 0, 255, 100))
+    g_text.setText('waiting for stats...')
     win = pg.GraphicsWindow(title="Basic plotting examples")
     win.resize(640,480)
     win.setWindowTitle('plotter')
     pg.setConfigOptions(antialias=True)
 
     g_p6 = win.addPlot(title="baseband signal")
+    g_p6.addItem(g_text)
     g_p7 = win.addPlot(title="bins of interest")
 
     g_curves = CreatePlotCurves(g_p6)
