@@ -71,18 +71,12 @@ void* radar_subscriber (void) {
     while(1) {
 
         uint8_t pb_buf[4096];
-        novelda_RadarFrame frame;
-#if 1
+
         int size = zmq_recv (subscriber, pb_buf, 4096, 0);
-        printf ("Received pb of size:%d\n",size);
-#else
-        char buffer[10] = {0};
-        int size = zmq_recv (subscriber, buffer, 10, 0);
-        printf ("Received: %s of size:%d\n", buffer, size);
-#endif
-#if 0
-        status = radar_data_decode ((uint8_t*) &frame, size, &packet);
-        printf ("radar data decoded with :%d\n", status);
+        printf ("size:%d\n",size);
+#if 1
+        status = radar_data_decode (pb_buf, size, &packet);
+//        printf ("radar data decoded with :%d\n", status);
 #endif
         /*
         if( !packet.fdata ) {

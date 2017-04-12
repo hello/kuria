@@ -15,7 +15,7 @@
 #include "hlo_notify.h"
 
 /* Defines */
-#if 1
+#if 0
 #define DISP printf
 #else
 #define DISP(...)
@@ -185,7 +185,7 @@ int32_t radar_task_init (void) {
     x4driver_set_downconversion(x4driver, 1);
     //  x4driver_set_frame_area_offset(x4driver, 0.6);
     //  x4driver_set_frame_area(x4driver, 0.5, 9.9);
-    x4driver_set_fps(x4driver,20);
+    x4driver_set_fps(x4driver,1);
 
     // Verify X4 configurations
     status = x4driver_check_configuration(x4driver);
@@ -220,7 +220,7 @@ void radar_task (void) {
             //            printf("Radar Data Ready\n");
 
             if(x4driver->trigger_mode != SWEEP_TRIGGER_MANUAL) {
-                printf("Read and send\n"); 
+//                printf("Read and send\n"); 
                 read_and_send_radar_frame(x4driver);
             }
 
@@ -336,7 +336,7 @@ static uint32_t read_and_send_radar_frame(X4Driver_t* x4driver) {
     status = x4driver_read_frame_normalized(x4driver, &radar_packet->frame_counter,radar_packet->fdata, radar_packet->num_of_bins);
 
     // TODO what does the frame counter indicate
-    printf ("frame counter: %d\n", radar_packet->frame_counter);
+//    printf ("frame counter: %d\n", radar_packet->frame_counter);
 
     if (status != XEP_ERROR_X4DRIVER_OK) {
         printf ("error reading frame\n");

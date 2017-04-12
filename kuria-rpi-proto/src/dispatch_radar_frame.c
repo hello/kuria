@@ -34,7 +34,6 @@ int32_t dispatch_radar_frame (radar_frame_packet_t* packet) {
     }
 
     size_t len = (size_t) status;
-    printf ("Radar data encoded. size: %d, len: %u\n", status, len);
 
     // publish radar data
     status = zmq_send (publisher, pb_buf , len, 0);
@@ -44,7 +43,7 @@ int32_t dispatch_radar_frame (radar_frame_packet_t* packet) {
         return status;
     }
     else {
-        printf ("zmq sent: %d\n", status);
+//        printf ("zmq sent: %d\n", status);
     }
     
     return 0;
