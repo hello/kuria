@@ -36,7 +36,7 @@ using Eigen::MatrixXf;
 #define PEAK_TO_PEAK_TIME_SECONDS_LOW_THRESHOLD (1.0)
 #define PEAK_TO_PEAK_TIME_SECONDS_HIGH_THRESHOLD (6.0)
 
-\
+
 
 RespirationStats RespirationClassifier::get_respiration_stats(const Eigen::MatrixXcf & probable_respiration_linear_combinations, const float sample_rate_hz) {
 

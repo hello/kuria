@@ -11,22 +11,25 @@ using namespace Eigen;
 #define FRACTION_OF_VARIANCE_THRESHOLD (0.05)
 
 
-static void print_top_modes(const Pca<MatrixXcf> & pca, const float threshold) {
+static FloatMatrix_t compute_top_modes(const Pca<MatrixXcf> & pca, const float threshold, bool print = true) {
     MatrixXcf principal_components = pca.get_principal_components();
-    MatrixXcf eigen_vectors = pca.get_transform();
+    const MatrixXcf eigen_vectors = pca.get_transform();
+    
+    
+    FloatMatrix_t important_magnitudes;
     
     principal_components.array() /= principal_components.sum();
-    
+
     for (int i = 0 ; i < eigen_vectors.cols(); i++) {
         
         if (principal_components(principal_components.rows() - i - 1).real() < threshold) {
             break;
         }
         
-        auto this_col = eigen_vectors.col(eigen_vectors.cols() - i - 1);
-        auto magnitudes = this_col.array().real() * this_col.array().real() +  this_col.array().imag()*this_col.array().imag();
-        //std::cout << magintudes.transpose() << std::endl;
-        //std::cout << myvec.transpose() << std::endl;
+        MatrixXcf this_col = eigen_vectors.col(eigen_vectors.cols() - i - 1);
+
+        MatrixXf magnitudes = this_col.array().real() * this_col.array().real() +  this_col.array().imag()*this_col.array().imag();
+
         float sum = 0.0;
         int significant_magnitudes = 0;
         for (int j = 0; j < magnitudes.rows(); j++) {
@@ -38,10 +41,18 @@ static void print_top_modes(const Pca<MatrixXcf> & pca, const float threshold) {
         
         
         
+        if (print) {
+            std::cout << principal_components(principal_components.rows() - i - 1).real() << "," << sum << "," << significant_magnitudes <<std::endl;
+        }
         
-        std::cout << principal_components(principal_components.rows() - i - 1).real() << "," << sum << "," << significant_magnitudes <<std::endl;
+        FloatVec_t v;
+        v.reserve(magnitudes.rows());
+        v.insert(v.begin(),magnitudes.data(),magnitudes.data() + magnitudes.rows());
+        important_magnitudes.push_back(v);
+        
     }
     
+    return important_magnitudes;
 }
 
 
@@ -80,7 +91,7 @@ Eigen::MatrixXcf RangebinCombiner::normalize_by_free_space_loss(const Eigen::Mat
 
 
 //triggers PCA computation
-Eigen::MatrixXcf RangebinCombiner::set_latest_segment(const Eigen::MatrixXcf & baseband_segment,const IntSet_t & bins_we_care_about) {
+void RangebinCombiner::set_latest_segment(const Eigen::MatrixXcf & baseband_segment,const IntSet_t & bins_we_care_about) {
     
     /* Determine if the range bins we care about has changed */
     bool is_bins_unchanged = false;
@@ -116,7 +127,7 @@ Eigen::MatrixXcf RangebinCombiner::set_latest_segment(const Eigen::MatrixXcf & b
     
     pca.fit(subset);
     
-    print_top_modes(pca,FRACTION_OF_VARIANCE_THRESHOLD);
+    _top_modes = compute_top_modes(pca,FRACTION_OF_VARIANCE_THRESHOLD);
     
     MatrixXcf eigen_vectors = pca.get_transform();
 
@@ -129,6 +140,8 @@ Eigen::MatrixXcf RangebinCombiner::set_latest_segment(const Eigen::MatrixXcf & b
     //pick the latest (i.e. most variance) bin that could be respiration
     int ibin = -1;
     for (int i = 0; i < high_variance_signals.cols(); i++) {
+        _best_respiration_segment = high_variance_signals.col(i);
+
         if (!RespirationClassifier::get_respiration_stats(high_variance_signals.col(i), 20.0).is_possible_respiration) {
             continue;
         }
@@ -140,7 +153,8 @@ Eigen::MatrixXcf RangebinCombiner::set_latest_segment(const Eigen::MatrixXcf & b
         ibin = subset.cols() - 1;
         LOG("NO POSSIBLE RESPIRATION, USING DEFAULT");
     }
-    ////////////////////////////////
+    
+        ////////////////////////////////
     
     //get last column, which is associated with the maximum variance principle component
     VectorXcf max_vector2 = eigen_vectors.col(ibin).conjugate();
@@ -160,7 +174,6 @@ Eigen::MatrixXcf RangebinCombiner::set_latest_segment(const Eigen::MatrixXcf & b
         _is_ready = true;
     }
     
-    return pca.get_most_significant_signals(subset, 1e-1);
 }
 
 //returns false if transformation is unavailable.
@@ -194,3 +207,9 @@ Eigen::MatrixXcf RangebinCombiner::get_subset(const Eigen::MatrixXcf & baseband_
 }
 
 
+const FloatMatrix_t & RangebinCombiner::get_top_modes() const {
+    return _top_modes;
+}
+const Eigen::MatrixXcf & RangebinCombiner::get_best_respiration_segment() const {
+    return _best_respiration_segment;
+}

@@ -10,6 +10,7 @@ typedef long long Timestamp_t;
 typedef std::complex<float> Complex_t;
 typedef std::vector<Complex_t> ComplexVec_t;
 typedef std::vector<float> FloatVec_t;
+typedef std::vector<FloatVec_t> FloatMatrix_t;
 typedef std::vector<int> IntVec_t;
 typedef std::set<int> IntSet_t;
 

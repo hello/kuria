@@ -9,7 +9,7 @@
 
 #define EXPECTED_SAMPLE_RATE_HZ (20)
 #define NUM_FRAMES_IN_SEGMENT (20 * EXPECTED_SAMPLE_RATE_HZ)
-#define NUM_FRAMES_TO_WAIT (10 * EXPECTED_SAMPLE_RATE_HZ)
+#define NUM_FRAMES_TO_WAIT (5 * EXPECTED_SAMPLE_RATE_HZ)
 
 #ifndef HOST_NAME_MAX
 #define HOST_NAME_MAX (1024)
@@ -26,7 +26,8 @@ NoveldaRadarSubscriber::NoveldaRadarSubscriber(RadarResultPublisherInterface * p
 :_publisher(publisher)
 ,_sequence_number(0)
 ,_received_number(0)
-,_stats_number(0) {
+,_stats_number(0)
+,_modes_number(0) {
     _preprocessor = PreprocessorPtr_t(NULL);
     
     for (int i = 8; i < 70; i++) {
@@ -84,9 +85,20 @@ void NoveldaRadarSubscriber::receive_message(const NoveldaData_t & message) {
     if (flags & PREPROCESSOR_FLAGS_SEGMENT_READY) {
         //DO FRAME PROCESSING HERE
         std::cout << "got new segment...." << std::endl;
-        const MatrixXcf significant_signals = _combiner.set_latest_segment(segment, _rangebins_we_care_about);
+        _combiner.set_latest_segment(segment, _rangebins_we_care_about);
         
-        RespirationStats stats = RespirationClassifier::get_respiration_stats(significant_signals,EXPECTED_SAMPLE_RATE_HZ);
+        RespirationStats stats = RespirationClassifier::get_respiration_stats(_combiner.get_best_respiration_segment(),EXPECTED_SAMPLE_RATE_HZ);
+        
+        
+        auto top_modes = _combiner.get_top_modes();
+        for (auto it = top_modes.begin(); it != top_modes.end(); it++)  {
+            (*it).size();
+            
+            publish_vec("PLOT","modes",*it,_modes_number);
+        }
+
+        _modes_number++;
+
         
         if (stats.is_valid) {
             //publish them
@@ -102,7 +114,8 @@ void NoveldaRadarSubscriber::receive_message(const NoveldaData_t & message) {
             statsvec.push_back(stats.peak_to_peak_mean_seconds);
             statsvec.push_back(stats.peak_to_peak_stddev_seconds);
             publish_vec("STATS","respiration",statsvec,_stats_number);
-            
+            publish_vec("PLOT","respiration",statsvec,_stats_number);
+   
         }
         
         

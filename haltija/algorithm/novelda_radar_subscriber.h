@@ -26,7 +26,8 @@ private:
     int64_t _sequence_number;
     int64_t _received_number;
     int64_t _stats_number;
-    
+    int64_t _modes_number;
+
     void publish_vec(const std::string & channel, const std::string & id, const FloatVec_t & featvec, const int sequence_number);
 };
 
