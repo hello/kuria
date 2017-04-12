@@ -8,7 +8,7 @@
 #include "respiration_classifier.h"
 
 #define EXPECTED_SAMPLE_RATE_HZ (20)
-#define NUM_FRAMES_IN_SEGMENT (30 * EXPECTED_SAMPLE_RATE_HZ)
+#define NUM_FRAMES_IN_SEGMENT (20 * EXPECTED_SAMPLE_RATE_HZ)
 #define NUM_FRAMES_TO_WAIT (10 * EXPECTED_SAMPLE_RATE_HZ)
 
 #ifndef HOST_NAME_MAX
@@ -91,7 +91,11 @@ void NoveldaRadarSubscriber::receive_message(const NoveldaData_t & message) {
         if (stats.is_valid) {
             //publish them
             
-            std::cout << "breaths per min: " << 60.0 / stats.peak_to_peak_mean_seconds << ", " << "std dev seconds: " << stats.peak_to_peak_stddev_seconds << std::endl;
+            std::cout
+            << "mean breath duration: " << stats.peak_to_peak_mean_seconds << ", "
+            << "breaths per min: " << 60.0 / stats.peak_to_peak_mean_seconds << ", "
+            << "std dev seconds: " << stats.peak_to_peak_stddev_seconds
+            << std::endl;
 
         }
         
@@ -106,7 +110,7 @@ void NoveldaRadarSubscriber::receive_message(const NoveldaData_t & message) {
         
         Eigen::MatrixXf foo;
         if (_peakfinder.isPeak(transformed_frame, _received_number, foo)) {
-            std::cout << "PEAK!" << std::endl;
+            //std::cout << "PEAK!" << std::endl;
         }
         
         //send frame over the wire, or process it or something
