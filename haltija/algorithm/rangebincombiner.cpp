@@ -166,9 +166,37 @@ void RangebinCombiner::set_latest_segment(const Eigen::MatrixXcf & baseband_segm
         _is_ready = true;
     }
     
-    Complex_t val = max_vector2.dot(_max_vector.conjugate());
+    MatrixXf magnitude_vec2 =
+    max_vector2.real().array() * max_vector2.real().array() +
+    max_vector2.imag().array() * max_vector2.imag().array();
     
-    if (val.real()*val.real() + val.imag() * val.imag() < 0.25) {
+    magnitude_vec2.array() -= magnitude_vec2.sum() / (float)magnitude_vec2.rows();
+    
+    MatrixXf magnitude_vec =
+    _max_vector.real().array() * _max_vector.real().array() +
+    _max_vector.imag().array() * _max_vector.imag().array();
+
+    
+    magnitude_vec.array() -= magnitude_vec.sum() / (float)magnitude_vec.rows();
+
+    MatrixXf modematrix(magnitude_vec.rows(),2);
+    modematrix.col(0) = magnitude_vec;
+    modematrix.col(1) = magnitude_vec2;
+    
+    MatrixXf covmat = modematrix.transpose() * modematrix;
+    
+    
+    
+    float correlation = 1.0;
+    
+    if (covmat(0,0) > 1e-6 && covmat(1,1) > 1e-6) {
+        correlation = covmat(0,1) / sqrt(covmat(1,1)) / sqrt(covmat(0,0));
+    }
+    
+
+    //float similarity = val.real()*val.real() + val.imag() * val.imag();
+    std::cout << "correlation: " << correlation << std::endl;
+    if (correlation < 0.6) {
         LOG("CHANGE OF MAX MODE");
         _max_vector = max_vector2;
         _is_ready = true;
