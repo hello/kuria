@@ -119,8 +119,8 @@ int32_t radar_data_decode (uint8_t* protobuf_bytes, const size_t protobuf_size, 
 
     const size_t num_items_received = info.pos / sizeof (double);
 
-    printf ("items received is %d\n", num_items_received);
-    printf ("Frame id: %d\n", frame.frame_id);
+//    printf ("items received is %d\n", num_items_received);
+//    printf ("Frame id: %d\n", frame.frame_id);
     if (num_items_received == 0) {
         return -1;
     }

@@ -60,6 +60,10 @@ int32_t radar_subscriber_init (void) {
     return 0;
 }
 
+#if (WRITE_PB_TO_FILE == 1)
+#include "base64.h"
+#endif
+
 void* radar_subscriber (void) {
 
     radar_frame_packet_t packet;
@@ -70,15 +74,47 @@ void* radar_subscriber (void) {
 
     while(1) {
 
+        // buffer for receiving the protobuf data through ipc
         uint8_t pb_buf[4096];
 
+        // receive protobuf data
         int size = zmq_recv (subscriber, pb_buf, 4096, 0);
-        printf ("size:%d\n",size);
-#if 1
+
+        // either write protobuf data, encoded as base64
+        // or
+        // write just baseband data to file
+
+#if (WRITE_PB_TO_FILE == 1)
+        // get the len for base64 encoding
+        int encoded_len = Base64encode_len(size);
+
+        // create buf to store base64 encoded data
+        uint8_t* base64_buf = malloc (sizeof(uint8_t) * encoded_len);
+        assert (base64_buf);
+
+        // encode pb data as base64
+        int len = Base64encode (base64_buf, pb_buf, size);
+
+        if (len == encoded_len) {
+            printf ("encoded length same\n");
+        }
+        else {
+            printf ("len doesn't match\n");
+        }
+
+        // save to file 
+        for (data_index = 0; data_index < len; data_index++) {
+            fprintf (fp, "%u", base64_buf[data_index);
+        }
+        fprintf (fp, "\r\n");
+
+        free (base64_buf);
+
+#else
+        //        printf ("size:%d\n",size);
         status = radar_data_decode (pb_buf, size, &packet);
-//        printf ("radar data decoded with :%d\n", status);
-#endif
-        
+        //        printf ("radar data decoded with :%d\n", status);
+
         if( !packet.fdata ) {
             printf(" invalid data \n" );
             continue;
@@ -96,9 +132,8 @@ void* radar_subscriber (void) {
             }
         }
 
-        printf (".");
         free(packet.fdata);
-        
+#endif    
 
     }
 

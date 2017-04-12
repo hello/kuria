@@ -3,20 +3,20 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <stdbool.h>
-#include "kuria_config.h"
-
-
 #include <string.h>
+
+#include "kuria_config.h"
 #include "radar_task.h"
 #include "hlo_notify.h"
-
 
 
 bool stop_x4_read = 0;
 extern hlo_notify_t radar_task_notify;
 void end_application(void); 
+
 void sig_handler(int sig) {
-    if(sig == SIGINT || sig == SIGABRT)  {
+
+    if(sig == SIGINT)  {
         stop_x4_read = 1;
         end_application();
         exit(0);
@@ -36,7 +36,7 @@ int main() {
     stop_x4_read = 0;
 
     if(signal(SIGINT, sig_handler) == SIG_ERR){
-        printf("can't catch SIGINT\n");
+        perror("can't catch SIGINT\n");
     }
 /*
     if(signal(SIGABRT, sig_handler) == SIG_ERR){

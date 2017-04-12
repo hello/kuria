@@ -2,16 +2,16 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <stdlib.h>
+#include <stdbool.h>
+#include <string.h>
+
 #include "radar_task.h"
 #include "x4driver.h"
 #include "kuria_config.h"
 #include "dispatch_radar_frame.h"
-
-#include <stdbool.h>
 #include "spidriver.h"
 #include "gpio_hal.h"
 #include "radar_data_format.h"
-#include <string.h>
 #include "hlo_notify.h"
 
 /* Defines */
@@ -23,8 +23,8 @@
 
 #define DUMP_SPI 0
 
-#define TASK_RADAR_STACK_SIZE            (1500)
-#define TASK_RADAR_PRIORITY        (tskIDLE_PRIORITY + 7)
+#define TASK_RADAR_STACK_SIZE           (1500)
+#define TASK_RADAR_PRIORITY             (tskIDLE_PRIORITY + 7)
 
 #define XEP_NOTIFY_RADAR_DATAREADY		0x0001
 #define XEP_NOTIFY_RADAR_TRIGGER_SWEEP	0x0002
@@ -39,6 +39,7 @@ static bool en_intr = true;
 hlo_notify_t radar_task_notify;
 
 static pthread_mutex_t radar_task_mutex;
+
 
 /* Static function declarations */
 static uint32_t read_and_send_radar_frame(X4Driver_t* x4driver);
@@ -80,11 +81,11 @@ int32_t radar_task_init (void) {
     // Init GPIO
     gpio_init();
 
+    // setup notify to signal task from ISR
     status = hlo_notify_init (&radar_task_notify);
     if (status) {
         printf (" error creating radar_task_notify: %d\n", status);
     }
-
 
     // initialize dispatcher to publish radar data
     if (dispatcher_init ()) {
@@ -220,7 +221,7 @@ void radar_task (void) {
             //            printf("Radar Data Ready\n");
 
             if(x4driver->trigger_mode != SWEEP_TRIGGER_MANUAL) {
-//                printf("Read and send\n"); 
+                //                printf("Read and send\n"); 
                 read_and_send_radar_frame(x4driver);
             }
 
@@ -336,7 +337,7 @@ static uint32_t read_and_send_radar_frame(X4Driver_t* x4driver) {
     status = x4driver_read_frame_normalized(x4driver, &radar_packet->frame_counter,radar_packet->fdata, radar_packet->num_of_bins);
 
     // TODO what does the frame counter indicate
-//    printf ("frame counter: %d\n", radar_packet->frame_counter);
+    //    printf ("frame counter: %d\n", radar_packet->frame_counter);
 
     if (status != XEP_ERROR_X4DRIVER_OK) {
         printf ("error reading frame\n");
@@ -350,7 +351,7 @@ static uint32_t read_and_send_radar_frame(X4Driver_t* x4driver) {
     // TODO publish radar data
     status = dispatch_radar_frame (radar_packet);
     if (status) {
-//        printf ("radar fram could not be dispatched\n");
+        //        printf ("radar fram could not be dispatched\n");
     }
 
     radar_data_frame_free (radar_packet, true);
