@@ -22,14 +22,12 @@ private:
     IntSet_t _rangebins_we_care_about;
 
     RadarResultPublisherInterface * _publisher;
-    DebugPublisherInterface * _debug_publisher; //TODO put this in a singleton or something
     
     int64_t _sequence_number;
     int64_t _received_number;
+    int64_t _stats_number;
     
-    IIRFilter<Eigen::MatrixXf, Eigen::MatrixXcf> * lpf;
-
-    Peakfinder _peakfinder;
+    void publish_vec(const std::string & channel, const std::string & id, const FloatVec_t & featvec, const int sequence_number);
 };
 
 #endif //_RADARSUBSCRIBER_H_

@@ -24,9 +24,9 @@ using namespace Eigen;
 
 NoveldaRadarSubscriber::NoveldaRadarSubscriber(RadarResultPublisherInterface * publisher,DebugPublisherInterface * debug_publisher)
 :_publisher(publisher)
-,_debug_publisher(debug_publisher)
 ,_sequence_number(0)
-,_received_number(0) {
+,_received_number(0)
+,_stats_number(0) {
     _preprocessor = PreprocessorPtr_t(NULL);
     
     for (int i = 8; i < 70; i++) {
@@ -97,6 +97,12 @@ void NoveldaRadarSubscriber::receive_message(const NoveldaData_t & message) {
             << "std dev seconds: " << stats.peak_to_peak_stddev_seconds
             << std::endl;
 
+            FloatVec_t statsvec;
+            
+            statsvec.push_back(stats.peak_to_peak_mean_seconds);
+            statsvec.push_back(stats.peak_to_peak_stddev_seconds);
+            publish_vec("STATS","respiration",statsvec,_stats_number);
+            
         }
         
         
@@ -105,43 +111,48 @@ void NoveldaRadarSubscriber::receive_message(const NoveldaData_t & message) {
     
     MatrixXcf transformed_frame;
     if (_combiner.get_latest_reduced_measurement(filtered_frame, transformed_frame)) {
-
-        debug_save("transformed_frames",transformed_frame);
         
-        Eigen::MatrixXf foo;
-        if (_peakfinder.isPeak(transformed_frame, _received_number, foo)) {
-            //std::cout << "PEAK!" << std::endl;
-        }
+        debug_save("transformed_frames",transformed_frame);
         
         //send frame over the wire, or process it or something
         
-        if (_publisher) {
-
-            char hostname[HOST_NAME_MAX] = {0};
-            char username[LOGIN_NAME_MAX] = {0};
-            gethostname(hostname, HOST_NAME_MAX);
-            getlogin_r(username, LOGIN_NAME_MAX);
-            
-            RadarMessage_t message;
-            message.sequence_number = _sequence_number;
-            message.vec.push_back(transformed_frame(0,0).real());
-            message.vec.push_back(transformed_frame(0,0).imag());
-            message.id = username;
-            message.device_id = hostname;
-            
-            //std::cout << "publish:" << message.sequence_number << "," << message.vec[0] << "," << message.vec[1] << std::endl;
-            
-            _publisher->publish("PLOT", message);
-            
-            _sequence_number++;
-
-        }
-    
+        FloatVec_t iqdata;
+        
+        iqdata.push_back(transformed_frame(0,0).real());
+        iqdata.push_back(transformed_frame(0,0).imag());
+        
+        publish_vec("PLOT", "maxvarresp", iqdata, _sequence_number++);
+        
+        
     }
     
-    
+}
+
+
 
     
 
+
+
+void NoveldaRadarSubscriber::publish_vec(const std::string & channel, const std::string & id, const FloatVec_t & featvec, const int sequence_number) {
+    
+    if (!_publisher) {
+        return;
+    }
+    
+    char hostname[HOST_NAME_MAX] = {0};
+    char username[LOGIN_NAME_MAX] = {0};
+    gethostname(hostname, HOST_NAME_MAX);
+    getlogin_r(username, LOGIN_NAME_MAX);
+    
+    RadarMessage_t message;
+    message.sequence_number = sequence_number;
+    message.vec.insert(message.vec.begin(),featvec.begin(),featvec.end());
+    message.id = id;
+    message.device_id = hostname;
+    
+   
+    _publisher->publish(channel.c_str(), message);
+    
 }
 
