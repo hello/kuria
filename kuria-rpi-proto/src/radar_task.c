@@ -335,6 +335,7 @@ static uint32_t read_and_send_radar_frame(X4Driver_t* x4driver) {
         return -1;
     }
 
+    radar_packet->content_id = down_convertion_enabled;
     // Read radar data into dispatch memory.
     status = x4driver_read_frame_normalized(x4driver, &radar_packet->frame_counter,radar_packet->fdata, radar_packet->num_of_bins);
 
