@@ -1,5 +1,5 @@
 #include "hlo_notify.h"
-
+#include <stdio.h> // TODO add more logging here
 
 
 int32_t hlo_notify_init (hlo_notify_t* param) {
@@ -35,6 +35,7 @@ int32_t hlo_notify_wait (hlo_notify_t* param, uint32_t* data, uint32_t bits) {
     }
 
     *data = param->notify_data;
+    param->notify_data = 0;
 
     pthread_mutex_unlock (&param->notify_mutex);
 

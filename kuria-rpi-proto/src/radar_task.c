@@ -208,11 +208,12 @@ int32_t radar_task_init (void) {
 /* RADAR TASK */
 void radar_task (void) {
 
+    uint32_t notify_value = 0;
+
     printf("X4 Test start...\n");
 
     while(1) {
 
-        uint32_t notify_value = 0;
         hlo_notify_wait (&radar_task_notify, &notify_value, 0xFFFFFFFF); // TODO remove magic number
 
         //        printf ("received hlo_notify value: %x\n",notify_value);
@@ -221,7 +222,7 @@ void radar_task (void) {
             //            printf("Radar Data Ready\n");
 
             if(x4driver->trigger_mode != SWEEP_TRIGGER_MANUAL) {
-                //                printf("Read and send\n"); 
+//                printf("Read and send\n"); 
                 read_and_send_radar_frame(x4driver);
             }
 
@@ -239,6 +240,7 @@ void radar_task (void) {
             exit (0);
         }
 
+        notify_value = 0;
 
     } // Task forever loop
 
@@ -337,7 +339,7 @@ static uint32_t read_and_send_radar_frame(X4Driver_t* x4driver) {
     status = x4driver_read_frame_normalized(x4driver, &radar_packet->frame_counter,radar_packet->fdata, radar_packet->num_of_bins);
 
     // TODO what does the frame counter indicate
-    //    printf ("frame counter: %d\n", radar_packet->frame_counter);
+    DISP("frame counter: %d\n", radar_packet->frame_counter);
 
     if (status != XEP_ERROR_X4DRIVER_OK) {
         printf ("error reading frame\n");

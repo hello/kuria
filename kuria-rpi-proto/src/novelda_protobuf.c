@@ -11,7 +11,6 @@ bool decode_repeated_doubles(pb_istream_t *stream, const pb_field_t *field, void
 #if (RADAR_DATA_TESTING == 0)
 int32_t radar_data_encode (uint8_t** buf, radar_frame_packet_t* packet){
 
-    static uint32_t frame_id_test = 0; 
     novelda_RadarFrame radar_frame;
 
     if (!packet){
@@ -24,12 +23,7 @@ int32_t radar_data_encode (uint8_t** buf, radar_frame_packet_t* packet){
 
     // initialize frame id, sequential counter, incremented for every message
     radar_frame.has_frame_id = true;
-#if 0
     radar_frame.frame_id = packet->frame_counter; // TODO verify this is populated by radar task 
-#else
-    radar_frame.frame_id = frame_id_test; // TODO verify this is populated by radar task 
-    frame_id_test++;
-#endif
 
     // Indicates if baseband data or raw
     radar_frame.has_base_band = true;

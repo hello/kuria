@@ -2,7 +2,7 @@ cmake_minimum_required (VERSION 3.5.1)
 
 project (sati_kuria_proto)
 
-set (CMAKE_C_COMPILER   "/usr/bin/clang")
+set (CMAKE_C_COMPILER   "/usr/bin/gcc")
 #set (CMAKE_C_COMPILER	"/usr/bin/arm-linux-gnueabihf-gcc")
 set(CMAKE_BUILD_TYPE Release)
 
@@ -45,10 +45,10 @@ set (PUB_ALL_SRCS
     )
 add_executable(radar_publisher ${PUB_ALL_SRCS})
 
-target_compile_options(radar_publisher PRIVATE -Wall -g -std=gnu++11 -std=c11 -mcpu=cortex-a53 -D_GNU_SOURCE)
+target_compile_options(radar_publisher PRIVATE -Wall -g -std=c11 -mcpu=cortex-a53 -D_GNU_SOURCE -pg )
 
 find_library( WIRINGPI wiringPi "lib") 
-target_link_libraries( radar_publisher ${WIRINGPI} -lzmq -lm -lpthread)
+target_link_libraries( radar_publisher ${WIRINGPI} -lzmq -lm -lpthread -pg)
 
 # RADAR SUBSCRIBER
 set (SUB_SOURCES src/radar_subscriber.c 
@@ -60,6 +60,6 @@ set (SUB_SOURCES src/radar_subscriber.c
     )
 add_executable(radar_subscriber ${SUB_SOURCES})
 
-target_compile_options(radar_subscriber PRIVATE -Wall -g -std=gnu++11 -std=c11 -mcpu=cortex-a53 -D_GNU_SOURCE -DRADAR_DATA_TESTING -DWRITE_PB_TO_FILE)
+target_compile_options(radar_subscriber PRIVATE -Wall -g -std=c11 -mcpu=cortex-a53 -D_GNU_SOURCE -DRADAR_DATA_TESTING -DWRITE_PB_TO_FILE)
 
 target_link_libraries( radar_subscriber -lzmq -lpthread)
