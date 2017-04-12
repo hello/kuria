@@ -78,7 +78,7 @@ void* radar_subscriber (void) {
         status = radar_data_decode (pb_buf, size, &packet);
 //        printf ("radar data decoded with :%d\n", status);
 #endif
-        /*
+        
         if( !packet.fdata ) {
             printf(" invalid data \n" );
             continue;
@@ -97,10 +97,8 @@ void* radar_subscriber (void) {
         }
 
         printf (".");
-        if( packet.fdata ) {
-            free(packet.fdata);
-        }
-        */
+        free(packet.fdata);
+        
 
     }
 

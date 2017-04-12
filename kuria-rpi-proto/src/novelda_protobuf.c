@@ -3,6 +3,8 @@
 #include "pb_encode.h"
 #include <stdlib.h>
 #include <stdio.h>
+#include <assert.h>
+
 
 bool decode_repeated_doubles(pb_istream_t *stream, const pb_field_t *field, void **arg); 
 
@@ -133,11 +135,15 @@ int32_t radar_data_decode (uint8_t* protobuf_bytes, const size_t protobuf_size, 
     if (frame.has_base_band) {
         packet->content_id = frame.base_band;
     }
-#if 0
+
+    packet->fdata = (float32_t*) malloc (sizeof (float32_t) * num_items_received);
+    assert (packet->fdata );
+#if 1
     for (int i = 0; i < num_items_received/2; i++) {
-        packet->fdata[2*i] = buf[2*i];
-        packet->fdata[2*i+1] = buf[2*i+1];
+        packet->fdata[2*i] = (float32_t) buf[2*i];
+        packet->fdata[2*i+1] = (float32_t) buf[2*i+1];
     }
+    packet->num_of_bins = num_items_received;
 #endif
     return 0;
 }
