@@ -11,6 +11,8 @@
 #include <unistd.h>
 #include "radar_data_format.h"
 #include "novelda_protobuf.h"
+#include <signal.h>
+
 
 // file for radar data
 FILE* fp;
@@ -22,7 +24,7 @@ void* subscriber;
 int32_t radar_subscriber_init (void);
 void* radar_subscriber (void); 
 int32_t file_close(void);
-
+void radar_subscriber_close (void);
 int32_t radar_subscriber_init (void) {
 
     char filename[40];
@@ -142,11 +144,7 @@ void* radar_subscriber (void) {
 
     }
 
-    file_close ();
-
-    zmq_close (subscriber);
-    zmq_ctx_destroy (context);
-
+    radar_subscriber_close();
 }
 
 int32_t file_close(void){
@@ -157,8 +155,28 @@ int32_t file_close(void){
     return status;
 
 }
+void radar_subscriber_close (void) {
+
+    file_close ();
+
+    zmq_close (subscriber);
+    zmq_ctx_destroy (context);
+}
+
+void sig_handler(int sig) {
+
+    if(sig == SIGINT)  {
+        printf ("closing subscriber\n");
+        radar_subscriber_close();
+        exit(0);
+    }
+}
 
 int main (void) {
+
+    if(signal(SIGINT, sig_handler) == SIG_ERR){
+        perror("can't catch SIGINT\n");
+    }
 
     // initialize radar subcriber
     radar_subscriber_init ();
