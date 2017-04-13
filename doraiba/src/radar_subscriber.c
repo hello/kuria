@@ -93,12 +93,26 @@ void* radar_subscriber (void) {
         int len = Base64encode (base64_buf, pb_buf, size);
 
         // save to file 
+#if 0
         for (data_index = 0; data_index < len; data_index++) {
             fprintf (fp, "%u", base64_buf[data_index]);
         }
-        fprintf (fp, "\r\n");
+#else
+        int bytes_written = fwrite (base64_buf, sizeof (char), len, fp);
+#endif
+        fprintf (fp, "\n");
 
         free (base64_buf);
+
+#if 1
+        radar_frame_packet_t packet;
+        int32_t status;
+
+        //        printf ("size:%d\n",size);
+        status = radar_data_decode (pb_buf, size, &packet);
+        printf ("radar data decoded with :%d, %d\n", packet.frame_counter, packet.content_id);
+        free (packet.fdata);
+#endif
 
 #else
         radar_frame_packet_t packet;
