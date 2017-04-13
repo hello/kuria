@@ -31,9 +31,6 @@ int32_t radar_subscriber_init (void) {
     // set filename
     sprintf(filename, "data_%d", (int)now);
 
-    // add file extension
-    strcat(filename, ".csv");
-
     printf("Opening file: %s\n", filename);
 
     // open file
@@ -98,9 +95,10 @@ void* radar_subscriber (void) {
             fprintf (fp, "%u", base64_buf[data_index]);
         }
 #else
-        int bytes_written = fwrite (base64_buf, sizeof (char), len, fp);
+//        int bytes_written = fwrite (base64_buf, sizeof (char), len, fp);
+        fprintf (fp, "%s\n", base64_buf);
 #endif
-        fprintf (fp, "\n");
+//        fprintf (fp, "\n");
 
         free (base64_buf);
 

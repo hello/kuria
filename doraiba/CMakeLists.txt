@@ -8,7 +8,7 @@ set(CMAKE_BUILD_TYPE Release)
 
 set(CMAKE_POSITION_INDEPENDENT_CODE TRUE)
 
-set(CMAKE_PREFIX_PATH /home/pi/github/kuria/kuria-rpi-proto)
+set(CMAKE_PREFIX_PATH /home/pi/github/kuria/doraiba)
 
 # Headers
 include_directories( "include")
