@@ -38,7 +38,9 @@ int32_t dispatch_radar_frame (radar_frame_packet_t* packet) {
     // publish radar data
     // TODO handle case where zmq_send fails if interrupted by system call
     // or due to EAGAIN - try again or drop
+    do {
     status = zmq_send (publisher, pb_buf , len, 0);
+    } while ( (status == -1) && ( (errno == EAGAIN) || (errno == EINTR) ) );
     free (pb_buf);
     if (status == -1) {
         perror ("zmq send fail ");

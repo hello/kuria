@@ -62,6 +62,7 @@ static void x4driver_callback_give_sem(void * sem);
 static int32_t radar_task_set_callbacks_timer( );
 static int32_t radar_task_set_callbacks_lock ();
 static int32_t radar_task_set_callbacks_driver ();
+static int32_t hlo_x4_set_config (void); 
 
 /* Global Variables */
 
@@ -174,19 +175,50 @@ int32_t radar_task_init (void) {
     else
         printf("X4Driver init success\n");
 
+    return hlo_x4_set_config ();
+
+}
+
+typedef struct {
+
+    uint16_t dac_min;
+    uint16_t dac_max;
+    uint8_t iterations;
+    uint16_t pps; // pulses per step
+    uint8_t downconversion_en;
+    uint32_t fps; //frames per second
+    xtx4_tx_center_frequency_t tx_center_freq; 
+} hlo_x4_config_t;
+
+hlo_x4_config_t hlo_x4_config_default = {
+    .dac_min = 800,
+    .dac_max = 1254,
+    .iterations = 32,
+    .pps = 6,
+    .downconversion_en = 1,
+    .fps = 20,
+    .tx_center_freq = TX_CENTER_FREQUENCY_KCC_8_748GHz
+};
+
+static int32_t hlo_x4_set_config (void) {
+
+    hlo_x4_config_t config = hlo_x4_config_default;
+
+    int32_t status;
 
     /* Update X4 configurations for application */
     //
     // TODO - This values will have to be read from a file
     // Configure the radar chip as needed
-    x4driver_set_dac_min(x4driver, 800);
-    x4driver_set_dac_max(x4driver, 1254);
-    x4driver_set_iterations(x4driver, 64);
-    x4driver_set_pulses_per_step(x4driver, 6);
-    x4driver_set_downconversion(x4driver, 1);
+    x4driver_set_dac_min(x4driver,              config.dac_min);
+    x4driver_set_dac_max(x4driver,              config.dac_max);
+    x4driver_set_iterations(x4driver,           config.iterations);
+    x4driver_set_pulses_per_step(x4driver,      config.pps);
+    x4driver_set_downconversion(x4driver,       config.downconversion_en);
+    x4driver_set_fps(x4driver,                  config.fps);
+    x4driver_set_tx_center_frequency(x4driver,  config.tx_center_freq);
     //  x4driver_set_frame_area_offset(x4driver, 0.6);
     //  x4driver_set_frame_area(x4driver, 0.5, 9.9);
-    x4driver_set_fps(x4driver,20);
 
     // Verify X4 configurations
     status = x4driver_check_configuration(x4driver);
@@ -202,7 +234,6 @@ int32_t radar_task_init (void) {
     }
 
     return status;
-
 }
 
 /* RADAR TASK */
