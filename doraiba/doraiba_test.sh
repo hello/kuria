@@ -2,7 +2,6 @@
 
 sig=2
 echo "Beginning Doraiba Test"
-rm data* -v
 xterm -e ./build/radar_publisher &
 xterm -e ./build/radar_subscriber & 
 sleep_time=10
@@ -29,6 +28,7 @@ my_path=$(pwd)
 echo "sending $my_path/$filename"
 send_to="divya-work@192.168.128.243:/Users/divya-work/Documents/Firmware/sati/x4/doraiba_data"
 scp $filename $send_to 
+rm $filename -v
 echo "Done"
 exit 0
 
