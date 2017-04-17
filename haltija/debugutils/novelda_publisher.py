@@ -201,9 +201,19 @@ def main():
     from pyradarlib4 import X4Driver
     
     r = X4Driver()
-    r.set_pps(550)
-    r.set_dacmax(1100)
-    r.set_dacmin(950)
+
+#   robust
+#    r.set_iterations(32)
+#    r.set_pps(6)
+#    r.set_dacmax(1254)
+#    r.set_dacmin(800)
+
+#   max sensitivity
+    r.set_iterations(64)
+    r.set_pps(75)
+    r.set_dacmin(948)
+    r.set_dacmax(1098)
+
     try:
         run_zmqserver(r, fps=20, bb=True, timeout=60, port=5563)
     except KeyboardInterrupt, e:
