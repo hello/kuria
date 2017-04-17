@@ -4,6 +4,8 @@
 #include "debug_publisher.h"
 #include "filters.h"
 #include "haltijamath.h"
+#include "hmm/HmmHelpers.h"
+#include "hmm/AllModels.h"
 
 
 /*
@@ -36,6 +38,93 @@ using Eigen::MatrixXf;
 #define PEAK_TO_PEAK_TIME_SECONDS_LOW_THRESHOLD (1.0)
 #define PEAK_TO_PEAK_TIME_SECONDS_HIGH_THRESHOLD (6.0)
 
+
+
+
+/*
+   Basic idea: measurement model is stationary, changing
+ 
+ 
+ */
+static Eigen::MatrixXf state;
+static void hmm_classifier(const MatrixXf & x) {
+    
+    ModelVec_t models;
+    
+    float max = -1000000;
+    float min  = 1000000;
+    for (int i = 0; i < x.rows(); i++) {
+        if (x(i,0) > max) {
+            max = x(i,0);
+        }
+        
+        if (x(i,0) < min) {
+            min = x(i,0);
+        }
+    }
+    
+    
+    
+    HmmDataVec_t obs1;
+    obs1.reserve(x.rows());
+    
+    for (int t = 0; t < x.rows(); t++) {
+        obs1.push_back(x(t,0));
+    }
+    
+    HmmDataMatrix_t meas = {obs1};
+    
+    const HmmDataVec_t pi = {1.0,1.0,1.0,1.0};
+    
+    //const int32_t obsnum,const float mean, const float stddev, const float weight
+    models.push_back(HmmPdfInterfaceSharedPtr_t(new OneDimensionalGaussianModel(0,max,0.3,1.0)));
+    models.push_back(HmmPdfInterfaceSharedPtr_t(new OneDimensionalGaussianModel(0,0.5*(max + min),0.5,1.0)));
+    models.push_back(HmmPdfInterfaceSharedPtr_t(new OneDimensionalGaussianModel(0,min,0.3,1.0)));
+    models.push_back(HmmPdfInterfaceSharedPtr_t(new OneDimensionalGaussianModel(0,0.5*(max + min),0.5,1.0)));
+
+    HmmDataMatrix_t logBmap;
+    for (ModelVec_t::const_iterator it = models.begin(); it != models.end(); it++) {
+        logBmap.push_back((*it).get()->getLogOfPdf(meas));
+    }
+    
+    HmmDataMatrix_t A;
+    
+    A.reserve(3);
+    
+    /*   
+      1 + r + r^2 + r^3 .... r^inf = 1 / (1 - r)
+     
+      1 / (1 - r) = x
+       1 - r = 1/x
+     
+       r = 1 - 1/x
+     
+     */
+    
+    const float long_term = 20.0f;
+    const float short_term = 2.0f;
+    
+    const float a1 = 1.0f - 1.0f / long_term;
+    const float b1 = 1.0f - a1;
+    
+    const float a2 = 1.0f - 1.0f / short_term;
+    const float b2 = 1.0 - a2;
+    
+    A.push_back({a1,b1,0,0});
+    A.push_back({0,a1,b1,0});
+    A.push_back({0,0,a1,b1});
+    A.push_back({b1,0,0,a1});
+
+    //AlphaBetaResult_t alphabeta = HmmHelpers::getAlphaAndBeta(meas.size(),pi, logBmap, A, A.size());
+    
+    ViterbiDecodeResult_t result = HmmHelpers::decodeWithoutLabels(A, logBmap, pi, A.size(), obs1.size());
+    
+    auto path = result.getPath();
+    
+    int foo = 3;
+    foo++;
+    
+}
 
 
 RespirationStats RespirationClassifier::get_respiration_stats(const Eigen::MatrixXcf & probable_respiration_linear_combinations, const float sample_rate_hz) {
@@ -123,6 +212,8 @@ RespirationStats RespirationClassifier::get_respiration_stats(const Eigen::Matri
     if (2*stddev > mean) {
         is_possible_respiration = false;
     }
+    
+    hmm_classifier(filtered_signal);
     
     return RespirationStats(mean,stddev,is_possible_respiration);
      

@@ -71,8 +71,11 @@ Eigen::MatrixXcf RangebinCombiner::normalize_by_free_space_loss(const Eigen::Mat
     
     int idx = 0;
     const float begin_bin = (float)*_bins_we_care_about.begin();
+    
     for (auto it = _bins_we_care_about.begin(); it != _bins_we_care_about.end(); it++) {
         float scale = pow(begin_bin / (float)(*it),-4.0) / MAX_SCALE;
+        
+        //std::cout << *it << "," << scale << std::endl;
         
         if (scale > 1.0) {
             scale = 1.0;
