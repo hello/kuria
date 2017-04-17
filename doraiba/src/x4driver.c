@@ -608,7 +608,7 @@ int x4driver_create(X4Driver_t** x4driver, void* instance_memory, X4DriverCallba
 	d->action_timer.configure = timer_action->configure;
 	d->next_action = 0;
     d->trigger_mode = SWEEP_TRIGGER_MANUAL;
-	d->region = X4DRIVER_REGION_EU;
+	d->region = X4DRIVER_REGION_KCC; //X4DRIVER_REGION_EU;
 	d->downconvertion_enabled= 0;
 	d->iq_separate = 0;
 	d->configured_fps = 0;
