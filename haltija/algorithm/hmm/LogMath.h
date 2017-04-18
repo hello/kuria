@@ -7,7 +7,7 @@
 
 
 #define MIN_NUMBER (std::numeric_limits<HmmFloat_t>::min() * 2)
-#define LOGZERO  (-INFINITY)
+#define LOGZERO  (-std::numeric_limits<HmmFloat_t>::infinity())
 
 inline HmmFloat_t eexp(const HmmFloat_t x) {
     if (x == LOGZERO) {

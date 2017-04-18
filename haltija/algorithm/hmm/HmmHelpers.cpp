@@ -359,6 +359,18 @@ static ViterbiPath_t decodePath(int32_t startidx,const ViterbiPathMatrix_t & pat
     return path;
 }
 
+static TransitionMap_t getPathTransitionsByTime(const ViterbiPath_t & path) {
+    TransitionMap_t results;
+    for (int t = 1; t < path.size(); t++) {
+        if (path[t] != path[t - 1]) {
+            results.insert(std::make_pair (t,StateIdxPair(path[t - 1],path[t])));
+        }
+    }
+    
+    return results;
+}
+
+
 static ViterbiDecodeResult_t decodePathAndGetCost(int32_t startidx,const ViterbiPathMatrix_t & paths,const HmmDataMatrix_t & phi)  {
     
     const size_t len = paths[0].size();
@@ -373,11 +385,11 @@ static ViterbiDecodeResult_t decodePathAndGetCost(int32_t startidx,const Viterbi
     //really -bic
 //    const HmmFloat_t bic = 2*cost - _alphabetNumerator[0].size() * _numStates * log(len);
     
-    return ViterbiDecodeResult_t(path,cost,cost);
+    return ViterbiDecodeResult_t(path,getPathTransitionsByTime(path),cost,cost);
 }
 
 
-ViterbiDecodeResult_t HmmHelpers::decodeWithoutLabels(const HmmDataMatrix_t & A, const HmmDataMatrix_t & logbmap, const HmmDataVec_t & pi, const uint32_t numStates,const uint32_t numObs) {
+ViterbiDecodeResult_t HmmHelpers::decodeWithoutLabels(const HmmDataMatrix_t & A, const HmmDataMatrix_t & logbmap, const HmmDataVec_t & pi, const uint32_t numStates,const uint32_t numObs, const UIntSet_t & allowed_final_states) {
     int j,i,t;
 
     HmmDataVec_t costs;
@@ -413,10 +425,23 @@ ViterbiDecodeResult_t HmmHelpers::decodeWithoutLabels(const HmmDataMatrix_t & A,
         }
     }
     
-    const ViterbiDecodeResult_t result = decodePathAndGetCost(A.size() - 1, vindices, phi);
     
     
-    return result;
+    ViterbiDecodeResult_t best_result(ViterbiPath_t(),TransitionMap_t(),LOGZERO,LOGZERO);
+    
+    for (auto it = allowed_final_states.begin(); it != allowed_final_states.end(); it++) {
+        
+        const ViterbiDecodeResult_t result = decodePathAndGetCost(*it, vindices, phi);
+        
+        if (result.getBIC() > best_result.getBIC()) {
+            best_result = result;
+        }
+    }
+    
+    
+    
+    
+    return best_result;
     
 }
 
@@ -437,16 +462,6 @@ static TransitionAtTime_t getPathTransitions(const ViterbiPath_t & path) {
     return results;
 }
 
-static TransitionMap_t getPathTransitionsByTime(const ViterbiPath_t & path) {
-    TransitionMap_t results;
-    for (int t = 1; t < path.size(); t++) {
-        if (path[t] != path[t - 1]) {
-            results.insert(std::make_pair (t,StateIdxPair(path[t - 1],path[t])));
-        }
-    }
-    
-    return results;
-}
 
 
 static void printTransitions(const ViterbiPath_t & path) {

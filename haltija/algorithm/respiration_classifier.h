@@ -3,6 +3,8 @@
 
 #include <Eigen/Core>
 
+#include "haltija_types.h"
+
 struct RespirationStats  {
     
     RespirationStats(const float mean, const float stddev,bool respiration)

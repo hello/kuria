@@ -6,16 +6,24 @@
 
 class ViterbiDecodeResult_t {
 public:
-    ViterbiDecodeResult_t(const ViterbiPath_t & vpath,const HmmFloat_t vcost, const HmmFloat_t bicScore)
+    ViterbiDecodeResult_t(const ViterbiPath_t & vpath,const TransitionMap_t & transitions, const HmmFloat_t vcost, const HmmFloat_t bicScore)
     :_path(vpath)
+    ,_transitions(transitions)
     ,_cost(vcost)
     ,_bic(bicScore)
-    {}
+    {
+    
+    
+    }
     
     ViterbiDecodeResult_t() : _path(ViterbiPath_t()), _cost(-INFINITY),_bic(-INFINITY) {}
     
-    ViterbiPath_t getPath() const {
+    const ViterbiPath_t & getPath() const {
         return _path;
+    }
+    
+    const TransitionMap_t & getTransitions() const {
+        return _transitions;
     }
     
     HmmFloat_t getCost() const {
@@ -30,6 +38,7 @@ public:
 private:
     
     ViterbiPath_t _path;
+    TransitionMap_t _transitions;
     HmmFloat_t _cost;
     HmmFloat_t _bic;
 };
@@ -75,7 +84,7 @@ public:
     static HmmDataVec_t elnVectorScalarProduct(const HmmDataVec_t & m1, const HmmFloat_t a);
     
     
-    static ViterbiDecodeResult_t decodeWithoutLabels(const HmmDataMatrix_t & A, const HmmDataMatrix_t & logbmap, const HmmDataVec_t & pi,const uint32_t numStates,const uint32_t numObs);
+    static ViterbiDecodeResult_t decodeWithoutLabels(const HmmDataMatrix_t & A, const HmmDataMatrix_t & logbmap, const HmmDataVec_t & pi,const uint32_t numStates,const uint32_t numObs,const UIntSet_t & allowed_final_states);
     
   
 };

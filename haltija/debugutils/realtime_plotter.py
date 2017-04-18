@@ -21,7 +21,8 @@ np.set_printoptions(precision=3, suppress=True, threshold=np.nan)
 
 plot_samples = 200
 num_feats = 2
-max_num_histogram = 5
+max_num_histogram = 1
+Fs = 20
 
 g_kill = False
 g_PlotQueue = Queue()
@@ -44,14 +45,15 @@ g_p7 = None
 g_p7_curves = None
 g_histogram_data = []
 g_yrangemax = 1e2
-g_yrangemin = 2e0
+g_yrangemin = 1e0
 g_prev_histogram_index = 0
 g_text = None
+
 
 plot_yrange = (-g_yrangemax, g_yrangemax)
 
 def CreatePlotCurves(p6):
-     p6.setRange(xRange=(0, plot_samples-1), yRange=plot_yrange)
+     p6.setRange(xRange=(-plot_samples / Fs, 0), yRange=plot_yrange)
 
      curves = []
      for i in range(num_feats):
@@ -82,10 +84,15 @@ def plot_signal(index,vec,plotdata,plt,curves,x_range,y_range,y_range_min,text_i
         text_item.setPos(1,-yrangemax*1.0)
 
     for j in range(len(curves)):
-        curves[j].setData(list(plotdata[j]))
+        N = len(plotdata[j])
+        x = np.array(range(N)).astype(float) - N
+        x = x / Fs
+        curves[j].setData(x,list(plotdata[j]))
 
 def plot_histogram(index,prev_index,data,vec,curves):
-     x = np.array(range(len(vec) + 1));
+     x = np.array(range(len(vec) + 1)) - 10;
+     x = x.astype(float)
+     x *= 0.05 * 100
      y = np.array(vec)
 
      if index != prev_index:
@@ -122,7 +129,7 @@ def update_plot():
             message_id,index,vec = g_PlotQueue.get(False)
 
             if (message_id == signal_target):
-                 plot_signal(index,vec,g_plotdata,g_p6,g_curves,(0, plot_samples - 1),None,g_yrangemin,g_text)
+                 plot_signal(index,vec,g_plotdata,g_p6,g_curves,(-plot_samples/Fs, 0),None,g_yrangemin,g_text)
             if (message_id == histogram_target):
                  plot_histogram(index,g_prev_histogram_index,g_histogram_data,vec,g_p7_curves)
                  g_prev_histogram_index = index
@@ -189,9 +196,9 @@ def main_plotter():
     win.setWindowTitle('plotter')
     pg.setConfigOptions(antialias=True)
 
-    g_p6 = win.addPlot(title="baseband signal")
+    g_p6 = win.addPlot(title="baseband signal",labels={'left': 'Complex Signal Amplitude', 'bottom': 'Time in the past (seconds)'})
     g_p6.addItem(g_text)
-    g_p7 = win.addPlot(title="bins of interest")
+    g_p7 = win.addPlot(title="Distance To Target",labels={'left': 'Fraction of Signal', 'bottom': 'Distance (cm)'})
 
     g_curves = CreatePlotCurves(g_p6)
     g_p7_curves = CreateHistogramCurves(g_p7)
