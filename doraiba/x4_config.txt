@@ -1,0 +1,7 @@
+MIN		800
+MAX		1254
+ITR		32
+PPS		6
+DWN		1
+FPS		20
+TXF		4

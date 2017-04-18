@@ -110,7 +110,7 @@ void* radar_subscriber (void) {
 
         //        printf ("size:%d\n",size);
         status = radar_data_decode (pb_buf, size, &packet);
-        printf ("radar data decoded with :%d, %d\n", packet.frame_counter, packet.content_id);
+        printf ("radar data decoded with :%d\n", packet.frame_counter);
         free (packet.fdata);
 #endif
 

@@ -23,11 +23,11 @@ int32_t radar_data_encode (uint8_t** buf, radar_frame_packet_t* packet){
 
     // initialize frame id, sequential counter, incremented for every message
     radar_frame.has_frame_id = true;
-    radar_frame.frame_id = packet->frame_counter; // TODO verify this is populated by radar task 
+    radar_frame.frame_id = packet->frame_counter;  
 
     // Indicates if baseband data or raw
     radar_frame.has_base_band = true;
-    radar_frame.base_band = packet->content_id;// TODO verify this is populated by radar task
+    radar_frame.base_band = packet->content_id;
 
     // set callbacks to encode the radar data
     radar_frame.range_bins.funcs.encode = _encode_range_bins;

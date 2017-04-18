@@ -22,6 +22,7 @@
 #endif
 
 #define DUMP_SPI 0
+#define HLO_NOTIFY_MASK                 (0xFFFFFFFF)
 
 #define TASK_RADAR_STACK_SIZE           (1500)
 #define TASK_RADAR_PRIORITY             (tskIDLE_PRIORITY + 7)
@@ -200,6 +201,50 @@ hlo_x4_config_t hlo_x4_config_default = {
     .tx_center_freq = TX_CENTER_FREQUENCY_KCC_8_748GHz
 };
 
+static int32_t hlo_x4_get_config_from_file (char* filename, hlo_x4_config_t* config) {
+
+    FILE* fp;
+
+    fp = fopen (filename, "r+");
+    if (fp == NULL) {
+        printf ("no config file found\n");
+        return -1;
+    }
+
+    size_t len = 0;
+    size_t nread;
+    uint32_t num;
+    char buf[256];
+    
+    fscanf (fp, "%s %u\n", buf, &config->dac_min);
+    printf ("dac_min:\t%u\n", config->dac_min);
+
+    fscanf (fp, "%s %u\n", buf, &config->dac_max);
+    printf ("dac_max:\t%u\n", config->dac_max);
+
+
+    fscanf (fp, "%s %u\n", buf, &config->iterations);
+    printf ("iter:\t%u\n", config->iterations);
+
+
+    fscanf (fp, "%s %u\n", buf, &config->pps);
+    printf ("pps:\t%u\n", config->pps);
+
+
+    fscanf (fp, "%s %u\n", buf, &config->downconversion_en);
+    printf ("don:\t%u\n", config->downconversion_en);
+    
+
+    fscanf (fp, "%s %u\n", buf, &config->fps);
+    printf ("fps:\t%u\n", config->fps);
+
+
+    fscanf (fp, "%s %u\n", buf, &config->tx_center_freq);
+    printf ("tx fre:\t%u\n", config->tx_center_freq);
+
+    fclose (fp);
+    return 0;
+}
 static int32_t hlo_x4_set_config (void) {
 
     hlo_x4_config_t config = hlo_x4_config_default;
@@ -208,7 +253,11 @@ static int32_t hlo_x4_set_config (void) {
 
     /* Update X4 configurations for application */
     //
+#if 1
     // TODO - This values will have to be read from a file
+    status = hlo_x4_get_config_from_file ("x4_config.txt", &config);
+#endif
+
     // Configure the radar chip as needed
     x4driver_set_dac_min(x4driver,              config.dac_min);
     x4driver_set_dac_max(x4driver,              config.dac_max);
@@ -228,6 +277,7 @@ static int32_t hlo_x4_set_config (void) {
     }
 
     // Set sweep trigger control
+    // By default let sweep trigger control done by X4
     if( x4driver_set_sweep_trigger_control(x4driver, SWEEP_TRIGGER_X4) ) {
         printf(" Set sweep trigger control fail\n");
         return status;
@@ -245,7 +295,7 @@ void radar_task (void) {
 
     while(1) {
 
-        hlo_notify_wait (&radar_task_notify, &notify_value, 0xFFFFFFFF); // TODO remove magic number
+        hlo_notify_wait (&radar_task_notify, &notify_value, HLO_NOTIFY_MASK); // TODO remove magic number
 
         //        printf ("received hlo_notify value: %x\n",notify_value);
         if (notify_value & XEP_NOTIFY_RADAR_DATAREADY) {
@@ -370,7 +420,6 @@ static uint32_t read_and_send_radar_frame(X4Driver_t* x4driver) {
     // Read radar data into dispatch memory.
     status = x4driver_read_frame_normalized(x4driver, &radar_packet->frame_counter,radar_packet->fdata, radar_packet->num_of_bins);
 
-    // TODO what does the frame counter indicate
     DISP("frame counter: %d\n", radar_packet->frame_counter);
 
     if (status != XEP_ERROR_X4DRIVER_OK) {
@@ -382,7 +431,7 @@ static uint32_t read_and_send_radar_frame(X4Driver_t* x4driver) {
         //        printf("Frame read completed\n");
     }
 
-    // TODO publish radar data
+    // publish radar data
     status = dispatch_radar_frame (radar_packet);
     if (status) {
         //        printf ("radar fram could not be dispatched\n");
@@ -501,12 +550,13 @@ void x4driver_notify_data_ready(void* user_reference){
 
 void x4driver_interrupt_notify_data_ready(void) {
     static bool first_intr = true;
+    /*
     // TODO ignore first interrupt since it writes junk data into file
     if (first_intr) {
         first_intr = false;
         return;
     }
-
+    */
 
     hlo_notify_send (&radar_task_notify, XEP_NOTIFY_RADAR_DATAREADY);
     DISP("INTR: \n");
