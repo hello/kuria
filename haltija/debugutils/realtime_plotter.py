@@ -81,7 +81,7 @@ def plot_signal(index,vec,plotdata,plt,curves,x_range,y_range,y_range_min,text_i
     plot_yrange = (-yrangemax,yrangemax)
     if plt != None:
         plt.setRange(xRange=x_range, yRange=plot_yrange)
-        text_item.setPos(1,-yrangemax*1.0)
+        text_item.setPos(x_range[0],-yrangemax*1.0)
 
     for j in range(len(curves)):
         N = len(plotdata[j])
@@ -90,7 +90,7 @@ def plot_signal(index,vec,plotdata,plt,curves,x_range,y_range,y_range_min,text_i
         curves[j].setData(x,list(plotdata[j]))
 
 def plot_histogram(index,prev_index,data,vec,curves):
-     x = np.array(range(len(vec) + 1)) - 10;
+     x = np.array(range(len(vec) + 1)) - 8;
      x = x.astype(float)
      x *= 0.05 * 100
      y = np.array(vec)
@@ -191,6 +191,7 @@ def main_plotter():
 
     g_text = pg.TextItem("",anchor=(-0.3,1.3), border='w', fill=(0, 0, 255, 100))
     g_text.setText('waiting for stats...')
+    g_text.setPos(-plot_samples/Fs,-g_yrangemax)
     win = pg.GraphicsWindow(title="Basic plotting examples")
     win.resize(640,480)
     win.setWindowTitle('plotter')
