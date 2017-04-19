@@ -72,6 +72,7 @@ typedef void (*EnableDataReadyISRFunc)(void* user_reference,uint32_t enable);
  * Error return codes
  */
 typedef enum {
+	XEP_ERROR_X4DRIVER_UNINITIALIZED                            =   -1,
 	XEP_ERROR_X4DRIVER_OK										=	0,
 	XEP_ERROR_X4DRIVER_NOK										=	1,
 	XEP_ERROR_X4DRIVER_NOT_SUPPORTED							=	2,
@@ -426,7 +427,7 @@ typedef struct
 	uint32_t frame_length;
 	uint32_t frame_read_size;	
 	uint32_t frame_is_ready_strategy;
-	uint32_t configured_fps;
+	float32_t configured_fps;
 	uint32_t sweep_trigger_strategy;
 	uint32_t next_action;
 	xtx4_sweep_trigger_control_mode_t trigger_mode;	
@@ -448,7 +449,8 @@ typedef struct
 	float32_t rx_wait_offset_m;
 	uint32_t frame_area_offset_bins;
 	float32_t frame_area_offset_meters;
-	uint8_t frame_buffer[5000];
+    uint8_t* frame_buffer;
+    uint32_t frame_buffer_size;
 	float32_t frame_area_start;
 	float32_t frame_area_end;
 	float32_t frame_area_start_requested;
@@ -516,7 +518,7 @@ int x4driver_set_frame_area_offset(X4Driver_t* x4driver, float32_t offset_in_met
  * @brief Sets frame rate for frame streaming. 
  * @return Status of execution as defined in x4driver.h.
  */
-int x4driver_set_fps(X4Driver_t* x4driver, uint32_t fps);
+int x4driver_set_fps(X4Driver_t* x4driver, float32_t fps);
 
 
 /**
@@ -799,14 +801,14 @@ int x4driver_set_sweep_trigger_control(X4Driver_t* x4driver, xtx4_sweep_trigger_
  * requires enable to be set and 8051 SRAM to be program.
  * @return Status of execution as defined in x4driver.h
  */
- int x4driver_get_fps(X4Driver_t* x4driver, uint32_t * fps);
+ int x4driver_get_fps(X4Driver_t* x4driver, float32_t * fps);
  
  
  /*
  * @brief Gets calculated fps i.e. for a software timer running timer ticks on ms resolution it will give the configured fps from the timer.
  * @return Status of execution as defined in x4driver.h
  */
- int x4driver_get_calculated_fps(X4Driver_t* x4driver, uint32_t * fps);
+ int x4driver_get_calculated_fps(X4Driver_t* x4driver, float32_t * fps);
  
  
  /*

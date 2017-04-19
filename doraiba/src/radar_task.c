@@ -159,6 +159,19 @@ int32_t radar_task_init (void) {
     // Set X4driver instance variable to default values, initialize callbacks
     x4driver_create(&x4driver, x4driver_instance_memory, &x4driver_callbacks,&lock,&timer_sweep,&timer_action,NULL);
 
+    // TODO add in new fw changes
+    x4driver->frame_buffer_size = 157*32;
+    x4driver->frame_buffer = malloc (x4driver->frame_buffer_size);
+    if ( ( ( (uint32_t) x4driver->frame_buffer) % 32) != 0) {
+        printf ("alignment diff frame buffer\n");
+        int alignment_diff = 32 - ( ( (uint32_t) x4driver->frame_buffer) % 32);
+        // TODO umm, is this a memory leak
+        x4driver->frame_buffer += alignment_diff;
+        x4driver->frame_buffer_size -= alignment_diff;
+    }
+    x4driver->frame_buffer_size -= x4driver->frame_buffer_size % 32;
+    printf ("frame buffer size: %d\n", x4driver->frame_buffer_size);
+
     // Enable X4 chip
     status = x4driver_set_enable(x4driver, 1);
     for(uint32_t i =0; i < 2000; i++) {

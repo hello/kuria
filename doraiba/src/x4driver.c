@@ -10,6 +10,7 @@
 #include <stdio.h>
 #include <time.h>
 #include <unistd.h>
+#include <float.h>
 
 #if 0
 #define DISP printf
@@ -17,6 +18,7 @@
 #define DISP(...)
 #endif
 
+#define UNUSED(x) (void)(x)
 #define START_OF_SRAM_LSB       0x00
 #define START_OF_SRAM_MSB       0x00
 #define SET_PROGRAMMING_MODE    0x01
@@ -45,6 +47,7 @@
 #define RESET_COUNTERS_ACTION 0xff
 #define TRX_START_ACTION 0xff
 
+float32_t measured_fps_from_x4_timer_1_34hz[] = {1.004108124950404, 2.0080154538542674, 3.0120231300774165, 4.0152279344517687, 5.0185332341280828, 6.0240460751902258, 7.0273512120334267, 8.0272459942058507, 9.030651670395633, 10.032052556008651, 11.035257553778095, 12.040868513866339, 13.041667871447936, 14.044873167198913, 15.05559814087251, 16.04166747731395, 17.049378771457828, 18.061302650200414, 19.055187571769331, 20.044079750069113, 21.052587257711036, 22.070514637123811, 23.085253644961522, 24.081739235799915, 25.042606665713322, 26.083338304556776, 27.067615812132296, 28.050517228370968, 29.107493859414152, 30.066123144589028, 31.090047130967591, 32.083338705938836, 33.033175120617237, 34.040966553477801};
 
 #include "8051_firmware.h"
 
@@ -123,9 +126,10 @@ const float32_t X4DRIVER_MAX_BINS_RANGE_METERS_DOWN_CONVERSION = 9.6707818930041
 
 const float32_t X4DRIVER_MAX_RANGE_OFFSET = 0.616856909*255;
 const float32_t X4DRIVER_MIN_RANGE = 0;
-const float32_t X4DRIVER_RX_WAIT_OFFSET_IN_METERS = 0.616856909;
-const float32_t X4DRIVER_METERS_PER_BIN = 0.00643004115226337448559670781893;
-const float32_t X4DRIVER_METERS_PER_BIN_DOWN_CONVERTION = 0.05144032921810699588477366255144;
+const double X4DRIVER_METERS_PER_BIN_DOWN_CONVERTION = 8*1.5e8/23.328e9;//0.05144032921810699588477366255144;
+const double X4DRIVER_RX_WAIT_OFFSET_IN_METERS = 8*1.5e8/23.328e9*12;//0.616856909;
+const double X4DRIVER_METERS_PER_BIN = 1*1.5e8/23.328e9;//0.00643004115226337448559670781893;
+
 const uint32_t  X4DRIVER_BINS_PER_RX_MFRAMES_COARSE = 96;
 const uint32_t  X4DRIVER_BINS_PER_RX_MFRAMES = 12;
 #include <math.h>
@@ -165,6 +169,10 @@ int _x4driver_set_rx_ram_last_line(X4Driver_t* x4driver,uint32_t last_line);
 int _x4driver_get_framecounter(X4Driver_t* x4driver, uint32_t * read_value);
 void _invert(int8_t * source,int8_t * dst,uint8_t len);
 float32_t _get_dr(X4Driver_t* x4driver);
+
+#if 0
+int _x4driver_test_io_connectivity(X4Driver_t* x4driver);
+#endif
 
 /**
  *  Set of coefficients for down conversion for I.
@@ -1072,16 +1080,24 @@ int x4driver_set_frame_area(X4Driver_t* x4driver, float32_t start, float32_t end
 	float32_t range_offset_in_meters = x4driver->frame_area_offset_meters;
 	
 	
+	/*float32_t FrameAreaStart_Min=0.4;
+	float32_t MinFrameArea=0.2;
+	float32_t FrameAreaStart_Max=9.4;
+	start = fmax(FrameAreaStart_Min,start);
+	start = fmin(start,FrameAreaStart_Max-MinFrameArea);
+	end = fmax(end,start+MinFrameArea);
+	end = fmin(end,FrameAreaStart_Max);*/
+	
 	float32_t X4DRIVER_MAX_BINS_RANGE_METERS =X4DRIVER_MAX_BINS_RANGE_METERS_RF;
 	if(x4driver->downconvertion_enabled == 1)
 	{
 		X4DRIVER_MAX_BINS_RANGE_METERS = X4DRIVER_MAX_BINS_RANGE_METERS_DOWN_CONVERSION;
 	}
 	
-	if(start < X4DRIVER_MIN_RANGE)
+	/*if(start < X4DRIVER_MIN_RANGE)
 	{
 		return XEP_ERROR_X4DRIVER_ERROR_FRAME_AREA_END_OUT_OF_SCOPE; 
-	}
+	}*/
 	if(start > end )
 	{
 		return XEP_ERROR_X4DRIVER_ERROR_FRAME_AREA_END_OUT_OF_SCOPE;
@@ -1090,10 +1106,10 @@ int x4driver_set_frame_area(X4Driver_t* x4driver, float32_t start, float32_t end
 	
 	
 	float32_t length = end-start;
-	if(end > (X4DRIVER_MAX_BINS_RANGE_METERS+ X4DRIVER_MAX_RANGE_OFFSET + range_offset_in_meters))
+	/*if(end > (X4DRIVER_MAX_BINS_RANGE_METERS+ X4DRIVER_MAX_RANGE_OFFSET + range_offset_in_meters))
 	{
 		return  XEP_ERROR_X4DRIVER_ERROR_FRAME_AREA_END_OUT_OF_SCOPE;
-	} 	
+	} */	
 		
 	if((x4driver->downconvertion_enabled) == 1 && (length > X4DRIVER_MAX_BINS_RANGE_METERS))
 	{
@@ -1101,10 +1117,10 @@ int x4driver_set_frame_area(X4Driver_t* x4driver, float32_t start, float32_t end
 		length = end-start;
 	}
 	
-	if(length > X4DRIVER_MAX_BINS_RANGE_METERS)
+	/*if(length > X4DRIVER_MAX_BINS_RANGE_METERS)
 	{
 		return XEP_ERROR_X4DRIVER_ERROR_FRAME_AREA_TOO_LARGE;
-	}
+	}*/
 	
 	uint32_t status = mutex_take(x4driver);	
 	if (status != XEP_ERROR_X4DRIVER_OK) return status;
@@ -1116,7 +1132,7 @@ int x4driver_set_frame_area(X4Driver_t* x4driver, float32_t start, float32_t end
 	float32_t range = end-start;
 	float32_t absolute_start = range_offset_in_meters + start;
 	
-	uint32_t rx_wait_max = floorf(absolute_start/X4DRIVER_RX_WAIT_OFFSET_IN_METERS);
+	uint32_t rx_wait_max = floorf(absolute_start/X4DRIVER_RX_WAIT_OFFSET_IN_METERS) ;
 	float32_t rx_wait_offset_m = rx_wait_max * X4DRIVER_RX_WAIT_OFFSET_IN_METERS;
 	x4driver_set_rx_wait(x4driver,rx_wait_max);
 	float32_t relative_offset =  rx_wait_offset_m - range_offset_in_meters;
@@ -1136,35 +1152,123 @@ int x4driver_set_frame_area(X4Driver_t* x4driver, float32_t start, float32_t end
 	{
 		relative_end_m = X4DRIVER_MAX_BINS_RANGE_METERS;
 	}
+	double NoBinsDiscarded;
+	double DecimationFactor;
+	if (x4driver->downconvertion_enabled == 1)
+	{
+		NoBinsDiscarded=4;
+		DecimationFactor=8;
+	}
+	else
+	{
+		NoBinsDiscarded=0;
+		DecimationFactor=1;
+	}
 	
+	double diff_eps_meter=1e-4;  //35 % accuracy used in quantization of range bins
+
+	int32_t NoBinsFrame=1536/DecimationFactor;
+	double Min_diff_RxTxWait=-1; //% minium value
+
+	double Max_diff_RxTxWait=0;// % To avoid sampling prf noize
+	double FrameAreaStart = start;
+	//debug_floats[0] = FrameAreaStart;
+	double FrameAreaOffset = x4driver->frame_area_offset_meters;
+	//debug_floats[1] = FrameAreaOffset;
+	double dR_bin = dR_bin=DecimationFactor*1.5e8/23.328e9;
+	double R_frame_step=dR_bin*96/DecimationFactor;
+	double R_FrameStart_discarded=NoBinsDiscarded*dR_bin; 
+	//debug_floats[2] = R_frame_step;	
+	//debug_floats[3] = dR_bin;
+	double FrameAreaStop = end;
+	//debug_floats[4] = FrameAreaStop;
+    //START lines relevant for FW implementation
+	double diff_rx_tx_wait_tmp = (FrameAreaStart-FrameAreaOffset)/R_frame_step;
+	//debug_floats[5] = diff_rx_tx_wait_tmp;
+	double diff_RxTxWait= floor(diff_rx_tx_wait_tmp);
+	diff_RxTxWait=fmin(diff_RxTxWait,Max_diff_RxTxWait);
+	diff_RxTxWait=fmax(diff_RxTxWait,Min_diff_RxTxWait);
+
+	//debug_floats[6] = diff_RxTxWait;
+    double FrameStart_quantized=diff_RxTxWait*R_frame_step+FrameAreaOffset; //# start of usable frame, 4 first samples discarded     
+    uint8_t TxWait = 0x00;
+    x4driver_get_pif_register(x4driver,ADDR_PIF_TX_WAIT_RW,&TxWait);	
+    double RxWait = (double)TxWait+diff_RxTxWait;
+	uint8_t RxWait_8 = (uint8_t)RxWait;
+	//debug_floats[7] = RxWait;
+	x4driver_set_rx_wait(x4driver,RxWait_8);
+	
+    FrameAreaStart=fmax(FrameAreaStart,FrameStart_quantized);
+	FrameAreaStop=fmin(FrameAreaStop,dR_bin*(NoBinsFrame-NoBinsDiscarded-1)+FrameStart_quantized); //fix typo
+	FrameAreaStop=fmax(FrameAreaStop,FrameAreaStart);
+
+    //% C - indexes - assuming first discarded samples are stored at indexes 0:NoBinsDiscarded-1
+ /*
+   // uint32_t FrameAreaStart_quantized_ind= floor((FrameAreaStart-FrameStart_quantized)/dR_bin)+4;
+	uint32_t FrameAreaStart_quantized_ind=floor((FrameAreaStart-FrameStart_quantized)/dR_bin)+NoBinsDiscarded;
+	FrameAreaStop=fmin(FrameAreaStop,dR_bin*(NoBinsFrame-NoBinsDiscarded-1)+FrameStart_quantized); //fix typo
+	//debug_floats[8] = FrameAreaStart_quantized_ind;
+    //uint32_t FrameAreaStop_quantized_ind= ceil((FrameAreaStop-FrameStart_quantized)/dR_bin)+4;
+	uint32_t FrameAreaStop_quantized_ind=ceil((FrameAreaStop-FrameStart_quantized)/dR_bin)+NoBinsDiscarded;
+
+	//debug_floats[9] = FrameAreaStop_quantized_ind;
+   */
+    double diff=((FrameAreaStart-FrameStart_quantized)/dR_bin)-ceil((FrameAreaStart-FrameStart_quantized)/dR_bin);
+    uint32_t FrameAreaStart_quantized_ind;     
+    if (fabs(diff) < diff_eps_meter)
+		FrameAreaStart_quantized_ind=ceil((FrameAreaStart-FrameStart_quantized)/dR_bin)+NoBinsDiscarded;
+    else
+		FrameAreaStart_quantized_ind=floor((FrameAreaStart-FrameStart_quantized)/dR_bin)+NoBinsDiscarded;
+   
+         
+    diff=((FrameAreaStop-FrameStart_quantized)/dR_bin)-floor((FrameAreaStop-FrameStart_quantized)/dR_bin);
+    uint32_t FrameAreaStop_quantized_ind;
+    if (fabs(diff) < diff_eps_meter)
+		FrameAreaStop_quantized_ind=floor((FrameAreaStop-FrameStart_quantized)/dR_bin)+NoBinsDiscarded;
+    else
+		FrameAreaStop_quantized_ind=ceil((FrameAreaStop-FrameStart_quantized)/dR_bin)+NoBinsDiscarded;
+    
+ 
+	
+    //Next 2 lines - output to user
+    double FrameAreaStart_quantized=(FrameAreaStart_quantized_ind-NoBinsDiscarded)*dR_bin + FrameStart_quantized;
+    double FrameAreaStop_quantized=(FrameAreaStop_quantized_ind-NoBinsDiscarded)*dR_bin + FrameStart_quantized;
+    //double FrameAreaStart_quantized=(FrameAreaStart_quantized_ind-4)*dR_bin + FrameStart_quantized;
+	//debug_floats[10] = FrameAreaStart_quantized;
+    //double FrameAreaStop_quantized=(FrameAreaStop_quantized_ind-4)*dR_bin + FrameStart_quantized;
+	//debug_floats[11] = FrameAreaStop_quantized;
+	
+    //END lines relevant for FW implementation
+    
 	float32_t relative_end_m_bins_active = relative_end_m;
 	float32_t bins_required_active = 4*8;
+	UNUSED(bins_required_active);
 	if(x4driver->downconvertion_enabled == 0)	
 		bins_required_active = 0;
-	bins_required_active += (ceilf(relative_end_m_bins_active/X4DRIVER_METERS_PER_BIN));
+	/*bins_required_active += (ceilf(FrameAreaStop_quantized/X4DRIVER_METERS_PER_BIN));
 	uint8_t min_rx_mframes_coarse = (ceilf(bins_required_active/X4DRIVER_BINS_PER_RX_MFRAMES_COARSE));
 	x4driver_set_pif_register(x4driver,ADDR_PIF_RX_MFRAMES_COARSE_RW,min_rx_mframes_coarse);
 	uint8_t min_rx_mframes = (ceilf(bins_required_active/X4DRIVER_BINS_PER_RX_MFRAMES));
 	x4driver_set_pif_register(x4driver,ADDR_PIF_RX_MFRAMES_RW,min_rx_mframes);
 	x4driver->required_bins_active = bins_required_active;
 	x4driver->rx_mframes = min_rx_mframes;
-	x4driver->rx_mframes_coarse = min_rx_mframes_coarse;
+	x4driver->rx_mframes_coarse = min_rx_mframes_coarse;*/
 
 		
 	
 	
 
 	
-	x4driver->frame_area_start = 0;
+	/*x4driver->frame_area_start = 0;
 	x4driver->frame_area_start_bin_requested = 0;
 	x4driver->frame_area_start_ram_line = 0;
 	x4driver->frame_area_start_ram_line_bin = 0;
 	x4driver->frame_area_start_bin_offset = 0;
-	x4driver->frame_area_start = relative_offset;	
+	x4driver->frame_area_start = relative_offset;*/
 	if(x4driver->downconvertion_enabled==1)
 	{
 		//skip 4 fist bins
-		uint32_t offset = 4;
+		/*uint32_t offset = 4;
 		x4driver->frame_area_start_ram_line = offset;
 		x4driver->frame_area_start_bin_requested = offset;		
 		x4driver->frame_area_start_ram_line_bin = offset;
@@ -1200,12 +1304,19 @@ int x4driver_set_frame_area(X4Driver_t* x4driver, float32_t start, float32_t end
 		x4driver->frame_area_end_bin_requested = end_bin;
 		float32_t end_bin_m = X4DRIVER_METERS_PER_BIN_DOWN_CONVERTION*(x4driver->frame_area_end_ram_line- offset +1);
 		x4driver->frame_area_end = end_bin_m + relative_offset;
+        float32_t tmp_FrameAreaStop_quantized = (float32_t)FrameAreaStop_quantized;
+		float32_t tmp_FrameAreaStart_quantized = (float32_t)FrameAreaStart_quantized;*/
+		
+		x4driver->frame_area_start_ram_line = FrameAreaStart_quantized_ind;
+		x4driver->frame_area_end_ram_line = FrameAreaStop_quantized_ind;		
+        x4driver->frame_area_end  = FrameAreaStop_quantized;
+        x4driver->frame_area_start = FrameAreaStart_quantized;
 		
 	}
 	else
 	{
 			
-			if (relative_start_m > 0)
+			/*if (relative_start_m > 0)
 			{
 				int32_t start_bin = floorf(relative_start_m/X4DRIVER_METERS_PER_BIN)-1;
 				float32_t start_bin_m = (start_bin+1)*X4DRIVER_METERS_PER_BIN;//start bin is relative start bin in this case set_frame_area_offset - rx_wait_m /binlen.
@@ -1230,7 +1341,14 @@ int x4driver_set_frame_area(X4Driver_t* x4driver, float32_t start, float32_t end
 			
 			
 			x4driver->frame_area_end_bin_offset =  x4driver->frame_area_end_ram_line_bin - x4driver->frame_area_end_bin_requested;
-			x4driver->frame_area_end_ram_line = x4driver->frame_area_end_ram_line-1;			
+			x4driver->frame_area_end_ram_line = x4driver->frame_area_end_ram_line-1;*/
+
+			x4driver->frame_area_start_ram_line = FrameAreaStart_quantized_ind/4;
+			x4driver->frame_area_end_ram_line = FrameAreaStop_quantized_ind/4;
+			x4driver->frame_area_start_bin_offset = FrameAreaStart_quantized_ind % 4;
+			x4driver->frame_area_end_bin_offset = (3 - (FrameAreaStop_quantized_ind % 4))*-1;			
+			x4driver->frame_area_end  = FrameAreaStop_quantized;
+			x4driver->frame_area_start = FrameAreaStart_quantized;			
 	}
 	
 	
@@ -1247,8 +1365,13 @@ int x4driver_set_frame_area(X4Driver_t* x4driver, float32_t start, float32_t end
 		uint32_t bytes_to_read = (x4driver->frame_area_end_ram_line - x4driver->frame_area_start_ram_line+1)*4* x4driver->bytes_per_counter ;
 		x4driver->frame_read_size = bytes_to_read;
 	}
-	
-		
+	/*debug_floats[12] = x4driver->frame_read_size;
+	debug_floats[13] = x4driver->frame_area_start_ram_line;
+	debug_floats[14] = x4driver->frame_area_end_ram_line;
+	uint32_t bins = 0;
+	x4driver_get_frame_bin_count(x4driver,&bins);
+	debug_floats[15] = bins;
+	dispatch_message_hostcom_send_reply_float(debug_dispatch,0x33,0,debug_floats,16);*/
 	mutex_give(x4driver);
 	return XEP_ERROR_X4DRIVER_OK;
 }
@@ -2018,6 +2141,65 @@ int x4driver_set_frame_length(X4Driver_t* x4driver, uint8_t cycles)
 	return status;
 }
 
+// not needed right now, used to set the gpio levels on X4
+// and verify those lines (levels) from host mcu
+// these lines are currently not connected and not used
+// if needed, this will have to be ported
+#if 0
+int _x4driver_test_io_connectivity(X4Driver_t* x4driver)
+{
+	uint32_t status = XEP_ERROR_X4DRIVER_OK;
+
+	int x4_io_pin_count;
+	const int* x4_io_pins;
+	const int* mcu_io_pins;
+	xt_selftest_x4_connectivity_get_pin_table(&x4_io_pin_count, &x4_io_pins, &mcu_io_pins);
+
+	uint8_t x4_pin_mask = 0;
+	for (int i = 0; i < x4_io_pin_count; i++)
+		x4_pin_mask |= 1<<x4_io_pins[i];
+
+	for (int i = 0; i < x4_io_pin_count; i++)
+		xtio_set_direction(mcu_io_pins[i], XTIO_INPUT, XTIO_PIN_LEVEL_LOW);
+
+	uint8_t ctrl_val, oe_val, out_val;
+	x4driver_get_pif_register(x4driver, ADDR_PIF_IO_CTRL_3_RW, &ctrl_val);
+	x4driver_get_pif_register(x4driver, ADDR_PIF_GPIO_OE_RW, &oe_val);
+	x4driver_get_pif_register(x4driver, ADDR_PIF_GPIO_OUT_RW, &out_val);
+	
+	x4driver_set_pif_register(x4driver, ADDR_PIF_IO_CTRL_3_RW, ctrl_val | x4_pin_mask);
+	x4driver_set_pif_register(x4driver, ADDR_PIF_GPIO_OE_RW, oe_val | x4_pin_mask);
+	
+	// Test travelling 1 pattern
+	for (int i = 0; i < x4_io_pin_count; i++)
+	{
+		x4driver_set_pif_register(x4driver, ADDR_PIF_GPIO_OUT_RW, (out_val&(~x4_pin_mask)) | (1<<x4_io_pins[i]));
+		
+		// Assure that value has time to propagate
+		for (volatile int k = 0; k < 100; k++); 
+
+		for (int j = 0; j < x4_io_pin_count; j++)
+		{
+			xtio_pin_level_t level;
+			xtio_get_level(mcu_io_pins[j], &level);
+			if (((j == i) && (!level)) || // Pin that should have been high was low
+				((j != i) && (level))) // Pin that should have been low was high
+			{
+				xt_selftest_x4_connectivity_mark_faulty_pin(j);
+				status = XEP_ERROR_X4DRIVER_NOK;
+			}
+		}
+	}
+	
+	// Set X4 IO pins as they were
+	x4driver_set_pif_register(x4driver, ADDR_PIF_GPIO_OUT_RW, out_val);
+	x4driver_set_pif_register(x4driver, ADDR_PIF_GPIO_OE_RW, oe_val);
+	x4driver_set_pif_register(x4driver, ADDR_PIF_IO_CTRL_3_RW, ctrl_val);
+
+	return status;
+}
+#endif
+
 int x4driver_cpu_reset(X4Driver_t* x4driver) {
 
     uint32_t status = mutex_take(x4driver);
@@ -2084,6 +2266,19 @@ int x4driver_init(X4Driver_t* x4driver)
     
     if (status != XEP_ERROR_X4DRIVER_OK) 
 		return status;
+
+    // factory test
+    // not needed now, look for comments under _x4driver_test_io_connectivity
+#if 0
+	{
+		// Perform pin test pattern
+		status = _x4driver_test_io_connectivity(x4driver);
+
+		if (status != XEP_ERROR_X4DRIVER_OK)
+			return status;
+	}
+#endif
+
     status = x4driver_ldo_enable_all(x4driver);
     if (status != XEP_ERROR_X4DRIVER_OK) 
 		return status;
@@ -2417,7 +2612,7 @@ int x4driver_get_pif_segment(X4Driver_t* x4driver,uint8_t segment_address,uint8_
  * requires enable to be set and 8051 SRAM to be program.
  * @return Status of execution as defined in x4driver.h
  */
- int x4driver_set_fps(X4Driver_t* x4driver, uint32_t fps)
+ int x4driver_set_fps(X4Driver_t* x4driver, float32_t fps)
  {
 	uint32_t status = mutex_take(x4driver);
 	if (status != XEP_ERROR_X4DRIVER_OK) return status;
@@ -2430,11 +2625,21 @@ int x4driver_get_pif_segment(X4Driver_t* x4driver,uint8_t segment_address,uint8_
 	else if (x4driver->trigger_mode == SWEEP_TRIGGER_X4)
 	{		 
 		 _x4driver_set_x4_sw_action(x4driver,X4_SW_ACTION_STOP_TIMER);
-		 if(fps != 0)
+		 if(fps > FLT_EPSILON)
 		 {
-			 _x4driver_set_x4_sw_register(x4driver,X4_SW_USE_PERIOD_TRIGGER,0);
-			uint8_t fps_lsb = (uint8_t)(fps & 0x000000ff);
-			uint8_t fps_msb = (uint8_t)((fps & 0x0000ff00)>>8);
+			 _x4driver_set_x4_sw_register(x4driver,X4_SW_USE_PERIOD_TRIGGER,0);			 
+			 if((fps > 0.0) && fps < 1.0)
+			 {
+				 fps = 1.0; 				 
+			 }
+			 
+			 uint32_t fps_uint = (uint32_t)fps;
+			 if(fps_uint < 35)
+			 {
+				 x4driver->configured_fps = measured_fps_from_x4_timer_1_34hz[fps_uint-1];
+			 }
+			uint8_t fps_lsb = (uint8_t)(fps_uint & 0x000000ff);
+			uint8_t fps_msb = (uint8_t)((fps_uint & 0x0000ff00)>>8);
 			_x4driver_set_x4_sw_register(x4driver,X4_SW_REGISTER_FPS_LSB_ADDR,fps_lsb);
 			_x4driver_set_x4_sw_register(x4driver,X4_SW_REGISTER_FPS_MSB_ADDR,fps_msb);
 			_x4driver_set_x4_sw_action(x4driver,X4_SW_ACTION_START_TIMER);
@@ -2459,7 +2664,7 @@ int x4driver_get_pif_segment(X4Driver_t* x4driver,uint8_t segment_address,uint8_
  * requires enable to be set and 8051 SRAM to be programed.
  * @return Status of execution as defined in x4driver.h
  */
- int x4driver_get_fps(X4Driver_t* x4driver, uint32_t * fps)
+ int x4driver_get_fps(X4Driver_t* x4driver, float32_t * fps)
 {
 	uint32_t status = mutex_take(x4driver);
 	if (status != XEP_ERROR_X4DRIVER_OK) return status;
@@ -2473,7 +2678,7 @@ int x4driver_get_pif_segment(X4Driver_t* x4driver,uint8_t segment_address,uint8_
  * @brief Gets calculated fps i.e. for a software timer running timer ticks on ms resolution it will give the configured fps from the timer.
  * @return Status of execution as defined in x4driver.h
  */
- int x4driver_get_calculated_fps(X4Driver_t* x4driver, uint32_t * fps)
+ int x4driver_get_calculated_fps(X4Driver_t* x4driver, float32_t * fps)
 {
 	uint32_t status = mutex_take(x4driver);
 	if (status != XEP_ERROR_X4DRIVER_OK) return status;
@@ -2511,16 +2716,16 @@ int x4driver_get_pif_segment(X4Driver_t* x4driver,uint8_t segment_address,uint8_
 	 if (status != XEP_ERROR_X4DRIVER_OK) return status;	
 	 if(x4driver->trigger_mode != mode )
 	 {	
-		 uint32_t fps = 0;
+		 float32_t fps = 0;
 		 x4driver_get_fps(x4driver,&fps);	 		 
 		 //stop previous mode..
-		if(fps != 0)	 		 
+		if(fps > FLT_EPSILON)	 		 
 			x4driver_set_fps(x4driver,0);	 		 		
 		 x4driver->trigger_mode = mode;	 		 
 		 //start new mode.
 		 if(mode != SWEEP_TRIGGER_MANUAL)
 		 {
-			if(fps != 0)
+			if(fps > FLT_EPSILON)
 				x4driver_set_fps(x4driver,fps);	 
 		 }
 		 
@@ -2966,7 +3171,7 @@ int _x4driver_set_rx_ram_last_line(X4Driver_t* x4driver,uint32_t last_line)
 	 uint32_t fc = 0;
 	 uint32_t bins = 0;
 	 xtx4_sweep_trigger_control_mode_t org_tm = x4driver->trigger_mode;
-	 uint32_t org_fps = 0;
+	 float32_t org_fps = 0;
 	 x4driver_get_fps(x4driver,&org_fps);
 	 x4driver_set_sweep_trigger_control(x4driver,SWEEP_TRIGGER_MANUAL); 
 	 x4driver_get_frame_bin_count(x4driver,&bins);
