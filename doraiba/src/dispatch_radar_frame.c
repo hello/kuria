@@ -10,7 +10,6 @@
 void* context;
 void* publisher;
 
-// TODO verify all ZMQ return values are handled accordingly
 
 int32_t dispatcher_init (void) {
 

@@ -56,10 +56,9 @@ static pthread_mutex_t radar_task_mutex;
 static uint32_t read_and_send_radar_frame(X4Driver_t* x4driver);
 void dump_spi_reg(void);
 
-// TODO uint32_t is just a placeholder till timer functionality is ported to non-freertos
-// remove once fixed, this is just to compile
-void x4driver_timer_sweep_timeout(uint32_t pxTimer) ;
-void x4driver_timer_action_timeout(uint32_t pxTimer) ;
+// timer callbacks
+void x4driver_timer_sweep_timeout(void* ctx) ;
+void x4driver_timer_action_timeout(void* ctx) ;
 
 uint32_t x4driver_timer_set_timer_timeout_frequency(void* timer , uint32_t frequency) ;
 void x4driver_notify_data_ready(void* user_reference);
@@ -106,16 +105,12 @@ int32_t radar_task_init (void) {
 
     // X4Driver calbacks
     X4DriverCallbacks_t x4driver_callbacks;
-    x4driver_callbacks.pin_set_enable = x4driver_callback_pin_set_enable;   // X4 ENABLE pin
-    x4driver_callbacks.spi_read = spi_read;               // SPI read method
-    x4driver_callbacks.spi_write = spi_write;             // SPI write method
-    x4driver_callbacks.spi_write_read = spi_write_read;   // SPI write and read method
-#if USE_WIRING_PI
-    x4driver_callbacks.wait_us = delayMicroseconds;                 // Delay method
-#endif
-    x4driver_callbacks.notify_data_ready = x4driver_notify_data_ready;      // Notification when radar data is ready to read
-    x4driver_callbacks.trigger_sweep = x4driver_trigger_sweep_pin;          // Method to set X4 sweep trigger pin
-    x4driver_callbacks.enable_data_ready_isr = x4driver_enable_ISR;         // Control data ready notification ISR
+    status = radar_task_set_callbacks_driver (&x4driver_callbacks);
+    if (status) {
+        printf ("error setting driver callbacks: %d\n", status);
+        return status;
+    }
+
 
     // Initialize X4driver lock mechanism
     X4DriverLock_t lock;
@@ -190,85 +185,6 @@ int32_t radar_task_init (void) {
 
 }
 
-#if 0
-static int32_t hlo_x4_get_config_from_file (char* filename, hlo_x4_config_t* config) {
-
-    FILE* fp;
-
-    fp = fopen (filename, "r+");
-    if (fp == NULL) {
-        printf ("no config file found\n");
-        return -1;
-    }
-
-    size_t len = 0;
-    size_t nread;
-    uint32_t num;
-    char buf[256];
-    
-    fscanf (fp, "%s %u\n", buf, &config->dac_min);
-    printf ("dac_min:\t%u\n", config->dac_min);
-
-    fscanf (fp, "%s %u\n", buf, &config->dac_max);
-    printf ("dac_max:\t%u\n", config->dac_max);
-
-
-    fscanf (fp, "%s %u\n", buf, &config->iterations);
-    printf ("iter:\t%u\n", config->iterations);
-
-
-    fscanf (fp, "%s %u\n", buf, &config->pps);
-    printf ("pps:\t%u\n", config->pps);
-
-
-    fscanf (fp, "%s %u\n", buf, &config->downconversion_en);
-    printf ("don:\t%u\n", config->downconversion_en);
-    
-
-    fscanf (fp, "%s %u\n", buf, &config->fps);
-    printf ("fps:\t%u\n", config->fps);
-
-
-    fscanf (fp, "%s %u\n", buf, &config->tx_center_freq);
-    printf ("tx fre:\t%u\n", config->tx_center_freq);
-
-    fclose (fp);
-    return 0;
-}
-
-static int32_t hlo_x4_get_value_from_file (char* filename, hlo_x4_config_t* config) {
-
-    FILE* fp;
-    size_t len = 0;
-    size_t nread;
-    uint32_t num;
-    char buf[256];
-    char* line = NULL;
-    char* ret_str = NULL;
-
-    fp = fopen (filename, "r+");
-    if (fp == NULL) {
-        printf ("no config file found\n");
-        return -1;
-    }
-
-    while ( (nread = getline (&line, &len, fp) ) != -1 ) {
-        printf ("read line: %s -", line);
-
-        if ( (ret_str = strstr (line, "DAC_MIN") ) != NULL) {
-            sscanf (line, "%s %d", buf, &config->dac_min);
-            printf ("found dac_min: %d\n", config->dac_min);
-        }
-    }
-
-    free (line);
-    fclose (fp);
-
-    return 0;
-}
-#endif
-
-
 static int32_t hlo_x4_set_config (void) {
 
     hlo_x4_config_t config = hlo_x4_config_default;
@@ -277,15 +193,10 @@ static int32_t hlo_x4_set_config (void) {
 
     /* Update X4 configurations for application */
     //
-#if 0
-    // TODO - This values will have to be read from a file
-    status = hlo_x4_get_config_from_file ("x4_config.txt", &config);
-#else
     status = hlo_x4_read_config_from_file (HLO_X4_CONFIG_FILE, &config);
     if (status) {
         printf ("Error reading config from file\n");
     }
-#endif
 
     // Configure the radar chip as needed
     x4driver_set_dac_min(x4driver,              config.dac_min);
@@ -324,15 +235,13 @@ void radar_task (void) {
 
     while(1) {
 
-        hlo_notify_wait (&radar_task_notify, &notify_value, HLO_NOTIFY_MASK); // TODO remove magic number
+        hlo_notify_wait (&radar_task_notify, &notify_value, HLO_NOTIFY_MASK); 
 
-        //        printf ("received hlo_notify value: %x\n",notify_value);
         if (notify_value & XEP_NOTIFY_RADAR_DATAREADY) {
 
-            //            printf("Radar Data Ready\n");
 
             if(x4driver->trigger_mode != SWEEP_TRIGGER_MANUAL) {
-//                printf("Read and send\n"); 
+                DISP("Read and send\n"); 
                 read_and_send_radar_frame(x4driver);
             }
 
@@ -529,21 +438,30 @@ static int32_t radar_task_set_callbacks_lock (X4DriverLock_t* lock) {
     return 0;
 }
 
-static int32_t radar_task_set_callbacks_driver () {
+static int32_t radar_task_set_callbacks_driver (X4DriverCallbacks_t* x4driver_callbacks) {
 
+    x4driver_callbacks->pin_set_enable = x4driver_callback_pin_set_enable;   // X4 ENABLE pin
+    x4driver_callbacks->spi_read = spi_read;               // SPI read method
+    x4driver_callbacks->spi_write = spi_write;             // SPI write method
+    x4driver_callbacks->spi_write_read = spi_write_read;   // SPI write and read method
+#if USE_WIRING_PI
+    x4driver_callbacks->wait_us = delayMicroseconds;                 // Delay method
+#endif
+    x4driver_callbacks->notify_data_ready = x4driver_notify_data_ready;      // Notification when radar data is ready to read
+    x4driver_callbacks->trigger_sweep = x4driver_trigger_sweep_pin;          // Method to set X4 sweep trigger pin
+    x4driver_callbacks->enable_data_ready_isr = x4driver_enable_ISR;         // Control data ready notification ISR
     return 0;
 }
 
 /************************ Callbacks ******************************************/
 
 
-// TODO use timer placeholder functions here
-//
-void x4driver_timer_sweep_timeout(uint32_t pxTimer) {
+void x4driver_timer_sweep_timeout(void* ctx) {
+    hlo_notify_send (&radar_task_notify, XEP_NOTIFY_RADAR_TRIGGER_SWEEP);
 }
 
-
-void x4driver_timer_action_timeout(uint32_t pxTimer) {
+void x4driver_timer_action_timeout(void* ctx) {
+    hlo_notify_send (&radar_task_notify, XEP_NOTIFY_X4DRIVER_ACTION);
 }
 
 uint32_t x4driver_timer_set_timer_timeout_frequency(void* timer , uint32_t frequency) {
@@ -579,13 +497,6 @@ void x4driver_notify_data_ready(void* user_reference){
 
 void x4driver_interrupt_notify_data_ready(void) {
     static bool first_intr = true;
-    /*
-    // TODO ignore first interrupt since it writes junk data into file
-    if (first_intr) {
-        first_intr = false;
-        return;
-    }
-    */
 
     hlo_notify_send (&radar_task_notify, XEP_NOTIFY_RADAR_DATAREADY);
     DISP("INTR: \n");
