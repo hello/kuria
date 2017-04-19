@@ -33,6 +33,16 @@
 #define XEP_NOTIFY_TASK_END             0x0010
 
 
+hlo_x4_config_t hlo_x4_config_default = {
+    .dac_min = 800,
+    .dac_max = 1254,
+    .iterations = 32,
+    .pps = 6,
+    .downconversion_en = 1,
+    .fps = 20,
+    .tx_center_freq = TX_CENTER_FREQUENCY_KCC_8_748GHz
+};
+
 /* Local Variables */
 static X4Driver_t* x4driver;
 static bool en_intr = true;
@@ -180,27 +190,7 @@ int32_t radar_task_init (void) {
 
 }
 
-typedef struct {
-
-    uint16_t dac_min;
-    uint16_t dac_max;
-    uint8_t iterations;
-    uint16_t pps; // pulses per step
-    uint8_t downconversion_en;
-    uint32_t fps; //frames per second
-    xtx4_tx_center_frequency_t tx_center_freq; 
-} hlo_x4_config_t;
-
-hlo_x4_config_t hlo_x4_config_default = {
-    .dac_min = 800,
-    .dac_max = 1254,
-    .iterations = 32,
-    .pps = 6,
-    .downconversion_en = 1,
-    .fps = 20,
-    .tx_center_freq = TX_CENTER_FREQUENCY_KCC_8_748GHz
-};
-
+#if 0
 static int32_t hlo_x4_get_config_from_file (char* filename, hlo_x4_config_t* config) {
 
     FILE* fp;
@@ -245,6 +235,40 @@ static int32_t hlo_x4_get_config_from_file (char* filename, hlo_x4_config_t* con
     fclose (fp);
     return 0;
 }
+
+static int32_t hlo_x4_get_value_from_file (char* filename, hlo_x4_config_t* config) {
+
+    FILE* fp;
+    size_t len = 0;
+    size_t nread;
+    uint32_t num;
+    char buf[256];
+    char* line = NULL;
+    char* ret_str = NULL;
+
+    fp = fopen (filename, "r+");
+    if (fp == NULL) {
+        printf ("no config file found\n");
+        return -1;
+    }
+
+    while ( (nread = getline (&line, &len, fp) ) != -1 ) {
+        printf ("read line: %s -", line);
+
+        if ( (ret_str = strstr (line, "DAC_MIN") ) != NULL) {
+            sscanf (line, "%s %d", buf, &config->dac_min);
+            printf ("found dac_min: %d\n", config->dac_min);
+        }
+    }
+
+    free (line);
+    fclose (fp);
+
+    return 0;
+}
+#endif
+
+
 static int32_t hlo_x4_set_config (void) {
 
     hlo_x4_config_t config = hlo_x4_config_default;
@@ -253,9 +277,14 @@ static int32_t hlo_x4_set_config (void) {
 
     /* Update X4 configurations for application */
     //
-#if 1
+#if 0
     // TODO - This values will have to be read from a file
     status = hlo_x4_get_config_from_file ("x4_config.txt", &config);
+#else
+    status = hlo_x4_read_config_from_file (HLO_X4_CONFIG_FILE, &config);
+    if (status) {
+        printf ("Error reading config from file\n");
+    }
 #endif
 
     // Configure the radar chip as needed

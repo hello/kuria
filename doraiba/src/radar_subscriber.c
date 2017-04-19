@@ -1,7 +1,6 @@
 #include <stdio.h>
 #include <fcntl.h>
 #include <stdint.h>
-#include "kuria_config.h"
 #include <math.h>
 #include <time.h>
 #include <string.h>
@@ -9,9 +8,9 @@
 #include <zmq.h>
 #include <assert.h>
 #include <unistd.h>
-#include "radar_data_format.h"
-#include "novelda_protobuf.h"
 #include <signal.h>
+#include "novelda_protobuf.h"
+#include "kuria_config.h"
 
 
 // file for radar data

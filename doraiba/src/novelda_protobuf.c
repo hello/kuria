@@ -1,9 +1,8 @@
-#include "novelda_protobuf.h"
-#include "novelda.pb.h"
-#include "pb_encode.h"
 #include <stdlib.h>
 #include <stdio.h>
 #include <assert.h>
+#include "pb_encode.h"
+#include "novelda_protobuf.h"
 
 
 bool decode_repeated_doubles(pb_istream_t *stream, const pb_field_t *field, void **arg); 
