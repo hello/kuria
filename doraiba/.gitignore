@@ -3,3 +3,5 @@ bin/
 *.o
 build/
 tests/
+gmon.out
+gprof_out.txt

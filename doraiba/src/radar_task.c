@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <string.h>
+#include <assert.h>
 
 #include "radar_task.h"
 #include "x4driver.h"
@@ -162,6 +163,7 @@ int32_t radar_task_init (void) {
     // TODO add in new fw changes
     x4driver->frame_buffer_size = 157*32;
     x4driver->frame_buffer = malloc (x4driver->frame_buffer_size);
+    assert (x4driver->frame_buffer);
     if ( ( ( (uint32_t) x4driver->frame_buffer) % 32) != 0) {
         printf ("alignment diff frame buffer\n");
         int alignment_diff = 32 - ( ( (uint32_t) x4driver->frame_buffer) % 32);
@@ -457,9 +459,7 @@ static int32_t radar_task_set_callbacks_driver (X4DriverCallbacks_t* x4driver_ca
     x4driver_callbacks->spi_read = spi_read;               // SPI read method
     x4driver_callbacks->spi_write = spi_write;             // SPI write method
     x4driver_callbacks->spi_write_read = spi_write_read;   // SPI write and read method
-#if USE_WIRING_PI
-    x4driver_callbacks->wait_us = delayMicroseconds;                 // Delay method
-#endif
+    x4driver_callbacks->wait_us = hlo_delay_us;                 // Delay method
     x4driver_callbacks->notify_data_ready = x4driver_notify_data_ready;      // Notification when radar data is ready to read
     x4driver_callbacks->trigger_sweep = x4driver_trigger_sweep_pin;          // Method to set X4 sweep trigger pin
     x4driver_callbacks->enable_data_ready_isr = x4driver_enable_ISR;         // Control data ready notification ISR
@@ -509,7 +509,6 @@ void x4driver_notify_data_ready(void* user_reference){
 }
 
 void x4driver_interrupt_notify_data_ready(void) {
-    static bool first_intr = true;
 
     hlo_notify_send (&radar_task_notify, XEP_NOTIFY_RADAR_DATAREADY);
     DISP("INTR: \n");

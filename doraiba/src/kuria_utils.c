@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdbool.h>
+#include <unistd.h>
 
 // verify that the string corresponds to the right index
 // as given by config_str_t
@@ -24,6 +25,17 @@ void pabort(const char *s)
 	abort();
 }
 
+// TODO - not sure how accurate this delay(usleep) will be. due to latencies, 
+// this delay might be more than specified
+void hlo_delay_us (uint32_t delay_us) {
+    int status;
+
+    status = usleep (delay_us);
+    if (status) {
+        perror ("usleep error: \n");
+    }
+    return;
+}
 
 int32_t hlo_x4_read_config_from_file (char* filename, hlo_x4_config_t* config) {
 

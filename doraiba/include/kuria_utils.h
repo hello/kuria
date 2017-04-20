@@ -39,5 +39,6 @@ typedef enum {
 
 void pabort(const char *s);
 int32_t hlo_x4_read_config_from_file (char* filename, hlo_x4_config_t* config); 
+void hlo_delay_us (uint32_t delay_us); 
 
 #endif
