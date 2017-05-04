@@ -18,8 +18,7 @@ _sym_db = _symbol_database.Default()
 DESCRIPTOR = _descriptor.FileDescriptor(
   name='radar_messages.proto',
   package='hello',
-  syntax='proto2',
-  serialized_pb=_b('\n\x14radar_messages.proto\x12\x05hello\"[\n\rFeatureVector\x12\n\n\x02id\x18\x01 \x01(\t\x12\x11\n\tdevice_id\x18\x02 \x01(\t\x12\x12\n\nfloatfeats\x18\x03 \x03(\x02\x12\x17\n\x0fsequence_number\x18\x04 \x01(\x03\x42-\n\x1c\x63om.hello.sati.radarmessagesB\rRadarMessages')
+  serialized_pb=_b('\n\x14radar_messages.proto\x12\x05hello\"[\n\rFeatureVector\x12\n\n\x02id\x18\x01 \x01(\t\x12\x11\n\tdevice_id\x18\x02 \x01(\t\x12\x12\n\nfloatfeats\x18\x03 \x03(\x02\x12\x17\n\x0fsequence_number\x18\x04 \x01(\x03\x42.\n\x1dis.hellos.demos.models.protosB\rRadarMessages')
 )
 _sym_db.RegisterFileDescriptor(DESCRIPTOR)
 
@@ -69,7 +68,6 @@ _FEATUREVECTOR = _descriptor.Descriptor(
   ],
   options=None,
   is_extendable=False,
-  syntax='proto2',
   extension_ranges=[],
   oneofs=[
   ],
@@ -88,5 +86,5 @@ _sym_db.RegisterMessage(FeatureVector)
 
 
 DESCRIPTOR.has_options = True
-DESCRIPTOR._options = _descriptor._ParseOptions(descriptor_pb2.FileOptions(), _b('\n\034com.hello.sati.radarmessagesB\rRadarMessages'))
+DESCRIPTOR._options = _descriptor._ParseOptions(descriptor_pb2.FileOptions(), _b('\n\035is.hellos.demos.models.protosB\rRadarMessages'))
 # @@protoc_insertion_point(module_scope)

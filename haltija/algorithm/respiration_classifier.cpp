@@ -219,6 +219,7 @@ RespirationStats RespirationClassifier::get_respiration_stats(const Eigen::Matri
     IntVec_t positive_crossings;
     IntVec_t negative_crossings;
     
+    
     for (int t = 1; t < T; t++) {
         float prev = filtered_signal(t - 1,0);
         float current = filtered_signal(t,0);
@@ -230,6 +231,11 @@ RespirationStats RespirationClassifier::get_respiration_stats(const Eigen::Matri
         if (prev >= 0.0f && current < 0.0f) {
             negative_crossings.push_back(t);
         }
+    }
+    
+    float energy = 0.0;
+    for (int t = 0; t < T; t++) {
+        energy += filtered_signal(t,0) * filtered_signal(t,0);
     }
     
     IntVec_t diffs;
@@ -286,6 +292,6 @@ RespirationStats RespirationClassifier::get_respiration_stats(const Eigen::Matri
     std::cout << "inhaled: " <<  respiration_clusters[inhaled] << std::endl;
     std::cout << "exhaled: " <<  respiration_clusters[exhaled] << std::endl;
 
-    return RespirationStats(mean,stddev,is_possible_respiration,respiration_clusters);
+    return RespirationStats(mean,stddev,10*log10(energy),is_possible_respiration,respiration_clusters);
      
 }

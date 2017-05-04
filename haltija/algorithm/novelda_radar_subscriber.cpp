@@ -108,23 +108,24 @@ void NoveldaRadarSubscriber::receive_message(const NoveldaData_t & message) {
         _modes_number++;
 
         
-        if (stats.is_valid) {
-            //publish them
-            
-            std::cout
-            << "mean breath duration: " << stats.peak_to_peak_mean_seconds << ", "
-            << "breaths per min: " << 60.0 / stats.peak_to_peak_mean_seconds << ", "
-            << "std dev seconds: " << stats.peak_to_peak_stddev_seconds
-            << std::endl;
-
-            FloatVec_t statsvec;
-            
-            statsvec.push_back(stats.peak_to_peak_mean_seconds);
-            statsvec.push_back(stats.peak_to_peak_stddev_seconds);
-            publish_vec("STATS","respiration",statsvec,_stats_number);
-            publish_vec("PLOT","respiration",statsvec,_stats_number);
-   
-        }
+        //publish them
+        
+        std::cout
+        << "mean breath duration: " << stats.peak_to_peak_mean_seconds << ", "
+        << "breaths per min: " << 60.0 / stats.peak_to_peak_mean_seconds << ", "
+        << "std dev seconds: " << stats.peak_to_peak_stddev_seconds << ","
+        << "energy (dB): " << stats.energy_db
+        << std::endl;
+        
+        FloatVec_t statsvec;
+        
+        statsvec.push_back(stats.peak_to_peak_mean_seconds);
+        statsvec.push_back(stats.peak_to_peak_stddev_seconds);
+        statsvec.push_back(stats.energy_db);
+        statsvec.push_back(stats.is_possible_respiration);
+        
+        publish_vec("STATS","respiration",statsvec,_stats_number);
+        publish_vec("PLOT","respiration",statsvec,_stats_number);
         
         
         debug_save("segment",segment);

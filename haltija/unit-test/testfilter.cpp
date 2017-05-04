@@ -5,6 +5,7 @@
 #include <Eigen/Core>
 #include "haltijamath.h"
 #include <complex>
+#include <cstdlib>
 typedef std::complex<float> Complex_t;
 
 using namespace Eigen;
@@ -348,3 +349,27 @@ TEST_F(TestFilter,TestIIRFilter) {
 
     
 }
+
+static float get_random_float() {
+    return (((int)(rand() % 20000)) - 10000) / 10000.0;
+    
+}
+
+TEST_F(TestFilter,TestWhitePSD) {
+    const int N = 512;
+    MatrixXcf x(N,1);
+    
+    /*
+    srand((unsigned)42));
+    int i;
+    
+    for (int i = 0; i < N; i++) {
+        x(i,0) = Complex_t(get_random_float(),get_random_float());
+    }
+ 
+    MatrixXcf y;
+    HaltijaMath::psd(512, x, y);
+ */
+}
+
+
