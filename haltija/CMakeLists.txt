@@ -144,7 +144,7 @@ if (NOT WIN32)
   add_executable(haltijanetworkrunner
   haltijanetworkrunner.cpp)
 
-  target_link_libraries(haltijanetworkrunner algorithm network protobuf-nanopb zmq)
+  target_link_libraries(haltijanetworkrunner algorithm network protobuf-nanopb zmq yaml-cpp)
 endif()
 ############
 if (BUILD_PUBLISHER)
