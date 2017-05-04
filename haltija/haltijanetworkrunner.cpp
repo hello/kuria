@@ -8,7 +8,7 @@
 #include "radar_result_publisher_interface.h"
 #include "haltija_types.h"
 
-const char * publish_host_port = "tcp://127.0.0.1:5564";
+const char * publish_host_port = "tcp://*:5564";
 const char * subscribe_host_port = "tcp://127.0.0.1:5563";
 
 class RadarMessagePublisher : public RadarResultPublisherInterface {

@@ -44,7 +44,9 @@ using Eigen::MatrixXf;
  
  
  */
-ViterbiDecodeResult_t hmm_segmenter(const MatrixXf & x) {
+
+
+void hmm_segmenter(const MatrixXf & x,const Eigen::MatrixXcf & orig, Complex_t  * resipration_clusters) {
     
     
     float max = -1e10;
@@ -104,7 +106,7 @@ ViterbiDecodeResult_t hmm_segmenter(const MatrixXf & x) {
     }
     
     HmmDataMatrix_t A;
-    A.reserve(4);
+    A.reserve(NUM_RESPIRATION_STATES);
     
     /*   
       1 + r + r^2 + r^3 .... r^inf = 1 / (1 - r)
@@ -116,8 +118,8 @@ ViterbiDecodeResult_t hmm_segmenter(const MatrixXf & x) {
      
      */
     
-    const float long_term = 10.0f;
-    const float short_term = 3.0f;
+    const float long_term = 20.0f;
+    const float short_term = 1.0f;
     
     const float a1 = 1.0f - 1.0f / long_term;
     const float b1 = 1.0f - a1;
@@ -125,10 +127,11 @@ ViterbiDecodeResult_t hmm_segmenter(const MatrixXf & x) {
     const float a2 = 1.0f - 1.0f / short_term;
     const float b2 = 1.0 - a2;
     
-    A.push_back({a1,b1,0,0});
-    A.push_back({0,a1,b1,0});
-    A.push_back({0,0,a2,b2});
-    A.push_back({b1,0,0,a1});
+    
+    A.push_back({a1,b1,0,0});  //state 0 is exhaled
+    A.push_back({0,a1,b1,0});  //state 1 is inhaling
+    A.push_back({0,0,a2,b2});  //state 2 is inhaled
+    A.push_back({b1,0,0,a1});  //state 3 is exhaling
 
     //AlphaBetaResult_t alphabeta = HmmHelpers::getAlphaAndBeta(meas.size(),pi, logBmap, A, A.size());
     UIntSet_t allowed_final_states = {0,1,2,3};
@@ -163,7 +166,28 @@ ViterbiDecodeResult_t hmm_segmenter(const MatrixXf & x) {
         debug_save("meas",x);
     }
     
-    return best_result;
+    Eigen::MatrixXcf accumulator = Eigen::MatrixXcf::Zero(NUM_RESPIRATION_STATES, 1);
+    
+    
+    int t = 0;
+    int counts[NUM_RESPIRATION_STATES] = {0,0,0,0};
+    for (auto it = best_result.getPath().begin(); it != best_result.getPath().end(); it++) {
+        accumulator(*it,0) += orig(t++,0);
+        counts[*it]++;
+    }
+    
+    for (int i = 0; i < NUM_RESPIRATION_STATES; i++) {
+        if (counts[i] == 0) {
+            continue;
+        }
+        
+        accumulator(i,0) /= Complex_t(counts[i],0);
+    }
+    
+    
+    for (int i = 0; i < NUM_RESPIRATION_STATES; i++) {
+        resipration_clusters[i] = accumulator(i,0);
+    }
 
 }
 
@@ -254,11 +278,14 @@ RespirationStats RespirationClassifier::get_respiration_stats(const Eigen::Matri
         is_possible_respiration = false;
     }
     
-    //ViterbiDecodeResult_t result = hmm_segmenter(filtered_signal);
+    //find out where possible respiration clusters are
+    Complex_t respiration_clusters[NUM_RESPIRATION_STATES];
     
-   // result.getPath()
+    hmm_segmenter(filtered_signal,probable_respiration_linear_combinations.col(idx),&respiration_clusters[0]);
     
-    
-    return RespirationStats(mean,stddev,is_possible_respiration);
+    std::cout << "inhaled: " <<  respiration_clusters[inhaled] << std::endl;
+    std::cout << "exhaled: " <<  respiration_clusters[exhaled] << std::endl;
+
+    return RespirationStats(mean,stddev,is_possible_respiration,respiration_clusters);
      
 }
