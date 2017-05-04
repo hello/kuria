@@ -75,9 +75,9 @@ PreprocessorPtr_t PreprocessorIIR::createWithDefaultHighpassFilterAndLowpass(con
     MatrixXf Blpf(2,1);
     MatrixXf Alpf(2,1);
     
-    //B,A = sig.iirdesign(wp=0.2/10.0,ws=4.0 / 10.0,gpass=2.0,gstop = 20.0,ftype='butter')
-    Blpf <<   0.03946985,  0.03946985;
-    Alpf << 1.       , -0.9210603;
+    //B,A = sig.iirdesign(wp=1.0/10.0,ws=4.0 / 10.0,gpass=2.0,gstop = 10.0,ftype='butter')
+    Blpf <<   0.1715663,  0.1715663;
+    Alpf << 1.       , -0.6568674;
     
     auto phpf = new IIRFilter<Eigen::MatrixXf, Eigen::MatrixXcf>(Bhpf,Ahpf,num_range_bins);
     auto plpf = new IIRFilter<Eigen::MatrixXf, Eigen::MatrixXcf>(Blpf,Alpf,num_range_bins);
@@ -99,6 +99,10 @@ uint32_t PreprocessorIIR::add_frame(const BasebandDataFrame_t &input, Eigen::Mat
 
     if (_idx_sample == 0) {
         _phpf->reset_to_output(raw, MatrixXcf::Zero(raw.rows(),raw.cols())); // force hpf
+        
+        if (_plpf) {
+            _plpf->reset_to_output(raw, raw);
+        }
     }
     
     //highpass filter
@@ -108,13 +112,13 @@ uint32_t PreprocessorIIR::add_frame(const BasebandDataFrame_t &input, Eigen::Mat
 
     
      //insert raw and optionall lowpass filtered segment
-    _raw_segment.row(_output_idx) = filtered_frame;
     
-    /*
+    
     if (_plpf) {
-        _lpf_segment.row(_output_idx) = _plpf->filter(raw);
+        filtered_frame = _plpf->filter(filtered_frame);
     }
-     */
+
+    _raw_segment.row(_output_idx) = filtered_frame;
 
     
     if (++_output_idx >= _raw_segment.rows()) {

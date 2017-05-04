@@ -29,6 +29,9 @@ private:
     int64_t _modes_number;
 
     void publish_vec(const std::string & channel, const std::string & id, const FloatVec_t & featvec, const int sequence_number);
+    
+    typedef std::shared_ptr<IIRFilter<Eigen::MatrixXf, Eigen::MatrixXcf>> FilterPtr_t;
+    FilterPtr_t _lpf;
 };
 
 #endif //_RADARSUBSCRIBER_H_

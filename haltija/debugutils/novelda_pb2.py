@@ -18,7 +18,6 @@ _sym_db = _symbol_database.Default()
 DESCRIPTOR = _descriptor.FileDescriptor(
   name='novelda.proto',
   package='novelda',
-  syntax='proto2',
   serialized_pb=_b('\n\rnovelda.proto\x12\x07novelda\"E\n\nRadarFrame\x12\x10\n\x08\x66rame_id\x18\x01 \x01(\r\x12\x12\n\nrange_bins\x18\x02 \x03(\x01\x12\x11\n\tbase_band\x18\x03 \x01(\x08\x42\x1f\n\x16\x63om.hello.sati.noveldaB\x05Radar')
 )
 _sym_db.RegisterFileDescriptor(DESCRIPTOR)
@@ -62,7 +61,6 @@ _RADARFRAME = _descriptor.Descriptor(
   ],
   options=None,
   is_extendable=False,
-  syntax='proto2',
   extension_ranges=[],
   oneofs=[
   ],

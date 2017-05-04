@@ -36,6 +36,14 @@ NoveldaRadarSubscriber::NoveldaRadarSubscriber(RadarResultPublisherInterface * p
     
     DebugPublisher::initialize(debug_publisher);
     
+    MatrixXf Blpf(2,1);
+    MatrixXf Alpf(2,1);
+
+    //B,A = sig.iirdesign(wp=1.0/10.0,ws=4.0 / 10.0,gpass=2.0,gstop = 10.0,ftype='butter')
+    //Blpf <<   0.1715663,  0.1715663;
+    //Alpf << 1.       , -0.6568674;
+
+    _lpf = NULL;//FilterPtr_t(new IIRFilter<MatrixXf, MatrixXcf>(Blpf,Alpf,1));
 }
 
 NoveldaRadarSubscriber::~NoveldaRadarSubscriber() {
@@ -126,6 +134,10 @@ void NoveldaRadarSubscriber::receive_message(const NoveldaData_t & message) {
     if (_combiner.get_latest_reduced_measurement(filtered_frame, transformed_frame)) {
         
         debug_save("transformed_frames",transformed_frame);
+        
+        if (_lpf) {
+            transformed_frame = _lpf->filter(transformed_frame);
+        }
         
         //send frame over the wire, or process it or something
         
