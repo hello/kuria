@@ -83,6 +83,7 @@ algorithm/respiration_segmenter.cpp
 algorithm/hmm/HmmHelpers.cpp
 algorithm/hmm/MatrixHelpers.cpp
 algorithm/hmm/AllModels.cpp
+algorithm/activity.cpp
 )
 
 add_library(network STATIC

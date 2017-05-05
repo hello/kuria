@@ -14,13 +14,17 @@ using Eigen::MatrixXf;
 
 
 #define MIN_REL_LOG_LIKELIHOOD (-10.0f)
+#define MIN_COUNTS (5)
+#define GOOD_RESPIRATION_SEGMENTS_THRESHOLD (2)
 
 RespirationPrediction::RespirationPrediction() {
     memset(respiration_probs.data(),0,respiration_probs.size()*sizeof(float));
 }
 
 
-RespirationSegmenter::RespirationSegmenter() {
+RespirationSegmenter::RespirationSegmenter()
+: _good_respiration_segments(0) {
+ 
     
     /*
      1 + r + r^2 + r^3 .... r^inf = 1 / (1 - r)
@@ -70,7 +74,7 @@ RespirationSegmenter::RespirationSegmenter() {
     
 }
 
-void RespirationSegmenter::hmm_segmenter(const MatrixXf & x,const Eigen::MatrixXcf & orig, Complex_t  * resipration_clusters) const {
+bool RespirationSegmenter::hmm_segmenter(const MatrixXf & x,const Eigen::MatrixXcf & orig, Complex_t  * resipration_clusters) const {
     
 
     
@@ -205,6 +209,16 @@ void RespirationSegmenter::hmm_segmenter(const MatrixXf & x,const Eigen::MatrixX
         resipration_clusters[i] = accumulator(i,0);
     }
     
+    //sanity check
+    
+    for (int i = 0; i < NUM_RESPIRATION_STATES; i++) {
+        if (counts[i] < MIN_COUNTS) {
+            return false;
+        }
+        
+    }
+    
+    return true;
 }
 
 
@@ -215,6 +229,7 @@ void RespirationSegmenter::set_segment(const Eigen::MatrixXcf segment, const Eig
     //set to uniform, nevermind the scaling (gets normalized later
     if (!is_respiration) {
         _state = 0.01 * Eigen::MatrixXf::Ones(NUM_RESPIRATION_STATES,1);
+        _good_respiration_segments = 0;
         return;
     }
     
@@ -223,7 +238,11 @@ void RespirationSegmenter::set_segment(const Eigen::MatrixXcf segment, const Eig
     
     //find out where possible respiration clusters are
     
-    hmm_segmenter(projected_real_filtered_signal,live_signal,&_respiration_clusters[0]);
+    if (!hmm_segmenter(projected_real_filtered_signal,live_signal,&_respiration_clusters[0])) {
+        _state = 0.01 * Eigen::MatrixXf::Ones(NUM_RESPIRATION_STATES,1);
+        _good_respiration_segments = 0;
+        return;
+    }
     
         /*
     std::cout << "exhaled: " <<  _respiration_clusters[exhaled] << std::endl;
@@ -236,15 +255,21 @@ void RespirationSegmenter::set_segment(const Eigen::MatrixXcf segment, const Eig
     
     _variance = (dx.real()*dx.real() + dx.imag()*dx.imag()) / 16.0;
     
+    _good_respiration_segments++;
+    
 }
 
 
 RespirationPrediction RespirationSegmenter::predict_respiration_state(const Eigen::MatrixXcf & transformed_frame, const float sample_rate_hz) {
     
+    RespirationPrediction pred;
+
+    if (_good_respiration_segments < GOOD_RESPIRATION_SEGMENTS_THRESHOLD) {
+        return pred;
+    }
     
     bayes_update(transformed_frame);
     
-    RespirationPrediction pred;
 
     for (int istate = 0; istate < NUM_RESPIRATION_STATES; istate++) {
         pred.respiration_probs[istate] = _state(istate,0);

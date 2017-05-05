@@ -30,7 +30,7 @@ int main(int argc, char * argv[]) {
     
     
     if (argc < 2) {
-        std::cerr << "requires config yml file, which must at least have the device field filled (/dev/ttyACM0, or something)" << std::endl;
+        std::cerr << "requires config yml format config file" << std::endl;
         return 0;
     }
     

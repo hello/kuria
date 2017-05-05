@@ -32,11 +32,12 @@ public:
     RespirationPrediction predict_respiration_state(const Eigen::MatrixXcf & transformed_frame, const float sample_rate_hz);
 private:
     void bayes_update(const Eigen::MatrixXcf & transformed_frame);
-    void hmm_segmenter(const Eigen::MatrixXf & x,const Eigen::MatrixXcf & orig, Complex_t  * resipration_clusters) const;
+    bool hmm_segmenter(const Eigen::MatrixXf & x,const Eigen::MatrixXcf & orig, Complex_t  * resipration_clusters) const;
     Complex_t _respiration_clusters[NUM_RESPIRATION_STATES];
     float _variance;
     Eigen::MatrixXf _state;
     Eigen::MatrixXf _state_transition_matrix;
+    uint32_t _good_respiration_segments;
 };
 
 #endif //_RESPIRATION_SEGMENTER_H_
