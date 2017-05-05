@@ -7,20 +7,74 @@
 #include "haltijamath.h"
 #include "hmm/HmmHelpers.h"
 #include "hmm/AllModels.h"
-
+#include <assert.h>
 
 using Eigen::MatrixXcf;
 using Eigen::MatrixXf;
 
+
+#define MIN_REL_LOG_LIKELIHOOD (-10.0f)
+
 RespirationPrediction::RespirationPrediction() {
     memset(respiration_probs.data(),0,respiration_probs.size()*sizeof(float));
-    memset(respiration_probs_deriv.data(),0,respiration_probs.size()*sizeof(float));
-    inhaleexhale = 0.0f;
 }
 
-static void hmm_segmenter(const MatrixXf & x,const Eigen::MatrixXcf & orig, Complex_t  * resipration_clusters) {
+
+RespirationSegmenter::RespirationSegmenter() {
+    
+    /*
+     1 + r + r^2 + r^3 .... r^inf = 1 / (1 - r)
+     
+     1 / (1 - r) = x
+     1 - r = 1/x
+     
+     r = 1 - 1/x
+     
+     */
     
     
+    const float long_term = 20.0f;
+    const float short_term = 3.0f;
+    
+    const float a1 = 1.0f - 1.0f / long_term;
+    const float b1 = 1.0f - a1;
+    
+    const float a2 = 1.0f - 1.0f / short_term;
+    const float b2 = 1.0 - a2;
+    
+    _state_transition_matrix.resize(NUM_RESPIRATION_STATES,NUM_RESPIRATION_STATES);
+    
+    _state_transition_matrix <<
+    a1,b1,0,0,
+    0,a1,b1,0,
+    0,0,a2,b2,
+    b1,0,0,a1;
+    
+    assert(0 == exhaled);
+    assert(1 == inhaling);
+    assert(2 == inhaled);
+    assert(3 == exhaling);
+    
+    /* use transpose for Bayes, because it is probability to transition INTO this state
+     a1 0  0  b1
+     b1 a1 0  0
+     0  b1 a2 0
+     0  0  b2 a1
+     
+     use original for HMM
+     HMM follows convention of (current state is row i, prob to transition is row i, col j)
+     i.e. transition OUT of this state
+     */
+    
+    _state = 0.01 * Eigen::MatrixXf::Ones(NUM_RESPIRATION_STATES,1);
+    
+}
+
+void RespirationSegmenter::hmm_segmenter(const MatrixXf & x,const Eigen::MatrixXcf & orig, Complex_t  * resipration_clusters) const {
+    
+
+    
+    //create pdfs of states
     float max = -1e10;
     float min  = 1e10;
     for (int i = 0; i < x.rows(); i++) {
@@ -51,7 +105,9 @@ static void hmm_segmenter(const MatrixXf & x,const Eigen::MatrixXcf & orig, Comp
     const float extrema_std_dev = range * 0.3;
     const float transition_std_dev = 0.2 * range;
     const float midpoint = 0.0;
-    //const int32_t obsnum,const float mean, const float stddev, const float weight
+
+
+
     ModelVec_t models_up = {
         HmmPdfInterfaceSharedPtr_t(new OneDimensionalGaussianModel(0,max,extrema_std_dev,1.0)),
         HmmPdfInterfaceSharedPtr_t(new OneDimensionalGaussianModel(0,midpoint,transition_std_dev,1.0)),
@@ -80,30 +136,18 @@ static void hmm_segmenter(const MatrixXf & x,const Eigen::MatrixXcf & orig, Comp
     HmmDataMatrix_t A;
     A.reserve(NUM_RESPIRATION_STATES);
     
-    /*
-     1 + r + r^2 + r^3 .... r^inf = 1 / (1 - r)
-     
-     1 / (1 - r) = x
-     1 - r = 1/x
-     
-     r = 1 - 1/x
-     
-     */
-    
-    const float long_term = 20.0f;
-    const float short_term = 1.0f;
-    
-    const float a1 = 1.0f - 1.0f / long_term;
-    const float b1 = 1.0f - a1;
-    
-    const float a2 = 1.0f - 1.0f / short_term;
-    const float b2 = 1.0 - a2;
+  
     
     
-    A.push_back({a1,b1,0,0});  //state 0 is exhaled
-    A.push_back({0,a1,b1,0});  //state 1 is inhaling
-    A.push_back({0,0,a2,b2});  //state 2 is inhaled
-    A.push_back({b1,0,0,a1});  //state 3 is exhaling
+    for (int j = 0; j < NUM_RESPIRATION_STATES; j++) {
+        HmmDataVec_t v;
+        for (int i = 0; i < NUM_RESPIRATION_STATES; i++) {
+            v.push_back(_state_transition_matrix(j,i));
+            
+        }
+        A.push_back(v);
+    }
+
     
     //AlphaBetaResult_t alphabeta = HmmHelpers::getAlphaAndBeta(meas.size(),pi, logBmap, A, A.size());
     UIntSet_t allowed_final_states = {0,1,2,3};
@@ -166,7 +210,13 @@ static void hmm_segmenter(const MatrixXf & x,const Eigen::MatrixXcf & orig, Comp
 
 
 
-void RespirationSegmenter::set_segment(const Eigen::MatrixXcf segment, const Eigen::MatrixXcf live_signal) {
+void RespirationSegmenter::set_segment(const Eigen::MatrixXcf segment, const Eigen::MatrixXcf live_signal,bool is_respiration) {
+    
+    //set to uniform, nevermind the scaling (gets normalized later
+    if (!is_respiration) {
+        _state = 0.01 * Eigen::MatrixXf::Ones(NUM_RESPIRATION_STATES,1);
+        return;
+    }
     
     //get real bandpassed signal from complex signal
     const Eigen::MatrixXf projected_real_filtered_signal = RespirationClassifier::get_bandpassed_and_reduced_signal(segment);
@@ -175,9 +225,12 @@ void RespirationSegmenter::set_segment(const Eigen::MatrixXcf segment, const Eig
     
     hmm_segmenter(projected_real_filtered_signal,live_signal,&_respiration_clusters[0]);
     
-    std::cout << "inhaled: " <<  _respiration_clusters[inhaled] << std::endl;
+        /*
     std::cout << "exhaled: " <<  _respiration_clusters[exhaled] << std::endl;
-    
+    std::cout << "inhaling: " <<  _respiration_clusters[inhaling] << std::endl;
+    std::cout << "inhaled: " <<  _respiration_clusters[inhaled] << std::endl;
+    std::cout << "exhaling: " <<  _respiration_clusters[exhaling] << std::endl;
+    */
     
     Complex_t dx = _respiration_clusters[exhaled] - _respiration_clusters[inhaled];
     
@@ -189,40 +242,23 @@ void RespirationSegmenter::set_segment(const Eigen::MatrixXcf segment, const Eig
 RespirationPrediction RespirationSegmenter::predict_respiration_state(const Eigen::MatrixXcf & transformed_frame, const float sample_rate_hz) {
     
     
-    //TODO keep history of last N transformed_frames, and notice if we are transitioning from exhaled to inhaled
+    bayes_update(transformed_frame);
     
     RespirationPrediction pred;
-    
-    pred.respiration_probs = eval_pdfs(transformed_frame);
-    
+
     for (int istate = 0; istate < NUM_RESPIRATION_STATES; istate++) {
-        pred.respiration_probs_deriv[istate] = (pred.respiration_probs[istate] - _prev_prediction.respiration_probs[istate]) * sample_rate_hz;
+        pred.respiration_probs[istate] = _state(istate,0);
     }
-    
-    _prev_prediction = pred;
-    
-    //maybe?  doubly pulsed
-    //pred.inhaleexhale = pred.respiration_probs_deriv[exhaled] - pred.respiration_probs_deriv[inhaled];
-    
-    //the safe option (inhaling and exhaling should produce a signal)
-    pred.inhaleexhale = pred.respiration_probs[inhaling] + pred.respiration_probs[exhaling]; //total movement
     
     return pred;
 }
 
 
-RespirationStateFloatArray_t RespirationSegmenter::eval_pdfs(const Eigen::MatrixXcf & transformed_frame) {
+void RespirationSegmenter::bayes_update(const Eigen::MatrixXcf & transformed_frame) {
     
     
     
-    RespirationStateFloatArray_t result;
-    RespirationStateFloatArray_t zero_result;
-
-    memset(zero_result.data(),0,result.size()*sizeof(float));
-
-    if (_variance <= 1e-6) {
-        return zero_result;
-    }
+    RespirationStateFloatArray_t pdf_eval;
     
     //basically assign a gaussian pdf to each state, centered at cluster, compute log likelihood
     //use smaller variance for exhaled and inhaled
@@ -231,45 +267,54 @@ RespirationStateFloatArray_t RespirationSegmenter::eval_pdfs(const Eigen::Matrix
         float dxsquared = dx.real()*dx.real() + dx.imag()*dx.imag();;
         float var = _variance;
         
-        if (istate == exhaled || istate == inhaled) {
-            var /= 4.0;
+        
+        if (istate == exhaling || istate == inhaling) {
+            var *= 4.0;
         }
         
-        result[istate] = -dxsquared / (2.0f * var) - 0.5*log(2*M_PI*var);
+        pdf_eval[istate] = -dxsquared / (2.0f * var) - 0.5*log(2*M_PI*var);
         
-
     }
+    
     
     //turn from log likelihood to normalized probabilities, without fucking up the numerics (sometimes pdf evals are, really unlikely)
-    float the_min = result[0];
+    float the_max = pdf_eval[0];
+
     for (int istate = 1; istate < NUM_RESPIRATION_STATES; istate++) {
-        if (result[istate] < the_min) {
-            the_min = result[istate];
+        if (pdf_eval[istate] > the_max) {
+            the_max = pdf_eval[istate];
         }
     }
     
     for (int istate = 0; istate < NUM_RESPIRATION_STATES; istate++) {
-        result[istate] -= the_min;
+        pdf_eval[istate] -= the_max;
+        
+        if (pdf_eval[istate] < MIN_REL_LOG_LIKELIHOOD) {
+            pdf_eval[istate] = MIN_REL_LOG_LIKELIHOOD;
+        }
     }
     
     for (int istate = 0; istate < NUM_RESPIRATION_STATES; istate++) {
-        result[istate] = exp(result[istate]);
+        pdf_eval[istate] = exp(pdf_eval[istate]);
     }
     
-    float sum = 0.0f;
+    
+    //apply state transition matrix
+    _state = _state_transition_matrix.transpose() * _state;
+    _state /= _state.sum();
+    
+    
+    //bayes rule, continuous discrete
+    // p(A | x) = P(x | A) * P(A) / p(x)
+    float px = 0.0f;
     for (int istate = 0; istate < NUM_RESPIRATION_STATES; istate++) {
-        sum += result[istate];
-    }
-    
-    if (sum <= 1e-6) {
-        return zero_result;
+        _state(istate,0) *=  pdf_eval[istate];
+        px += _state(istate,0);
     }
     
     for (int istate = 0; istate < NUM_RESPIRATION_STATES; istate++) {
-        result[istate] /= sum;
+        _state(istate,0) /= px;
     }
     
-    return result;
-
 }
 

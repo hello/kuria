@@ -27,7 +27,8 @@ NoveldaRadarSubscriber::NoveldaRadarSubscriber(RadarResultPublisherInterface * p
 ,_sequence_number(0)
 ,_received_number(0)
 ,_stats_number(0)
-,_modes_number(0) {
+,_modes_number(0)
+,_is_respiration(false) {
     _preprocessor = PreprocessorPtr_t(NULL);
     
     for (int i = 8; i < 70; i++) {
@@ -92,6 +93,7 @@ void NoveldaRadarSubscriber::receive_message(const NoveldaData_t & message) {
         
         RespirationStats stats = RespirationClassifier::get_respiration_stats(_combiner.get_best_respiration_segment(),EXPECTED_SAMPLE_RATE_HZ);
         
+        _is_respiration = stats.is_possible_respiration;
         
         auto top_modes = _combiner.get_top_modes();
         for (auto it = top_modes.begin(); it != top_modes.end(); it++)  {
@@ -139,7 +141,7 @@ void NoveldaRadarSubscriber::receive_message(const NoveldaData_t & message) {
             _combiner.get_latest_reduced_measurement(segment, live_signal);
             
             /* this will figure out the values of the live signal that correspond to the stages of breathing */
-            _segmenter.set_segment(_combiner.get_best_respiration_segment(), live_signal);
+            _segmenter.set_segment(_combiner.get_best_respiration_segment(), live_signal,_is_respiration);
         }
         
         RespirationPrediction prediction = _segmenter.predict_respiration_state(transformed_frame,EXPECTED_SAMPLE_RATE_HZ);
@@ -149,10 +151,11 @@ void NoveldaRadarSubscriber::receive_message(const NoveldaData_t & message) {
             debug_save("resp_probs", temp);
         }
         
-        //possibly MVP
-        FloatVec_t inhaleexhalevec;
-        inhaleexhalevec.push_back(prediction.inhaleexhale);
-        publish_vec("v1/breath", "inhalexhale", inhaleexhalevec, 0);
+        FloatVec_t respprobs;
+        for (int i = 0; i < NUM_RESPIRATION_STATES; i++) {
+            respprobs.push_back(prediction.respiration_probs[i]);
+        }
+        publish_vec("v1/breath", "respprobs", respprobs, 0);
 
         
         //send frame over the wire, or process it or something

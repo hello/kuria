@@ -34,6 +34,7 @@ private:
     typedef std::shared_ptr<IIRFilter<Eigen::MatrixXf, Eigen::MatrixXcf>> FilterPtr_t;
     
     RespirationSegmenter _segmenter;
+    bool _is_respiration;
 };
 
 #endif //_RADARSUBSCRIBER_H_
