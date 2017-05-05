@@ -132,6 +132,7 @@ void NoveldaRadarSubscriber::receive_message(const NoveldaData_t & message) {
         
         debug_save("transformed_frames",transformed_frame);
         
+        std::cout << _activity.get_log_energy_change(transformed_frame(0,0)) << std::endl;
         
         if (flags & PREPROCESSOR_FLAGS_SEGMENT_READY) {
             

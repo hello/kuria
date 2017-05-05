@@ -9,6 +9,7 @@
 #include "peakFinding.h"
 #include "debug_publisher_interface.h"
 #include "respiration_segmenter.h"
+#include "activity.h"
 
 struct NoveldaRadarSubsciberConfig {
     int min_range_bin;
@@ -40,6 +41,8 @@ private:
     typedef std::shared_ptr<IIRFilter<Eigen::MatrixXf, Eigen::MatrixXcf>> FilterPtr_t;
     
     RespirationSegmenter _segmenter;
+    
+    ActivityDetector _activity;
 };
 
 #endif //_RADARSUBSCRIBER_H_
