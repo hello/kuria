@@ -55,8 +55,13 @@ int main(int argc, char * argv[]) {
         return 0;
     }
     
+    NoveldaRadarSubsciberConfig novelda_config;
+    novelda_config.min_range_bin = 8;
+    novelda_config.max_range_bin = 70;
+
+    
     //create radar data subscriber and result publisher
-    NoveldaRadarSubscriber subscriber(new ResultPublisher(),new MatlabDebugPublisher(argv[2]));
+    NoveldaRadarSubscriber subscriber(novelda_config,new ResultPublisher(),new MatlabDebugPublisher(argv[2]));
     
     for (int iframe = 0; iframe < baseband.rows(); iframe++) {
         

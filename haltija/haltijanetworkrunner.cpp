@@ -52,11 +52,29 @@ int main(int argc, char * argv[]) {
         return 0;
     }
     
+    if (!config["min_range_bin"]) {
+        std::cerr << "min_range_bin field not found in " << argv[1] << std::endl;
+        return 0;
+    }
+    
+    if (!config["max_range_bin"]) {
+        std::cerr << "max_range_bin field not found in " << argv[1] << std::endl;
+        return 0;
+    }
+
+    
+    
 
     std::string publish_host_port = config["result_publish_address"].as<std::string>();
     std::string subscribe_host_port = config["radar_subscribe_address"].as<std::string>();
     std::string radar_subscribe_prefix = config["radar_subscribe_prefix"].as<std::string>();
+    int min_range_bin = config["min_range_bin"].as<int>();
+    int max_range_bin = config["max_range_bin"].as<int>();
 
+    NoveldaRadarSubsciberConfig novelda_config;
+    novelda_config.min_range_bin = min_range_bin;
+    novelda_config.max_range_bin = max_range_bin;
+    
     std::cout << "publish to: " << publish_host_port << std::endl;
     std::cout << "subscribe from: " << subscribe_host_port << std::endl;
     std::cout << "subscribe channel: " << radar_subscribe_prefix << std::endl;
@@ -64,7 +82,7 @@ int main(int argc, char * argv[]) {
     
     ZmqSubscriber<NoveldaProtobuf,NoveldaData_t,NoveldaRadarSubscriber> zmq_subscriber(100000,subscribe_host_port.c_str());
     
-    zmq_subscriber.add_subscriber(radar_subscribe_prefix.c_str(), new NoveldaRadarSubscriber(new RadarMessagePublisher(publish_host_port),NULL));
+    zmq_subscriber.add_subscriber(radar_subscribe_prefix.c_str(), new NoveldaRadarSubscriber(novelda_config,new RadarMessagePublisher(publish_host_port),NULL));
     
     zmq_subscriber.run();
     

@@ -22,7 +22,7 @@
 using namespace Eigen;
 
 
-NoveldaRadarSubscriber::NoveldaRadarSubscriber(RadarResultPublisherInterface * publisher,DebugPublisherInterface * debug_publisher)
+NoveldaRadarSubscriber::NoveldaRadarSubscriber(const NoveldaRadarSubsciberConfig & config,RadarResultPublisherInterface * publisher,DebugPublisherInterface * debug_publisher)
 :_publisher(publisher)
 ,_sequence_number(0)
 ,_received_number(0)
@@ -30,7 +30,7 @@ NoveldaRadarSubscriber::NoveldaRadarSubscriber(RadarResultPublisherInterface * p
 ,_modes_number(0) {
     _preprocessor = PreprocessorPtr_t(NULL);
     
-    for (int i = 8; i < 70; i++) {
+    for (int i = config.min_range_bin; i < config.max_range_bin; i++) {
         _rangebins_we_care_about.insert(i);
     }
     

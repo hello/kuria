@@ -10,9 +10,15 @@
 #include "debug_publisher_interface.h"
 #include "respiration_segmenter.h"
 
+struct NoveldaRadarSubsciberConfig {
+    int min_range_bin;
+    int max_range_bin;
+};
+
+
 class NoveldaRadarSubscriber {
 public:
-    NoveldaRadarSubscriber(RadarResultPublisherInterface * publisher,DebugPublisherInterface * debug_publisher);
+    NoveldaRadarSubscriber(const NoveldaRadarSubsciberConfig & config, RadarResultPublisherInterface * publisher,DebugPublisherInterface * debug_publisher);
     ~NoveldaRadarSubscriber();
         
     void receive_message(const NoveldaData_t & message);

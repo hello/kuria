@@ -1,3 +1,6 @@
 result_publish_address: "tcp://*:5564"
 radar_subscribe_address: "tcp://127.0.0.1:5563"
 radar_subscribe_prefix: "foobars"
+
+min_range_bin: 8
+max_range_bin: 38
