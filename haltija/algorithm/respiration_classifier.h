@@ -5,25 +5,17 @@
 
 #include "haltija_types.h"
 
-enum {
-    exhaled = 0,
-    exhaling,
-    inhaled,
-    inhaling,
-    NUM_RESPIRATION_STATES
-} ERespirationState_t;
-
 
 
 struct RespirationStats  {
     
-    RespirationStats(const float mean, const float stddev,const float the_energy_db,bool respiration,Complex_t r[NUM_RESPIRATION_STATES])
+    RespirationStats(const float mean, const float stddev,const float the_energy_db,bool respiration)
     :peak_to_peak_mean_seconds(mean)
     ,peak_to_peak_stddev_seconds(stddev)
     ,energy_db(the_energy_db)
     ,is_valid(true)
     ,is_possible_respiration(respiration)
-    ,resipration_clusters{r[0],r[1],r[2],r[3]} {}
+    {}
     
     RespirationStats()
     :peak_to_peak_mean_seconds(0)
@@ -37,7 +29,6 @@ struct RespirationStats  {
     const float energy_db;
     const bool is_valid;
     const bool is_possible_respiration;
-    const Complex_t resipration_clusters[NUM_RESPIRATION_STATES];
 } ;
 
 
@@ -46,6 +37,10 @@ struct RespirationStats  {
 class RespirationClassifier {
 public:
     static RespirationStats get_respiration_stats(const Eigen::MatrixXcf & probable_respiration_linear_combination,const float sample_rate_hz);
+    
+    static Eigen::MatrixXf get_bandpassed_and_reduced_signal(const Eigen::MatrixXcf & probable_respiration_linear_combinations);
+    
+
     
 };
 

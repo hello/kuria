@@ -79,6 +79,7 @@ algorithm/peakFinding.cpp
 algorithm/ekf.cpp
 algorithm/debug_publisher.cpp
 algorithm/respiration_classifier.cpp
+algorithm/respiration_segmenter.cpp
 algorithm/hmm/HmmHelpers.cpp
 algorithm/hmm/MatrixHelpers.cpp
 algorithm/hmm/AllModels.cpp

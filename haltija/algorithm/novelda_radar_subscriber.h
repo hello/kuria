@@ -8,6 +8,7 @@
 #include "filters.h"
 #include "peakFinding.h"
 #include "debug_publisher_interface.h"
+#include "respiration_segmenter.h"
 
 class NoveldaRadarSubscriber {
 public:
@@ -31,7 +32,8 @@ private:
     void publish_vec(const std::string & channel, const std::string & id, const FloatVec_t & featvec, const int sequence_number);
     
     typedef std::shared_ptr<IIRFilter<Eigen::MatrixXf, Eigen::MatrixXcf>> FilterPtr_t;
-    FilterPtr_t _lpf;
+    
+    RespirationSegmenter _segmenter;
 };
 
 #endif //_RADARSUBSCRIBER_H_

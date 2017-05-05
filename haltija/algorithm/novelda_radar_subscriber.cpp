@@ -39,11 +39,6 @@ NoveldaRadarSubscriber::NoveldaRadarSubscriber(RadarResultPublisherInterface * p
     MatrixXf Blpf(2,1);
     MatrixXf Alpf(2,1);
 
-    //B,A = sig.iirdesign(wp=1.0/10.0,ws=4.0 / 10.0,gpass=2.0,gstop = 10.0,ftype='butter')
-    //Blpf <<   0.1715663,  0.1715663;
-    //Alpf << 1.       , -0.6568674;
-
-    _lpf = NULL;//FilterPtr_t(new IIRFilter<MatrixXf, MatrixXcf>(Blpf,Alpf,1));
 }
 
 NoveldaRadarSubscriber::~NoveldaRadarSubscriber() {
@@ -136,9 +131,29 @@ void NoveldaRadarSubscriber::receive_message(const NoveldaData_t & message) {
         
         debug_save("transformed_frames",transformed_frame);
         
-        if (_lpf) {
-            transformed_frame = _lpf->filter(transformed_frame);
+        
+        if (flags & PREPROCESSOR_FLAGS_SEGMENT_READY) {
+            
+            /* if there's a new segment, segment the segment? okay our naming sucks.  Dang. */
+            MatrixXcf live_signal;
+            _combiner.get_latest_reduced_measurement(segment, live_signal);
+            
+            /* this will figure out the values of the live signal that correspond to the stages of breathing */
+            _segmenter.set_segment(_combiner.get_best_respiration_segment(), live_signal);
         }
+        
+        RespirationPrediction prediction = _segmenter.predict_respiration_state(transformed_frame,EXPECTED_SAMPLE_RATE_HZ);
+        {
+            Eigen::MatrixXf temp(4,1);
+            temp << prediction.respiration_probs[0],prediction.respiration_probs[1],prediction.respiration_probs[2],prediction.respiration_probs[3];
+            debug_save("resp_probs", temp);
+        }
+        
+        //possibly MVP
+        FloatVec_t inhaleexhalevec;
+        inhaleexhalevec.push_back(prediction.inhaleexhale);
+        publish_vec("v1/breath", "inhalexhale", inhaleexhalevec, 0);
+
         
         //send frame over the wire, or process it or something
         
