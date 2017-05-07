@@ -9,7 +9,7 @@ def print_initializer(varname,x):
         if i != 0:
             s += ',\n'
 
-        s += 'ComplexFloat_t(%9.8f,%9.8f)' % (np.real(x[i]),np.imag(x[i]))
+        s += 'Complex_t(%9.8f,%9.8f)' % (np.real(x[i]),np.imag(x[i]))
 
     s += ';'
 
