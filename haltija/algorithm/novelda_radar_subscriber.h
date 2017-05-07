@@ -26,6 +26,9 @@ public:
     
 private:
     PreprocessorPtr_t _preprocessor;
+    PreprocessorPtr_t _pos;
+    PreprocessorPtr_t _neg;
+
     RangebinCombiner _combiner;
     IntSet_t _rangebins_we_care_about;
 

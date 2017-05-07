@@ -4,6 +4,7 @@
 #include "log.h"
 #include <unistd.h>
 #include "preprocessorIIR.h"
+#include "preprocessor.h"
 #include "debug_publisher.h"
 #include "respiration_classifier.h"
 
@@ -29,6 +30,8 @@ NoveldaRadarSubscriber::NoveldaRadarSubscriber(const NoveldaRadarSubsciberConfig
 ,_stats_number(0)
 ,_modes_number(0) {
     _preprocessor = PreprocessorPtr_t(NULL);
+    _pos = PreprocessorPtr_t(NULL);
+    _neg = PreprocessorPtr_t(NULL);
     
     for (int i = config.min_range_bin; i < config.max_range_bin; i++) {
         _rangebins_we_care_about.insert(i);
@@ -36,8 +39,7 @@ NoveldaRadarSubscriber::NoveldaRadarSubscriber(const NoveldaRadarSubsciberConfig
     
     DebugPublisher::initialize(debug_publisher);
     
-    MatrixXf Blpf(2,1);
-    MatrixXf Alpf(2,1);
+  
 
 }
 
@@ -58,6 +60,12 @@ void NoveldaRadarSubscriber::receive_message(const NoveldaData_t & message) {
         
         _preprocessor = PreprocessorIIR::createWithDefaultHighpassFilterAndLowpass(message.range_bins.size(), NUM_FRAMES_IN_SEGMENT, NUM_FRAMES_TO_WAIT,1e-6);
         
+        _pos = Preprocessor::createWithPostiveFreqBandpass(message.range_bins.size(), NUM_FRAMES_IN_SEGMENT, NUM_FRAMES_TO_WAIT);
+        
+        _neg = Preprocessor::createWithNegativeFreqBandpass(message.range_bins.size(), NUM_FRAMES_IN_SEGMENT, NUM_FRAMES_TO_WAIT);
+        
+        
+        
         LOG("initialized preprocessor");
     }
     
@@ -76,12 +84,28 @@ void NoveldaRadarSubscriber::receive_message(const NoveldaData_t & message) {
     MatrixXcf filtered_frame;
     MatrixXcf segment;
     
+    MatrixXcf posfiltered;
+    MatrixXcf possegment;
+    
+    MatrixXcf negfiltered;
+    MatrixXcf negsegment;
+    
     
     
     uint32_t flags = _preprocessor->add_frame(frame, filtered_frame, segment);
-    
+    uint32_t posflags = _pos->add_frame(frame, posfiltered, possegment); //positive frequency filterbank
+    uint32_t negflags = _neg->add_frame(frame, negfiltered, negsegment); //negative frequency filterbank
+
     //DO KALMAN FILTERS HERE
     if (~flags & PREPROCESSOR_FLAGS_FRAME_READY) {
+        return;
+    }
+    
+    if (~posflags & PREPROCESSOR_FLAGS_FRAME_READY) {
+        return;
+    }
+    
+    if (~negflags & PREPROCESSOR_FLAGS_FRAME_READY) {
         return;
     }
     
@@ -130,7 +154,15 @@ void NoveldaRadarSubscriber::receive_message(const NoveldaData_t & message) {
     MatrixXcf transformed_frame;
     if (_combiner.get_latest_reduced_measurement(filtered_frame, transformed_frame)) {
         
+        MatrixXcf postransformed,negtransformed;
+        _combiner.get_latest_reduced_measurement(posfiltered,postransformed);
+        _combiner.get_latest_reduced_measurement(negfiltered,negtransformed);
+        
+        
         debug_save("transformed_frames",transformed_frame);
+        debug_save("postransformed",transformed_frame);
+        debug_save("negtransformed",transformed_frame);
+
         
         std::cout << _activity.get_log_energy_change(transformed_frame(0,0)) << std::endl;
         
