@@ -154,7 +154,8 @@ void RangebinCombiner::set_latest_segment(const Eigen::MatrixXcf & baseband_segm
     
     if (ibin == -1) {
         ibin = subset.cols() - 1;
-        LOG("NO POSSIBLE RESPIRATION, USING DEFAULT");
+        LOG("NO POSSIBLE RESPIRATION, USING PREVIOUS BEST RESPIRATION");
+        return;
     }
     
         ////////////////////////////////
@@ -169,6 +170,7 @@ void RangebinCombiner::set_latest_segment(const Eigen::MatrixXcf & baseband_segm
         _is_ready = true;
     }
     
+    //compare correlation of old mode vs new
     MatrixXf magnitude_vec2 =
     max_vector2.real().array() * max_vector2.real().array() +
     max_vector2.imag().array() * max_vector2.imag().array();
