@@ -154,8 +154,13 @@ void RangebinCombiner::set_latest_segment(const Eigen::MatrixXcf & baseband_segm
     
     if (ibin == -1) {
         ibin = subset.cols() - 1;
-        LOG("NO POSSIBLE RESPIRATION, USING PREVIOUS BEST RESPIRATION");
-        return;
+        
+        if (_is_ready) {
+            LOG("NO POSSIBLE RESPIRATION, USING PREVIOUS BEST RESPIRATION");
+            return;
+        }
+        
+        LOG("USING MAX ENERGY MODE");
     }
     
         ////////////////////////////////
