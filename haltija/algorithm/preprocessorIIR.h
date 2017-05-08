@@ -13,8 +13,12 @@ private:
     
 public:
     static PreprocessorPtr_t createWithDefaultHighpassFilter(const int num_range_bins,const int num_frames_in_segment,const int num_frames_to_wait_between_segments,float scale);
+    
     static PreprocessorPtr_t createWithDefaultHighpassFilterAndLowpass(const int num_range_bins,const int num_frames_in_segment,const int num_frames_to_wait_between_segments,float scale);
 
+    static PreprocessorPtr_t createWithAggressiveHighpassFilterAndLowpass(const int num_range_bins,const int num_frames_in_segment,const int num_frames_to_wait_between_segments,float scale);
+
+    
     ~PreprocessorIIR();
     
     void reset();

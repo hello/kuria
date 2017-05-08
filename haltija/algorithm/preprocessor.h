@@ -22,7 +22,8 @@ public:
     //return flags
     uint32_t add_frame(const BasebandDataFrame_t & input, Eigen::MatrixXcf & filtered_frame, Eigen::MatrixXcf & segment);
     
-    //create with this
+    static PreprocessorPtr_t createWithDefaultHighpassFilter(const int num_range_bins,const int num_frames_in_segment,const int num_frames_to_wait_between_segments);
+
     static PreprocessorPtr_t createWithPostiveFreqBandpass(const int num_range_bins,const int num_frames_in_segment,const int num_frames_to_wait_between_segments);
     
     static PreprocessorPtr_t createWithNegativeFreqBandpass(const int num_range_bins,const int num_frames_in_segment,const int num_frames_to_wait_between_segments);

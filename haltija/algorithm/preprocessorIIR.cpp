@@ -87,6 +87,31 @@ PreprocessorPtr_t PreprocessorIIR::createWithDefaultHighpassFilterAndLowpass(con
     
 }
 
+PreprocessorPtr_t PreprocessorIIR::createWithAggressiveHighpassFilterAndLowpass(const int num_range_bins,const int num_frames_in_segment,const int num_frames_to_wait_between_segments,float scale) {
+    
+    
+    MatrixXf Bhpf(2,1);
+    MatrixXf Ahpf(2,1);
+    
+    Bhpf <<  0.97652981, -0.97652981;
+    Ahpf <<  1.        , -0.95305962;
+    
+    
+    MatrixXf Blpf(2,1);
+    MatrixXf Alpf(2,1);
+    
+    //B,A = sig.iirdesign(wp=1.0/10.0,ws=4.0 / 10.0,gpass=2.0,gstop = 10.0,ftype='butter')
+    Blpf <<   0.1715663,  0.1715663;
+    Alpf << 1.       , -0.6568674;
+    
+    auto phpf = new IIRFilter<Eigen::MatrixXf, Eigen::MatrixXcf>(Bhpf,Ahpf,num_range_bins);
+    auto plpf = new IIRFilter<Eigen::MatrixXf, Eigen::MatrixXcf>(Blpf,Alpf,num_range_bins);
+    
+    return PreprocessorPtr_t(new PreprocessorIIR(phpf,plpf,num_range_bins,num_frames_in_segment,num_frames_to_wait_between_segments,scale));
+    
+    
+}
+
 uint32_t PreprocessorIIR::add_frame(const BasebandDataFrame_t &input, Eigen::MatrixXcf &filtered_frame, Eigen::MatrixXcf &segment) {
     
     uint32_t flags = PREPROCESSOR_FLAGS_NOT_READY;

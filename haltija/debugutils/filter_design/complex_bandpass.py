@@ -17,9 +17,9 @@ def print_initializer(varname,x):
 
 
 Fs = 20.0 #hz sample frequency
-bw = 0.5 #Hz bandwidth of originator lowpass
+bw = 1.5 #Hz bandwidth of originator lowpass
 Fc = 2.0#Hz center frequency of complex bandpass
-numtaps = 21
+numtaps = 101
 
 Fb = 2*bw / Fs
 
