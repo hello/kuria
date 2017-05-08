@@ -18,10 +18,18 @@ public:
     }
     
     void publish(const char * prefix, const RadarMessage_t & message) {
+        
+        if (_seen_prefixes.find(prefix) == _seen_prefixes.end()) {
+            std::cout << "PUBLISHING TO TOPIC: " << prefix << std::endl;
+        }
+        
+        _seen_prefixes.insert(prefix);
+        
         _publisher.publish(prefix, message);
     }
     
 private:
+    std::set<std::string> _seen_prefixes;
     
     ZmqPublisher<RadarMessageProtobuf,RadarMessage_t> _publisher;
 };

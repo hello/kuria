@@ -5,15 +5,15 @@ import novelda_pb2
 import scipy.io as io
 import sys
 
-Fs = 100.0
+Fs = 20.0
 
 def row_to_protobuf(vec,count):
     a = novelda_pb2.RadarFrame()
     a.base_band = True
     a.frame_id = count
     for i in range(vec.shape[0]):
-        a.range_bins.append(np.real(vec[i]))
-        a.range_bins.append(np.imag(vec[i]))
+        a.range_bins.append(float(np.real(vec[i])))
+        a.range_bins.append(float(np.imag(vec[i])))
 
     return a
 
