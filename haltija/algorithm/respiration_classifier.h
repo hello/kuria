@@ -17,10 +17,10 @@ struct RespirationStats  {
     ,is_possible_respiration(respiration)
     {}
     
-    RespirationStats()
+    RespirationStats(const float the_energy_db)
     :peak_to_peak_mean_seconds(0)
     ,peak_to_peak_stddev_seconds(0)
-    ,energy_db(-INFINITY)
+    ,energy_db(the_energy_db)
     ,is_valid(false)
     ,is_possible_respiration(false) {}
     

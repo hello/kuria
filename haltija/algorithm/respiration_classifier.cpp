@@ -93,7 +93,7 @@ RespirationStats RespirationClassifier::get_respiration_stats(const Eigen::Matri
     }
     
     if (diffs.empty()) {
-        return RespirationStats();
+        return RespirationStats(10*log10(energy));
     }
     
     float sum = 0.0;

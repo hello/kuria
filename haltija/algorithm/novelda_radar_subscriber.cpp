@@ -35,9 +35,7 @@ NoveldaRadarSubscriber::NoveldaRadarSubscriber(const NoveldaRadarSubsciberConfig
     }
     
     DebugPublisher::initialize(debug_publisher);
-    
-    MatrixXf Blpf(2,1);
-    MatrixXf Alpf(2,1);
+
 
 }
 
@@ -132,7 +130,10 @@ void NoveldaRadarSubscriber::receive_message(const NoveldaData_t & message) {
         
         debug_save("transformed_frames",transformed_frame);
         
-        //std::cout << _activity.get_log_energy_change(transformed_frame(0,0)) << std::endl;
+        FloatVec_t motionprobs = {_activity.get_motion_prob(transformed_frame)};
+        publish_vec("v1/motionprob", "", motionprobs, 0);
+
+
         
         if (flags & PREPROCESSOR_FLAGS_SEGMENT_READY) {
             

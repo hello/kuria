@@ -13,7 +13,7 @@ import radar_messages_pb2
 import zmq
 import collections
 
-server_address = "tcp://127.0.0.1:5564"
+server_address = "tcp://192.168.128.101:5564"
 signal_target = "maxvarresp"
 histogram_target = "modes"
 stats_target = "respiration"
